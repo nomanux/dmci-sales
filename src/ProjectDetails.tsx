@@ -3,11 +3,6 @@ import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
 import { Badge } from "./StatusBadge";
 import { useNavigation, type Screen } from "./NavigationContext";
 import PropertyCard, { type PropertyCardData } from "./PropertyCard";
-import {
-  acaciaEstatesLogoUrl,
-  aristaPlaceLogoUrl,
-  valeronTowerLogoUrl,
-} from "./assets/figmaAssets";
 
 /**
  * ProjectDetails — a single project's overview screen, reached from the
@@ -78,19 +73,16 @@ const OVERVIEW_ROWS: OverviewRow[] = [
 const RECENTLY_VIEWED: PropertyCardData[] = [
   {
     name: "Acacia Estates",
-    logoUrl: acaciaEstatesLogoUrl,
     available: [1302, 1230, 1123],
     sold: [523, 523, 523],
   },
   {
     name: "Arista Place",
-    logoUrl: aristaPlaceLogoUrl,
     available: [1302, 1230, 1123],
     sold: [523, 523, 523],
   },
   {
     name: "The Valeron Tower",
-    logoUrl: valeronTowerLogoUrl,
     available: [1302, 1230, 1123],
     sold: [523, 523, 523],
   },
@@ -101,7 +93,6 @@ const RECENTLY_VIEWED: PropertyCardData[] = [
   },
   {
     name: "Arista Place",
-    logoUrl: aristaPlaceLogoUrl,
     available: [1302, 1230, 1123],
     sold: [523, 523, 523],
   },

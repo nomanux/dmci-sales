@@ -14,14 +14,12 @@
 
 import unitFloorplanB3Png from "./unit-floorplan-b3.png";
 import dmciLogoSvg from "./dmci-logo.svg";
-import acaciaEstatesLogoPng from "./acacia-estates-logo.png";
-import aristaPlaceLogoPng from "./arista-place-logo.png";
-import valeronTowerLogoPng from "./valeron-tower-logo.png";
-import anissaHeightsLogoPng from "./anissa-heights-logo.png";
-import astonPlaceLogoPng from "./aston-place-logo.png";
-import athertonLogoPng from "./atherton-logo.png";
-import altaVistaBoracayLogoPng from "./alta-vista-boracay-logo.png";
-import allegraGardenPlaceLogoPng from "./allegra-garden-place-logo.png";
+import acaciaEstatesPhoto from "./property-photos/acacia-estates.jpg";
+import gardenPoolPhoto from "./property-photos/garden-pool.jpg";
+import resortPoolPhoto from "./property-photos/resort-pool.webp";
+import deckPoolPhoto from "./property-photos/deck-pool.webp";
+import poolClubhouseNightPhoto from "./property-photos/pool-clubhouse-night.webp";
+import aerialNightPhoto from "./property-photos/aerial-night.webp";
 import noImageAvailablePng from "./no-image-available.png";
 import noImageAvailableGraphicSvg from "./no-image-available-graphic.svg";
 import thumbnailPhoto1Png from "./1.png";
@@ -45,22 +43,25 @@ export const unitFloorplanB3Url = unitFloorplanB3Png;
 // expired.
 export const dmciLogoUrl = dmciLogoSvg;
 
-// Property List grid-view card logos (Acacia Estates, Arista Place, The
-// Valeron Tower) + the "No Image Available" placeholder graphic. Supplied
-// directly by the user, bundled locally so they never expire — replaces the
-// earlier temporary Figma CDN pull.
-export const acaciaEstatesLogoUrl = acaciaEstatesLogoPng;
-export const aristaPlaceLogoUrl = aristaPlaceLogoPng;
-export const valeronTowerLogoUrl = valeronTowerLogoPng;
+// "No Image Available" placeholder for property cards without a photo.
 export const noImageAvailableUrl = noImageAvailablePng;
 
-// Additional Property List grid-view card logos, supplied directly by the
-// user and bundled locally so they never expire.
-export const anissaHeightsLogoUrl = anissaHeightsLogoPng;
-export const astonPlaceLogoUrl = astonPlaceLogoPng;
-export const athertonLogoUrl = athertonLogoPng;
-export const altaVistaBoracayLogoUrl = altaVistaBoracayLogoPng;
-export const allegraGardenPlaceLogoUrl = allegraGardenPlaceLogoPng;
+// Property card photos (Property List grid + Recently Viewed), replacing the
+// project logos. Supplied directly by the user, bundled locally. Only the
+// Acacia Estates photo shows its project (the entrance sign); the other five
+// carry no name, so their project pairing is a best match by look. One photo
+// per project, the same everywhere that project appears. There are five
+// unnamed photos for seven projects, so two are shared.
+export const projectPhotoUrls: Record<string, string> = {
+  "Acacia Estates": acaciaEstatesPhoto,
+  "Allegra Garden Place": gardenPoolPhoto, // green balconies
+  "Alta Vista De Boracay": resortPoolPhoto, // tropical resort clubhouse
+  "The Valeron Tower": deckPoolPhoto, // high-rise tower
+  "Arista Place": poolClubhouseNightPhoto,
+  "Anissa Heights": aerialNightPhoto,
+  "The Aston Place": deckPoolPhoto,
+  "The Atherton": poolClubhouseNightPhoto,
+};
 
 // "No Image Available" graphic (house icon + diagonal line + wordmark, all
 // one vector) used on the Unit Availability Details "Property Unit Image"

@@ -1,15 +1,14 @@
-import { noImageAvailableUrl } from "./assets/figmaAssets";
+import { noImageAvailableUrl, projectPhotoUrls } from "./assets/figmaAssets";
 
 /**
  * PropertyCard — the project card used in the Property List grid view
- * (logo, name, CU/PS/SA Available/Sold stats). Also reused by the
+ * (project photo, name, CU/PS/SA Available/Sold stats). Also reused by the
  * "Recently Viewed" section on ProjectDetails so both places render an
  * identical card.
  */
 
 export interface PropertyCardData {
   name: string;
-  logoUrl?: string;
   available: [number, number, number];
   sold: [number, number, number];
 }
@@ -28,18 +27,19 @@ export default function PropertyCard({
       className="group flex cursor-pointer flex-col rounded-xl border border-gray-200 bg-white text-left transition-shadow duration-200 ease-out hover:shadow-lg"
       style={{ WebkitFontSmoothing: "antialiased" }}
     >
-      <div className="flex h-32 shrink-0 items-center justify-center overflow-hidden rounded-t-xl bg-gray-50 p-4">
-        {card.logoUrl ? (
+      <div className="flex h-32 shrink-0 items-center justify-center overflow-hidden rounded-t-xl bg-gray-50">
+        {projectPhotoUrls[card.name] ? (
           <img
-            src={card.logoUrl}
+            src={projectPhotoUrls[card.name]}
             alt={card.name}
-            className="max-h-full max-w-full object-contain"
+            loading="lazy"
+            className="h-full w-full object-cover"
           />
         ) : (
           <img
             src={noImageAvailableUrl}
             alt="No image available"
-            className="max-h-full max-w-full object-contain"
+            className="max-h-full max-w-full object-contain p-4"
           />
         )}
       </div>
@@ -52,7 +52,7 @@ export default function PropertyCard({
           {["CU", "PS", "SA"].map((label) => (
             <span
               key={label}
-              className="justify-self-center rounded-[5px] bg-gray-50 px-3 py-0.5 text-xs font-semibold text-gray-600"
+              className="justify-self-center rounded-md bg-gray-50 px-3 py-0.5 text-xs font-semibold text-gray-600"
             >
               {label}
             </span>

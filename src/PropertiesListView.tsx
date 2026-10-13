@@ -15,13 +15,8 @@ import {
 import FilterTrigger from "./FilterTrigger";
 import { useNavigation, type Screen } from "./NavigationContext";
 import {
-  aristaPlaceLogoUrl,
-  anissaHeightsLogoUrl,
-  astonPlaceLogoUrl,
-  athertonLogoUrl,
-  altaVistaBoracayLogoUrl,
-  allegraGardenPlaceLogoUrl,
   noImageAvailableUrl,
+  projectPhotoUrls,
 } from "./assets/figmaAssets";
 
 /**
@@ -134,7 +129,6 @@ const PROJECTS: ProjectRow[] = [
 
 interface GridCard {
   name: string;
-  logoUrl?: string;
   available: [number, number, number];
   sold: [number, number, number];
 }
@@ -147,7 +141,6 @@ const GRID_CARDS: GridCard[] = [
   },
   {
     name: "Allegra Garden Place",
-    logoUrl: allegraGardenPlaceLogoUrl,
     available: [713, 138, 0],
     sold: [1706, 998, 0],
   },
@@ -163,13 +156,11 @@ const GRID_CARDS: GridCard[] = [
   },
   {
     name: "Anissa Heights",
-    logoUrl: anissaHeightsLogoUrl,
     available: [45, 1, 0],
     sold: [1340, 311, 0],
   },
   {
     name: "Arista Place",
-    logoUrl: aristaPlaceLogoUrl,
     available: [0, 110, 0],
     sold: [1295, 898, 1295],
   },
@@ -180,19 +171,16 @@ const GRID_CARDS: GridCard[] = [
   },
   {
     name: "The Aston Place",
-    logoUrl: astonPlaceLogoUrl,
     available: [0, 7, 0],
     sold: [1096, 546, 0],
   },
   {
     name: "The Atherton",
-    logoUrl: athertonLogoUrl,
     available: [6, 13, 1],
     sold: [866, 497, 192],
   },
   {
     name: "Alta Vista De Boracay",
-    logoUrl: altaVistaBoracayLogoUrl,
     available: [99, 0, 0],
     sold: [204, 0, 0],
   },
@@ -470,18 +458,19 @@ function GridView({
             className="group relative cursor-pointer select-text"
           >
             <div className="flex flex-col rounded-xl border border-gray-200 bg-white text-left shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition-[box-shadow,border-color] duration-300 ease-out group-hover:border-primary-200 group-hover:shadow-[0_10px_24px_-8px_rgba(16,24,40,0.15)]">
-            <div className="flex h-32 shrink-0 items-center justify-center overflow-hidden rounded-t-xl bg-gray-50 p-4">
-              {card.logoUrl ? (
+            <div className="flex h-32 shrink-0 items-center justify-center overflow-hidden rounded-t-xl bg-gray-50">
+              {projectPhotoUrls[card.name] ? (
                 <img
-                  src={card.logoUrl}
+                  src={projectPhotoUrls[card.name]}
                   alt={card.name}
-                  className="max-h-full max-w-full object-contain"
+                  loading="lazy"
+                  className="h-full w-full object-cover"
                 />
               ) : (
                 <img
                   src={noImageAvailableUrl}
                   alt="No image available"
-                  className="max-h-full max-w-full object-contain"
+                  className="max-h-full max-w-full object-contain p-4"
                 />
               )}
             </div>
@@ -494,7 +483,7 @@ function GridView({
                 {["CU", "PS", "SA"].map((label) => (
                   <span
                     key={label}
-                    className="mb-1.5 justify-self-center rounded-[5px] bg-gray-100 px-3 py-0.5 font-medium text-gray-500"
+                    className="mb-1.5 justify-self-center rounded-md bg-gray-100 px-3 py-0.5 text-xs font-medium text-gray-500"
                   >
                     {label}
                   </span>
