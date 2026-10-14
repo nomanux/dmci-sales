@@ -22,10 +22,11 @@ import poolClubhouseNightPhoto from "./property-photos/pool-clubhouse-night.webp
 import aerialNightPhoto from "./property-photos/aerial-night.webp";
 import noImageAvailablePng from "./no-image-available.png";
 import noImageAvailableGraphicSvg from "./no-image-available-graphic.svg";
-import thumbnailPhoto1Png from "./1.png";
-import thumbnailPhoto2Png from "./2.png";
-import thumbnailPhoto3Png from "./3.png";
-import thumbnailPhoto4Png from "./right.png";
+import thumbnailPhoto1Png from "./selfie-examples/too-far.jpg";
+import thumbnailPhoto2Png from "./selfie-examples/sunglasses-on.jpg";
+import thumbnailPhoto3Png from "./selfie-examples/face-turned.jpg";
+import thumbnailPhoto4Png from "./selfie-examples/good-example.jpg";
+import thumbnailOverexposedPng from "./selfie-examples/overexposed.jpg";
 import idCardImagePng from "./dummyid.png";
 
 const FIGMA_ASSET_BASE = "https://www.figma.com/api/mcp/asset";
@@ -88,6 +89,9 @@ export const thumbnailPhoto1Url = thumbnailPhoto1Png;
 export const thumbnailPhoto2Url = thumbnailPhoto2Png;
 export const thumbnailPhoto3Url = thumbnailPhoto3Png;
 export const thumbnailPhoto4Url = thumbnailPhoto4Png;
+// "Overexposed" example (washed-out, too bright). All five "Check your photo"
+// examples are 1600px JPEGs in ./selfie-examples so the full-size preview stays sharp.
+export const thumbnailOverexposedUrl = thumbnailOverexposedPng;
 
 // Client/Company Representative step (node 167635:167887) icons, saved
 // locally from the Figma export: co-buyer/PEP section icon, red trash-02

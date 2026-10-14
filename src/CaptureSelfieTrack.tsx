@@ -8,6 +8,7 @@ import DataPrivacyStep from "./DataPrivacyStep";
 import ConsentStep from "./ConsentStep";
 import ReviewStep from "./ReviewStep";
 import StepHeader from "./StepHeader";
+import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
 import {
   COUNTDOWN_DELAY_MS,
   COUNTDOWN_FROM,
@@ -29,6 +30,7 @@ import {
   thumbnailPhoto2Url,
   thumbnailPhoto3Url,
   thumbnailPhoto4Url,
+  thumbnailOverexposedUrl,
   sendIconUrl,
 } from "./assets/figmaAssets";
 
@@ -246,15 +248,133 @@ function LockIcon() {
 interface ThumbnailAttempt {
   id: string;
   photo: string;
+  label: string;
   status: "rejected" | "accepted";
 }
 
+// Rejected examples first, the good one last.
 const THUMBNAIL_ATTEMPTS: ThumbnailAttempt[] = [
-  { id: "attempt-1", photo: thumbnailPhoto1Url, status: "rejected" },
-  { id: "attempt-2", photo: thumbnailPhoto2Url, status: "rejected" },
-  { id: "attempt-3", photo: thumbnailPhoto3Url, status: "rejected" },
-  { id: "attempt-4", photo: thumbnailPhoto4Url, status: "accepted" },
+  { id: "attempt-1", photo: thumbnailPhoto1Url, label: "Too far", status: "rejected" },
+  { id: "attempt-2", photo: thumbnailPhoto2Url, label: "Sunglasses on", status: "rejected" },
+  { id: "attempt-3", photo: thumbnailPhoto3Url, label: "Face turned", status: "rejected" },
+  { id: "attempt-5", photo: thumbnailOverexposedUrl, label: "Overexposed", status: "rejected" },
+  { id: "attempt-4", photo: thumbnailPhoto4Url, label: "Good example", status: "accepted" },
 ];
+
+/**
+ * Full-size preview of a "Check your photo" example: dark backdrop, the
+ * photo large, its verdict underneath, arrows (and ←/→ keys) to step
+ * through the examples. Closes on ✕, Esc or a tap outside the photo.
+ */
+function ExamplePhotoPreview({
+  index,
+  onIndexChange,
+  onClose,
+}: {
+  index: number;
+  onIndexChange: (index: number) => void;
+  onClose: () => void;
+}) {
+  const count = THUMBNAIL_ATTEMPTS.length;
+  const attempt = THUMBNAIL_ATTEMPTS[index];
+  const accepted = attempt.status === "accepted";
+  const step = (delta: number) => onIndexChange((index + delta + count) % count);
+  const stepRef = useRef(step);
+  stepRef.current = step;
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+      else if (event.key === "ArrowLeft") stepRef.current(-1);
+      else if (event.key === "ArrowRight") stepRef.current(1);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  const navButton =
+    "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95";
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={"Example photo: " + attempt.label}
+      onClick={onClose}
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 p-4 md:p-8"
+    >
+      <button
+        type="button"
+        aria-label="Close preview"
+        onClick={onClose}
+        className={navButton + " absolute right-4 top-4"}
+      >
+        <CloseIcon className="h-5 w-5" />
+      </button>
+
+      <div className="flex w-full max-w-3xl items-center gap-2 md:gap-4">
+        <button
+          type="button"
+          aria-label="Previous example"
+          onClick={(e) => {
+            e.stopPropagation();
+            step(-1);
+          }}
+          className={navButton}
+        >
+          <ChevronLeftIcon className="h-5 w-5" />
+        </button>
+
+        <figure
+          onClick={(e) => e.stopPropagation()}
+          className="m-0 flex min-w-0 flex-1 flex-col items-center gap-3"
+        >
+          <img
+            src={attempt.photo}
+            alt={attempt.label + " example"}
+            className={
+              "block max-h-[75dvh] w-full rounded-xl object-contain outline outline-2 -outline-offset-2 " +
+              (accepted ? "outline-[#079455]" : "outline-[#f02b2b]")
+            }
+          />
+          <figcaption className="flex items-center gap-3">
+            <span
+              className={
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold leading-5 text-white " +
+                (accepted ? "bg-[#079455]" : "bg-[#f02b2b]")
+              }
+            >
+              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25">
+                {accepted ? <CheckIcon /> : <XIcon />}
+              </span>
+              {attempt.label}
+            </span>
+            <span className="text-xs font-medium text-white/70">
+              {index + 1} / {count}
+            </span>
+          </figcaption>
+        </figure>
+
+        <button
+          type="button"
+          aria-label="Next example"
+          onClick={(e) => {
+            e.stopPropagation();
+            step(1);
+          }}
+          className={navButton}
+        >
+          <ChevronRightIcon className="h-5 w-5" />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const TOTAL_STEPS = 8;
 const BUYER_PROPERTY_STEP = 1;
@@ -279,6 +399,8 @@ export default function CaptureSelfieTrack() {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [retryToken, setRetryToken] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  // "Check your photo" example open in the preview, by index.
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [faceFit, setFaceFit] = useState<FaceFit>("none");
   const faceDetected = faceFit === "ok";
   const [idHeld, setIdHeld] = useState(false);
@@ -1060,14 +1182,17 @@ export default function CaptureSelfieTrack() {
                       <p className="m-0 text-xs leading-4 font-semibold text-gray-900">
                         Check your photo
                       </p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 w-full">
-                        {THUMBNAIL_ATTEMPTS.map((attempt) => (
+                      <div className="grid grid-cols-3 md:grid-cols-5 gap-2 w-full">
+                        {THUMBNAIL_ATTEMPTS.map((attempt, index) => (
                           <div
                             key={attempt.id}
                             className="flex flex-col items-center gap-1"
                           >
-                            <div
-                              className={`relative w-full overflow-hidden bg-white min-w-0 outline outline-[1.4px] -outline-offset-[1.4px] rounded-lg p-0.5 ${
+                            <button
+                              type="button"
+                              aria-label={"View example: " + attempt.label}
+                              onClick={() => setPreviewIndex(index)}
+                              className={`relative w-full cursor-zoom-in overflow-hidden bg-white min-w-0 border-0 outline outline-[1.4px] -outline-offset-[1.4px] rounded-lg p-0.5 transition-transform duration-150 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 ${
                                 attempt.status === "accepted"
                                   ? "outline-[#079455]"
                                   : "outline-[#f02b2b]"
@@ -1096,7 +1221,7 @@ export default function CaptureSelfieTrack() {
                                   <XIcon />
                                 </span>
                               )}
-                            </div>
+                            </button>
                             <span
                               className={`text-[10px] md:text-xs leading-4 font-medium text-center ${
                                 attempt.status === "accepted"
@@ -1104,13 +1229,7 @@ export default function CaptureSelfieTrack() {
                                   : "text-error-600"
                               }`}
                             >
-                              {attempt.id === "attempt-1"
-                                ? "Too far"
-                                : attempt.id === "attempt-2"
-                                  ? "Sunglasses on"
-                                  : attempt.id === "attempt-3"
-                                    ? "Face turned"
-                                    : "Good example"}
+                              {attempt.label}
                             </span>
                           </div>
                         ))}
@@ -1391,6 +1510,14 @@ export default function CaptureSelfieTrack() {
             </button>
           )}
         </div>
+      )}
+
+      {previewIndex !== null && (
+        <ExamplePhotoPreview
+          index={previewIndex}
+          onIndexChange={setPreviewIndex}
+          onClose={() => setPreviewIndex(null)}
+        />
       )}
     </div>
   );
