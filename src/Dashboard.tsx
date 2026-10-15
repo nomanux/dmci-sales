@@ -182,8 +182,8 @@ export default function Dashboard() {
 
           {/* Position breakdown table */}
           <div className="relative w-full overflow-x-auto rounded-lg border border-primary-50">
-            <table className="w-full border-collapse text-xs sm:text-sm">
-              <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+            <table className="w-full border-collapse text-[13px]">
+              <thead className="table-head">
                 <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
                   <th className="px-2 py-2 sm:px-5 sm:py-3">Position</th>
                   {TREND_SERIES.map((series) => (
@@ -207,11 +207,11 @@ export default function Dashboard() {
               </tbody>
               <tfoot>
                 <tr className="border-t border-primary-50">
-                  <td className="px-2 py-1 text-sm font-semibold text-gray-900 sm:px-5 sm:py-3">Total</td>
-                  <td className="px-1 py-1 text-center text-sm font-semibold text-gray-900 sm:px-5 sm:py-3">##</td>
-                  <td className="px-1 py-1 text-center text-sm font-semibold text-gray-900 sm:px-5 sm:py-3">##</td>
-                  <td className="px-1 py-1 text-center text-sm font-semibold text-gray-900 sm:px-5 sm:py-3">##</td>
-                  <td className="px-1 py-1 text-center text-sm font-semibold text-gray-900 sm:px-5 sm:py-3">##</td>
+                  <td className="px-2 py-1 text-[13px] font-semibold text-gray-900 sm:px-5 sm:py-3">Total</td>
+                  <td className="px-1 py-1 text-center text-[13px] font-semibold text-gray-900 sm:px-5 sm:py-3">##</td>
+                  <td className="px-1 py-1 text-center text-[13px] font-semibold text-gray-900 sm:px-5 sm:py-3">##</td>
+                  <td className="px-1 py-1 text-center text-[13px] font-semibold text-gray-900 sm:px-5 sm:py-3">##</td>
+                  <td className="px-1 py-1 text-center text-[13px] font-semibold text-gray-900 sm:px-5 sm:py-3">##</td>
                 </tr>
               </tfoot>
             </table>

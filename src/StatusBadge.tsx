@@ -62,7 +62,9 @@ const BADGE_COLOR_STYLES: Record<BadgeColor, string> = {
 
 const BADGE_BORDER_STYLES: Record<BadgeColor, { plain: string; icon: string }> =
   {
-    brand: { plain: "border-[#98b9ff]", icon: "border-[#6293f8]" },
+    // Icon (link) badges: the same soft border as plain ones at rest; the
+    // stronger blue only on hover, as a "clickable" cue.
+    brand: { plain: "border-[#98b9ff]", icon: "border-[#98b9ff] hover:border-[#6293f8]" },
   };
 
 const BADGE_TEXT_STYLES: Record<BadgeSize, string> = {
@@ -73,7 +75,8 @@ const BADGE_TEXT_STYLES: Record<BadgeSize, string> = {
 const BADGE_PADDING_STYLES: Record<BadgeSize, Record<BadgeIcon, string>> = {
   sm: {
     none: "px-1.5 py-0.5",
-    leading: "gap-1 py-0.5 pl-1 pr-1.5",
+    // Roomier than the other sm variants: these are clickable link badges.
+    leading: "gap-1.5 py-1 pl-2 pr-2.5",
     trailing: "gap-1 py-0.5 pl-1.5 pr-1",
     only: "p-1",
   },

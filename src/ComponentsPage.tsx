@@ -55,14 +55,14 @@ function SizeHeaderRow() {
 function ButtonVariantTable({ variant }: { variant: ButtonVariant }) {
   return (
     <div className="overflow-x-auto">
-      <table className="border-collapse text-sm">
-        <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+      <table className="border-collapse text-[13px]">
+        <thead className="table-head">
           <SizeHeaderRow />
         </thead>
         <tbody>
           {[false, true].map((isDisabled) => (
             <tr key={String(isDisabled)}>
-              <td className="px-2 py-1 text-sm font-medium text-gray-700">{isDisabled ? "Disabled" : "Default"}</td>
+              <td className="px-2 py-1 text-[13px] font-medium text-gray-700">{isDisabled ? "Disabled" : "Default"}</td>
               {BUTTON_SIZES.map(({ size, iconClasses }) => (
                 <td key={size} className="px-3 py-1">
                   <Button variant={variant} size={size} disabled={isDisabled}>
@@ -82,14 +82,14 @@ function ButtonVariantTable({ variant }: { variant: ButtonVariant }) {
 function IconOnlyButtonTable() {
   return (
     <div className="overflow-x-auto">
-      <table className="border-collapse text-sm">
-        <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+      <table className="border-collapse text-[13px]">
+        <thead className="table-head">
           <SizeHeaderRow />
         </thead>
         <tbody>
           {[false, true].map((isDisabled) => (
             <tr key={String(isDisabled)}>
-              <td className="px-2 py-1 text-sm font-medium text-gray-700">{isDisabled ? "Disabled" : "Default"}</td>
+              <td className="px-2 py-1 text-[13px] font-medium text-gray-700">{isDisabled ? "Disabled" : "Default"}</td>
               {BUTTON_SIZES.map(({ size, iconClasses }) => (
                 <td key={size} className="px-3 py-1">
                   <IconButton size={size} aria-label="Icon action" disabled={isDisabled}>
@@ -108,14 +108,14 @@ function IconOnlyButtonTable() {
 function SecondaryIconButtonTable() {
   return (
     <div className="overflow-x-auto">
-      <table className="border-collapse text-sm">
-        <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+      <table className="border-collapse text-[13px]">
+        <thead className="table-head">
           <SizeHeaderRow />
         </thead>
         <tbody>
           {[false, true].map((isDisabled) => (
             <tr key={String(isDisabled)}>
-              <td className="px-2 py-1 text-sm font-medium text-gray-700">{isDisabled ? "Disabled" : "Default"}</td>
+              <td className="px-2 py-1 text-[13px] font-medium text-gray-700">{isDisabled ? "Disabled" : "Default"}</td>
               {BUTTON_SIZES.map(({ size, iconClasses }) => (
                 <td key={size} className="px-3 py-1">
                   <SecondaryIconButton size={size} aria-label="Secondary action" disabled={isDisabled}>

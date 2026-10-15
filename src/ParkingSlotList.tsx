@@ -7,7 +7,7 @@ import Select from "./Select";
 import { DownloadPdfButton, StatusPill, TableCardHeader } from "./StatusBadge";
 import FilterTrigger from "./FilterTrigger";
 import RowActionButton from "./RowActionButton";
-import { EyeIcon, PlusIcon } from "./icons";
+import { ChevronLeftIcon, EyeIcon, PlusIcon } from "./icons";
 import { useNavigation } from "./NavigationContext";
 
 /**
@@ -60,7 +60,10 @@ const ROWS: ParkingSlotRow[] = [
 ];
 
 export default function ParkingSlotList() {
-  const { navigate } = useNavigation();
+  const { route, navigate } = useNavigation();
+  // Opened from a project's Project Details pill: show that project in the
+  // breadcrumb and a back button to it (the sidebar link has no project).
+  const project = route.project;
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
@@ -93,7 +96,21 @@ export default function ParkingSlotList() {
     <Layout
       active="properties"
       activeSubItem="Parking Slot"
-      breadcrumb={[
+      breadcrumb={
+        project
+          ? [
+              {
+                label: "Property",
+                onClick: () => navigate({ screen: "properties" }),
+              },
+              { label: "List", onClick: () => navigate({ screen: "properties" }) },
+              {
+                label: project,
+                onClick: () => navigate({ screen: "project-details", project }),
+              },
+              { label: "Parking Slot" },
+            ]
+          : [
         {
           label: "Dashboard",
           onClick: () => navigate({ screen: "dashboard" }),
@@ -103,12 +120,24 @@ export default function ParkingSlotList() {
           onClick: () => navigate({ screen: "properties" }),
         },
         { label: "Parking Slot" },
-      ]}
+      ]
+      }
       orgBadge
     >
       <div className="flex h-full w-full flex-col">
         <div className="shrink-0 px-5 py-3">
           <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {project && (
+                <button
+                  type="button"
+                  aria-label={"Back to " + project}
+                  onClick={() => navigate({ screen: "project-details", project })}
+                  className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                >
+                  <ChevronLeftIcon className="h-5 w-5" />
+                </button>
+              )}
             <div className="flex flex-col gap-1">
               <h1 className="text-base font-semibold text-gray-900">
                 Parking Slot
@@ -117,6 +146,7 @@ export default function ParkingSlotList() {
                 {filteredRows.length} parking slots available
               </p>
             </div>
+            </div>
             <Button variant="primary" size="sm">
               <PlusIcon className="h-4 w-4" />
               New Parking Slot
@@ -124,7 +154,7 @@ export default function ParkingSlotList() {
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-2">
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
           <div className="flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
             <TableCardHeader
               leftSlot={
@@ -147,7 +177,7 @@ export default function ParkingSlotList() {
             />
             <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]">
               <table className="w-full min-w-[1040px] border-collapse" style={{ fontSize: "13px" }}>
-                <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+                <thead className="table-head">
                   <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
                     <th className="w-8 px-3 py-1">
                       <Checkbox size="sm" />
@@ -157,7 +187,7 @@ export default function ParkingSlotList() {
                     <th className="px-2 py-1 font-semibold">Description</th>
                     <th className="px-2 py-1 font-semibold">Status</th>
                     <th className="px-2 py-1 font-semibold">Category</th>
-                    <th className="w-24 px-2 py-1 text-center font-semibold">
+                    <th className="w-24 px-2 py-1 text-center font-semibold col-actions">
                       Actions
                     </th>
                   </tr>
@@ -180,7 +210,7 @@ export default function ParkingSlotList() {
                         <StatusPill status={row.status} />
                       </td>
                       <td className="px-2 py-2">{row.category}</td>
-                      <td className="px-2 py-2">
+                      <td className="px-2 py-2 col-actions">
                         <div className="flex items-center justify-center">
                           <RowActionButton
                             aria-label={`View ${row.code} details`}

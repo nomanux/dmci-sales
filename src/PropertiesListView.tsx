@@ -314,8 +314,8 @@ function TableView({
         }
       />
       <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]">
-        <table className="w-full min-w-[960px] border-collapse text-sm">
-          <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+        <table className="w-full min-w-[960px] border-collapse text-[13px]">
+          <thead className="table-head">
             <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
               <th className="w-10 px-4 py-2">
                 <Checkbox size="sm" />
@@ -458,21 +458,24 @@ function GridView({
             className="group relative cursor-pointer select-text"
           >
             <div className="flex flex-col rounded-xl border border-gray-200 bg-white text-left shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition-[box-shadow,border-color] duration-300 ease-out group-hover:border-primary-200 group-hover:shadow-[0_10px_24px_-8px_rgba(16,24,40,0.15)]">
-            <div className="flex h-32 shrink-0 items-center justify-center overflow-hidden rounded-t-xl bg-gray-50">
-              {projectPhotoUrls[card.name] ? (
-                <img
-                  src={projectPhotoUrls[card.name]}
-                  alt={card.name}
-                  loading="lazy"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <img
-                  src={noImageAvailableUrl}
-                  alt="No image available"
-                  className="max-h-full max-w-full object-contain p-4"
-                />
-              )}
+            {/* Photo inset from the card edge, with its own rounded corners. */}
+            <div className="shrink-0 px-3 pt-3">
+              <div className="flex h-32 items-center justify-center overflow-hidden rounded-lg bg-gray-50">
+                {projectPhotoUrls[card.name] ? (
+                  <img
+                    src={projectPhotoUrls[card.name]}
+                    alt={card.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <img
+                    src={noImageAvailableUrl}
+                    alt="No image available"
+                    className="max-h-full max-w-full object-contain p-4"
+                  />
+                )}
+              </div>
             </div>
             <div className="flex flex-col gap-3 p-4">
               <span className="text-base font-semibold text-primary-500 group-hover:underline">
@@ -548,7 +551,7 @@ export default function PropertiesListView() {
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-2">
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
           {view === "list" ? (
             <TableView
               view={view}

@@ -176,7 +176,7 @@ export default function LotteryUnitPicker() {
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-2">
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
           <div className="flex min-h-0 w-full flex-1 flex-col rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
             <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-6 py-3">
               <div className="flex items-center gap-2">

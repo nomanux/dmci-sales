@@ -87,8 +87,8 @@ export default function EntitySelectionModal({
               <span className="text-xs text-gray-500">Showing {ENTITIES.length} company lists</span>
             </div>
             <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="w-full min-w-[420px] border-collapse text-sm">
-                <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+              <table className="w-full min-w-[420px] border-collapse text-[13px]">
+                <thead className="table-head">
                   <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
                     <th className="w-[38%] px-4 py-2">Company Code</th>
                     <th className="px-4 py-2">Company Name</th>

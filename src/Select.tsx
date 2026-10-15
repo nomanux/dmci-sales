@@ -16,7 +16,7 @@ import { ChevronDownIcon, ChevronUpIcon } from "./icons";
  * dropdown UI can render.
  */
 
-export type SelectSize = "sm" | "md";
+export type SelectSize = "xs" | "sm" | "md";
 
 export interface SelectOption {
   value: string;
@@ -37,6 +37,7 @@ export interface SelectProps {
 
 /** Maps size -> the CSS class defined in tailwind.css (@layer components). */
 export const SELECT_SIZE_CLASSES: Record<SelectSize, string> = {
+  xs: "select-xs",
   sm: "select-sm",
   md: "select-md",
 };

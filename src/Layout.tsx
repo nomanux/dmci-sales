@@ -164,6 +164,23 @@ function isBranch(item: NavLeaf | NavBranch): item is NavBranch {
   return "items" in item;
 }
 
+// Sidebar brand styling (client: "subtle DMCI Homes brand colors"): the
+// active item gets a light brand tint, navy text and a 3px navy bar on its
+// left edge; hover is a fainter tint. Everything else stays neutral.
+// Hierarchy: top level medium/gray-700 > sub-items regular/gray-600; the
+// selected main menu and sub-item are semibold in the primary color. Icons
+// sit a shade lighter than their labels (gray-500, still 4.8:1 on white).
+const NAV_ACTIVE =
+  "relative bg-brand-25 font-semibold text-primary-500 before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-primary-500";
+const NAV_IDLE = "font-medium text-gray-700 hover:bg-brand-25/60 hover:text-gray-900";
+// Parent of the active sub-item (expanded): primary text, no tint (the
+// sub-item carries the background highlight).
+const NAV_PARENT_ACTIVE = "font-semibold text-primary-500 hover:bg-brand-25/60";
+const ICON_ACTIVE = "text-primary-500";
+const ICON_IDLE = "text-gray-500 group-hover:text-gray-700";
+const SUB_ACTIVE = "bg-brand-25 font-semibold text-primary-500";
+const SUB_IDLE = "font-normal text-gray-600 hover:bg-brand-25/60 hover:text-gray-900";
+
 function NavItem({
   icon: Icon,
   label,
@@ -183,14 +200,12 @@ function NavItem({
       onClick={(e) => onClick?.(e)}
       title={collapsed ? label : undefined}
       className={
-        "flex h-10 w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm font-semibold transition-colors " +
+        "group flex h-10 w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors " +
         (collapsed ? "lg:justify-center lg:px-0 " : "") +
-        (active
-          ? "bg-gray-50 text-primary-500"
-          : "text-gray-500 hover:bg-gray-50")
+        (active ? NAV_ACTIVE : NAV_IDLE)
       }
     >
-      <Icon className="h-4 w-4 shrink-0" />
+      <Icon className={"h-4 w-4 shrink-0 transition-colors " + (active ? ICON_ACTIVE : ICON_IDLE)} />
       <span className={collapsed ? "lg:hidden" : ""}>{label}</span>
     </button>
   );
@@ -227,16 +242,18 @@ function NavDropdown({
         onClick={() => !collapsed && setOpen((v) => !v)}
         title={collapsed ? label : undefined}
         className={
-          "flex h-10 w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm font-semibold transition-colors " +
+          "group flex h-10 w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors " +
           (collapsed ? "lg:justify-center lg:px-0 " : "") +
-          (active ? "text-primary-500" : "text-gray-500 hover:bg-gray-50")
+          // Expanded, the active sub-item carries the highlight, so the parent
+          // only darkens; on the icon rail it gets the full active style.
+          (active ? (collapsed ? NAV_ACTIVE : NAV_PARENT_ACTIVE) : NAV_IDLE)
         }
       >
-        <Icon className="h-4 w-4 shrink-0" />
+        <Icon className={"h-4 w-4 shrink-0 transition-colors " + (active ? ICON_ACTIVE : ICON_IDLE)} />
         <span className={"flex-1 " + (collapsed ? "lg:hidden" : "")}>
           {label}
         </span>
-        <span className={collapsed ? "lg:hidden" : ""}>
+        <span className={"text-gray-400 " + (collapsed ? "lg:hidden" : "")}>
           {open ? (
             <ChevronUpIcon className="h-4 w-4 shrink-0" />
           ) : (
@@ -247,9 +264,12 @@ function NavDropdown({
 
       {/* Inline accordion — expanded sidebar (and always on mobile). */}
       {open && items.length > 0 && (
+        // Guide line under the parent's icon; the active sub-item draws a navy
+        // segment over it. Text still starts 32px in, as before.
         <div
           className={
-            "flex flex-col items-start pb-1 " + (collapsed ? "lg:hidden" : "")
+            "ml-[15px] mt-0.5 flex flex-col items-start gap-0.5 border-l border-gray-200 pb-1 pl-2 " +
+            (collapsed ? "lg:hidden" : "")
           }
         >
           {items.map((item) => (
@@ -259,11 +279,12 @@ function NavDropdown({
               onClick={(e) => item.onClick?.(e)}
               disabled={!item.onClick}
               className={
-                "w-full rounded-md py-1.5 pl-8 pr-2 text-left text-[13px] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent " +
+                "relative w-full rounded-md px-2 py-1.5 text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent " +
                 (item.onClick ? "cursor-pointer " : "") +
                 (item.label === activeSubItem
-                  ? "bg-gray-50 font-semibold text-primary-500"
-                  : "font-medium text-gray-700")
+                  ? SUB_ACTIVE +
+                    " before:absolute before:inset-y-1 before:-left-[9px] before:w-[2px] before:rounded-full before:bg-brand-500"
+                  : SUB_IDLE)
               }
             >
               {item.label}
@@ -286,11 +307,9 @@ function NavDropdown({
                 onClick={(e) => item.onClick?.(e)}
                 disabled={!item.onClick}
                 className={
-                  "w-full rounded-md px-2 py-1.5 text-left text-[13px] hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent " +
+                  "w-full rounded-md px-2 py-1.5 text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent " +
                   (item.onClick ? "cursor-pointer " : "") +
-                  (item.label === activeSubItem
-                    ? "bg-gray-50 font-semibold text-primary-500"
-                    : "font-medium text-gray-700")
+                  (item.label === activeSubItem ? SUB_ACTIVE : SUB_IDLE)
                 }
               >
                 {item.label}
@@ -320,6 +339,17 @@ export interface LayoutProps {
   children: ReactNode;
 }
 
+// Sidebar collapse default: icon-only on mid-size screens (1000–1440px wide;
+// below lg the sidebar is a drawer, so in practice 1024–1440), expanded on
+// wider ones. Each page renders its own Layout, so a ☰ toggle is remembered
+// here for the rest of the session instead of resetting on every navigation.
+let userCollapsedChoice: boolean | null = null;
+function initialCollapsed(): boolean {
+  if (userCollapsedChoice !== null) return userCollapsedChoice;
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(min-width: 1000px) and (max-width: 1440px)").matches;
+}
+
 export default function Layout({
   active,
   activeSubItem,
@@ -331,7 +361,13 @@ export default function Layout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // Desktop-only: collapses the static sidebar to an icon-only rail. Mobile
   // keeps its own off-canvas drawer (sidebarOpen) untouched.
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsedState] = useState(initialCollapsed);
+  const setCollapsed = (update: (value: boolean) => boolean) =>
+    setCollapsedState((value) => {
+      const next = update(value);
+      userCollapsedChoice = next;
+      return next;
+    });
   const [entityModalOpen, setEntityModalOpen] = useState(false);
   const [selectedEntity, setSelectedEntity] = useState<SelectedEntity>({
     code: "DPDI",
@@ -604,19 +640,19 @@ export default function Layout({
                   (collapsed ? "lg:flex-none lg:justify-center" : "")
                 }
               >
-                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-[0.75px] border-black/10 bg-gray-100 text-sm font-semibold text-primary-600">
+                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-100 bg-brand-25 text-sm font-semibold text-brand-600">
                   OR
                 </div>
                 <div
                   className={
-                    "flex flex-col text-sm leading-5 " +
+                    "flex min-w-0 flex-col text-sm leading-5 " +
                     (collapsed ? "lg:hidden" : "")
                   }
                 >
-                  <span className="font-semibold text-gray-900">
+                  <span className="truncate font-semibold text-gray-900">
                     Super Admin
                   </span>
-                  <span className="text-gray-600">Admin</span>
+                  <span className="truncate text-xs leading-[18px] text-gray-500">Admin</span>
                 </div>
               </div>
               <button

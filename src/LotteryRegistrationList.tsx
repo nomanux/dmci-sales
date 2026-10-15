@@ -392,7 +392,7 @@ export default function LotteryRegistrationList() {
 
         <LiveBatchBanner />
 
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-2">
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
           <div className="flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
             <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-3">
               <input
@@ -413,14 +413,14 @@ export default function LotteryRegistrationList() {
                 className="w-full min-w-[1040px] border-collapse"
                 style={{ fontSize: "13px" }}
               >
-                <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+                <thead className="table-head">
                   <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
-                    <th className="px-2 py-1 font-semibold">CRF Number</th>
+                    <th className="py-1 pl-4 pr-2 font-semibold">CRF Number</th>
                     <th className="px-2 py-1 font-semibold">Account Number</th>
                     <th className="px-2 py-1 font-semibold">Client Name</th>
                     <th className="px-2 py-1 font-semibold">Status</th>
                     <th className="px-2 py-1 font-semibold">Seller Name</th>
-                    <th className="w-16 px-2 py-1 text-center font-semibold">
+                    <th className="w-16 px-2 py-1 text-center font-semibold col-actions">
                       Actions
                     </th>
                   </tr>
@@ -431,7 +431,7 @@ export default function LotteryRegistrationList() {
                       key={row.crfNumber}
                       className="border-b border-gray-100 text-gray-600 hover:bg-gray-50"
                     >
-                      <td className="px-2 py-2 font-medium text-gray-900">
+                      <td className="py-2 pl-4 pr-2 font-medium text-gray-900">
                         {row.crfNumber}
                       </td>
                       <td className="px-2 py-2">{row.accountNumber}</td>
@@ -440,7 +440,7 @@ export default function LotteryRegistrationList() {
                         <StatusPill status={row.status} />
                       </td>
                       <td className="px-2 py-2">{row.sellerName}</td>
-                      <td className="px-2 py-2">
+                      <td className="px-2 py-2 col-actions">
                         <div className="flex items-center justify-center">
                           <Button
                             variant="tertiary"

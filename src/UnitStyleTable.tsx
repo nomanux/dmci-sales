@@ -1,12 +1,13 @@
 import { useState } from "react";
 import Layout, { PageBackHeading } from "./Layout";
-import FilterBar, { type FilterField } from "./FilterBar";
+import type { FilterField } from "./FilterBar";
+import ListSearchFilter, { type FilterValues } from "./ListSearchFilter";
 import Pagination from "./Pagination";
 import Checkbox from "./Checkbox";
 import ImagePreviewModal from "./ImagePreviewModal";
 import { DownloadPdfButton, StatusPill, TableCardHeader } from "./StatusBadge";
 import RowActionButton from "./RowActionButton";
-import { EyeIcon, ImageIcon } from "./icons";
+import { EyeIcon, ImageIcon, PauseCircleIcon } from "./icons";
 import { useNavigation } from "./NavigationContext";
 import { unitFloorplanB3Url } from "./assets/figmaAssets";
 
@@ -33,37 +34,70 @@ export interface UnitStyleTableProps {
   title: string;
   categoryDefault: string;
   showPropertyUnitColumn?: boolean;
+  /** Unit screen: a third "Hold" action, disabled once the unit is sold. */
+  showHoldAction?: boolean;
   rows: UnitStyleRow[];
+}
+
+/** "C- Accolade 101" → "C- Accolade" (the building, without the unit number). */
+function buildingOf(row: UnitStyleRow): string {
+  return row.buildingUnit.replace(/s*S+$/, "");
 }
 
 export default function UnitStyleTable({
   title,
   categoryDefault,
   showPropertyUnitColumn,
+  showHoldAction,
   rows,
 }: UnitStyleTableProps) {
   const [previewRow, setPreviewRow] = useState<UnitStyleRow | null>(null);
   const { route, navigate } = useNavigation();
   const project = route.project ?? "Acacia Estates";
 
+  // Filter options come from this page's own rows, so every choice matches
+  // something in the table. Nothing is pre-applied (the page is already
+  // scoped to its category).
+  const unique = (values: string[]) =>
+    [...new Set(values)].sort((a, b) => a.localeCompare(b)).map((value) => ({ value, label: value }));
   const filters: FilterField[] = [
-    { kind: "select", label: "Project", placeholder: "Select one" },
-    { kind: "select", label: "Building", placeholder: "Select one" },
-    { kind: "select", label: "Status", placeholder: "Select one" },
+    { kind: "select", label: "Project", placeholder: "Select one", options: unique(rows.map((r) => r.code)) },
+    { kind: "select", label: "Building", placeholder: "Select one", options: unique(rows.map(buildingOf)) },
     {
       kind: "select",
-      label: "Category",
+      label: "Status",
       placeholder: "Select one",
-      value: categoryDefault,
+      options: unique(["Available", "On Hold", "Sold", ...rows.map((r) => r.status)]),
     },
-    { kind: "select", label: "Type", placeholder: "Select one" },
+    { kind: "select", label: "Category", placeholder: "Select one", options: unique(rows.map((r) => r.category)) },
+    { kind: "select", label: "Unit Type", placeholder: "Select one", options: unique(rows.map((r) => r.description)) },
     {
       kind: "select",
       label: "Show List Price?",
       labelAccent: "(PDF Report)",
       placeholder: "Select one",
+      options: [
+        { value: "Yes", label: "Yes" },
+        { value: "No", label: "No" },
+      ],
     },
   ];
+
+  const [search, setSearch] = useState("");
+  const [applied, setApplied] = useState<FilterValues>({});
+  const query = search.trim().toLowerCase();
+  const visibleRows = rows.filter(
+    (row) =>
+      (!applied.Project || row.code === applied.Project) &&
+      (!applied.Building || buildingOf(row) === applied.Building) &&
+      (!applied.Status || row.status === applied.Status) &&
+      (!applied.Category || row.category === applied.Category) &&
+      (!applied["Unit Type"] || row.description === applied["Unit Type"]) &&
+      (!query ||
+        [row.code, row.buildingUnit, row.description, row.category, row.propertyUnit ?? "", row.notes ?? ""].some((v) =>
+          v.toLowerCase().includes(query),
+        )),
+  );
 
   return (
     <Layout
@@ -91,19 +125,22 @@ export default function UnitStyleTable({
           />
         </div>
 
-        <div className="flex flex-col gap-4 px-5">
-          <FilterBar fields={filters} />
-        </div>
-
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-2">
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
           <div className="flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
             <TableCardHeader
-              title="Property List"
+              leftSlot={
+                <ListSearchFilter
+                  fields={filters}
+                  onSearchChange={setSearch}
+                  onApply={setApplied}
+                />
+              }
               rightSlot={<DownloadPdfButton />}
             />
             <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]">
-              <table className="w-full min-w-[960px] border-collapse text-sm">
-                <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+              {/* Cells 13px; header labels stay 12px (table-head), pills/actions keep their own size. */}
+              <table className="w-full min-w-[960px] border-collapse text-[13px]">
+                <thead className="table-head">
                   <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
                     <th className="w-10 px-4 py-2">
                       <Checkbox size="sm" />
@@ -117,13 +154,25 @@ export default function UnitStyleTable({
                       <th className="px-2 py-2 font-semibold">Property Unit</th>
                     )}
                     <th className="px-2 py-2 font-semibold">Property Notes</th>
-                    <th className="w-[200px] px-2 py-2 text-center font-semibold">
+                    <th
+                      className={
+                        (showHoldAction ? "w-[300px]" : "w-[200px]") +
+                        " col-actions px-2 py-2 text-center font-semibold"
+                      }
+                    >
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((row, index) => (
+                  {visibleRows.length === 0 && (
+                    <tr>
+                      <td colSpan={showPropertyUnitColumn ? 9 : 8} className="px-4 py-10 text-center text-[13px] text-gray-500">
+                        No {title.toLowerCase()}s match your search or filters.
+                      </td>
+                    </tr>
+                  )}
+                  {visibleRows.map((row, index) => (
                     <tr
                       key={index}
                       className="border-b border-gray-100 text-gray-600 hover:bg-gray-50"
@@ -144,7 +193,7 @@ export default function UnitStyleTable({
                         <td className="px-2 py-1">{row.propertyUnit ?? "-"}</td>
                       )}
                       <td className="px-2 py-1">{row.notes ?? "-"}</td>
-                      <td className="px-2 py-1">
+                      <td className="px-2 py-1 col-actions">
                         <div className="flex items-center justify-center gap-3">
                           <RowActionButton
                             aria-label={`View ${row.code} details`}
@@ -157,6 +206,14 @@ export default function UnitStyleTable({
                             icon={<ImageIcon className="h-6 w-6" />}
                             label="Image"
                           />
+                          {showHoldAction && (
+                            <RowActionButton
+                              aria-label={`Put ${row.buildingUnit} on hold`}
+                              disabled={row.status === "Sold"}
+                              icon={<PauseCircleIcon className="h-6 w-6" />}
+                              label="Hold"
+                            />
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -164,7 +221,7 @@ export default function UnitStyleTable({
                 </tbody>
               </table>
             </div>
-            <Pagination total={85} />
+            <Pagination total={visibleRows.length} />
           </div>
         </div>
       </div>

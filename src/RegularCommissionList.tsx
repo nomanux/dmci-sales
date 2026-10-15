@@ -7,7 +7,7 @@ import Pagination from "./Pagination";
 import Checkbox from "./Checkbox";
 import { DownloadPdfButton, RecordTabs } from "./StatusBadge";
 import RowActionButton from "./RowActionButton";
-import { EyeIcon } from "./icons";
+import { EyeIcon, InfoIcon, UserCheckIcon } from "./icons";
 import { useNavigation } from "./NavigationContext";
 
 /**
@@ -234,34 +234,45 @@ export default function RegularCommissionList() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 px-5">
-          <p className="text-xs text-gray-500">
-            <strong className="font-semibold">Note:</strong> All reservations
-            prior to July 1, 2016 and released in IFCA (previous system) will
-            not be displayed in commission ledger.
-          </p>
+        {/* pb-4: same 16px gap between the seller card and the table card. */}
+        <div className="flex flex-col gap-4 px-5 pb-4">
+          {/* Highlighted caveat, same soft yellow as the selfie step's "Important" note. */}
+          <div className="flex items-start gap-2 rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs leading-[18px] text-yellow-900">
+            <InfoIcon className="mt-px h-4 w-4 shrink-0 text-yellow-600" />
+            <p className="m-0">
+              <strong className="font-semibold">Note:</strong> All reservations
+              prior to July 1, 2016 and released in IFCA (previous system) will
+              not be displayed in commission ledger.
+            </p>
+          </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
-            <span className="text-sm text-gray-700">
-              View Seller:{" "}
-              <strong className="font-semibold text-gray-900">
+          {/* Compact seller bar: icon + seller ID on the left, the seller's
+              ledger reports as small buttons (same light-blue look) on the right. */}
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-25 text-primary-500">
+                <UserCheckIcon className="h-4 w-4" />
+              </span>
+              <span className="text-xs text-gray-500">View Seller</span>
+              <strong className="truncate text-[13px] font-semibold tracking-wide tabular-nums text-gray-900">
                 E000000000000000008729345
               </strong>
-            </span>
-            <div className="flex gap-2">
+            </div>
+            <div className="flex flex-wrap gap-1.5">
               {["Deduction", "Posted VAT", "Debit Advice"].map((label) => (
-                <span
+                <button
                   key={label}
-                  className="rounded-md border border-primary-50 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-primary-500"
+                  type="button"
+                  className="h-7 cursor-pointer rounded-md border border-primary-50 bg-blue-50 px-2.5 text-xs font-semibold text-primary-500 transition-colors hover:border-primary-100 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
                 >
                   {label}
-                </span>
+                </button>
               ))}
             </div>
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-2">
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
           <div className="flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-4 pt-1">
               <RecordTabs
@@ -290,21 +301,21 @@ export default function RegularCommissionList() {
                 className="w-full min-w-[1040px] border-collapse"
                 style={{ fontSize: "13px" }}
               >
-                <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
-                  <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
-                    <th className="w-8 px-3 py-1">
+                <thead className="table-head">
+                  <tr className="text-left">
+                    <th className="w-10 px-4 py-2">
                       <Checkbox size="sm" />
                     </th>
-                    <th className="px-2 py-1 font-semibold">Contract No.</th>
-                    <th className="px-2 py-1 font-semibold">Building Unit</th>
-                    <th className="px-2 py-1 font-semibold">Client Name</th>
-                    <th className="px-2 py-1 font-semibold">Net TCP</th>
-                    <th className="px-2 py-1 font-semibold">
+                    <th className="px-2 py-2 font-semibold">Contract No.</th>
+                    <th className="px-2 py-2 font-semibold">Building Unit</th>
+                    <th className="px-2 py-2 font-semibold">Client Name</th>
+                    <th className="px-2 py-2 font-semibold">Net TCP</th>
+                    <th className="px-2 py-2 font-semibold">
                       Primary Seller Name
                     </th>
-                    <th className="px-2 py-1 font-semibold">Seller Role</th>
-                    <th className="px-2 py-1 font-semibold">Seller Group</th>
-                    <th className="w-24 px-2 py-1 text-center font-semibold">
+                    <th className="px-2 py-2 font-semibold">Seller Role</th>
+                    <th className="px-2 py-2 font-semibold">Seller Group</th>
+                    <th className="w-24 px-2 py-2 text-center font-semibold col-actions">
                       Actions
                     </th>
                   </tr>
@@ -313,23 +324,23 @@ export default function RegularCommissionList() {
                   {filteredRows.map((row) => (
                     <tr
                       key={row.contractNo}
-                      className="border-b border-gray-100 text-gray-600 hover:bg-gray-50"
+                      className="border-b border-gray-100 text-gray-600 transition-colors hover:bg-primary-25/50"
                     >
-                      <td className="px-3 py-2">
+                      <td className="px-4 py-1">
                         <Checkbox size="sm" />
                       </td>
-                      <td className="px-2 py-2 font-medium text-gray-900">
+                      <td className="px-2 py-1 font-medium text-gray-900">
                         {row.contractNo}
                       </td>
-                      <td className="px-2 py-2">{row.buildingUnit}</td>
-                      <td className="px-2 py-2 font-medium text-gray-900">
+                      <td className="px-2 py-1">{row.buildingUnit}</td>
+                      <td className="px-2 py-1 font-medium text-gray-900">
                         {row.clientName}
                       </td>
-                      <td className="px-2 py-2">{row.netTcp}</td>
-                      <td className="px-2 py-2">{row.primarySellerName}</td>
-                      <td className="px-2 py-2">{row.sellerRole}</td>
-                      <td className="px-2 py-2">{row.sellerGroup}</td>
-                      <td className="px-2 py-2">
+                      <td className="px-2 py-1">{row.netTcp}</td>
+                      <td className="px-2 py-1">{row.primarySellerName}</td>
+                      <td className="px-2 py-1">{row.sellerRole}</td>
+                      <td className="px-2 py-1">{row.sellerGroup}</td>
+                      <td className="px-2 py-1 col-actions">
                         <div className="flex items-center justify-center">
                           <RowActionButton
                             aria-label={`View ${row.contractNo} details`}

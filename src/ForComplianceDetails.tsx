@@ -67,8 +67,8 @@ export default function ForComplianceDetails() {
           </div>
 
           <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="w-full min-w-[1200px] border-collapse text-sm">
-              <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+            <table className="w-full min-w-[1200px] border-collapse text-[13px]">
+              <thead className="table-head">
                 <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
                   <th className="px-4 py-3">Primary Seller Name</th>
                   <th className="px-4 py-3">Commission Payout Plan</th>

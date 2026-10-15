@@ -73,7 +73,7 @@ export default function RegularCommissionDetails() {
 
           <div className="overflow-x-auto rounded-lg border border-gray-200">
             <table className="w-full min-w-[720px] border-collapse" style={{ fontSize: "13px" }}>
-              <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+              <thead className="table-head">
                 <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
                   <th className="px-5 py-1">Milestone</th>
                   <th className="px-5 py-1">Net TCP</th>

@@ -1,5 +1,6 @@
 import Layout, { PageBackHeading } from "./Layout";
-import FilterBar, { type FilterField } from "./FilterBar";
+import type { FilterField } from "./FilterBar";
+import ListSearchFilter from "./ListSearchFilter";
 import Pagination from "./Pagination";
 import { DownloadPdfButton, TableCardHeader } from "./StatusBadge";
 import { useNavigation } from "./NavigationContext";
@@ -48,19 +49,20 @@ export default function GroupedStatsTable({ title, filters, leadingColumns, grou
           <PageBackHeading title={title} onBack={() => navigate({ screen: "project-details", project })} />
         </div>
 
-        <div className="flex flex-col gap-4 px-5">
-          <FilterBar fields={filters} />
-        </div>
-
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-2">
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
         <div className="flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
-          <TableCardHeader title="Property List" rightSlot={<DownloadPdfButton />} />
+          <TableCardHeader
+            title="Property List"
+            leftSlot={<ListSearchFilter fields={filters} />}
+            rightSlot={<DownloadPdfButton />}
+          />
           <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]">
-          <table className="w-full min-w-[1100px] border-collapse text-sm">
-            <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
+          <table className="w-full min-w-[1100px] border-collapse text-[13px]">
+            <thead className="table-head">
               <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
-                {leadingColumns.map((col) => (
-                  <th key={col} rowSpan={2} className="px-3 py-2 align-bottom font-semibold">
+                {/* First column starts 16px in, lining up with the search box above. */}
+                {leadingColumns.map((col, i) => (
+                  <th key={col} rowSpan={2} className={(i === 0 ? "pl-4 pr-3" : "px-3") + " py-2 align-bottom font-semibold"}>
                     {col}
                   </th>
                 ))}
@@ -84,7 +86,7 @@ export default function GroupedStatsTable({ title, filters, leadingColumns, grou
               {rows.map((row, rowIndex) => (
                 <tr key={rowIndex} className="border-b border-gray-100 text-gray-600 hover:bg-gray-50">
                   {row.leading.map((value, i) => (
-                    <td key={i} className={"px-3 py-1 " + (i === 0 ? "font-medium text-gray-900" : "")}>
+                    <td key={i} className={"py-1 " + (i === 0 ? "pl-4 pr-3 font-medium text-gray-900" : "px-3")}>
                       {value}
                     </td>
                   ))}

@@ -368,7 +368,7 @@ export default function ForComplianceList() {
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-2">
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
           <div className="flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
             <TableCardHeader
               leftSlot={
@@ -391,21 +391,21 @@ export default function ForComplianceList() {
             />
             <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]">
               <table className="w-full min-w-[1080px] border-collapse" style={{ fontSize: "13px" }}>
-                <thead className="sticky top-0 z-10 bg-gray-50 [&_th]:text-xs [&_th]:font-semibold">
-                  <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
-                    <th className="w-8 px-3 py-1">
+                <thead className="table-head">
+                  <tr className="text-left">
+                    <th className="w-10 px-4 py-2">
                       <Checkbox size="sm" />
                     </th>
-                    <th className="px-2 py-1 font-semibold">Contract Number</th>
-                    <th className="px-2 py-1 font-semibold">Account #</th>
-                    <th className="px-2 py-1 font-semibold">Client Name</th>
-                    <th className="px-2 py-1 font-semibold">
+                    <th className="px-2 py-2 font-semibold">Contract Number</th>
+                    <th className="px-2 py-2 font-semibold">Account #</th>
+                    <th className="px-2 py-2 font-semibold">Client Name</th>
+                    <th className="px-2 py-2 font-semibold">
                       Payment Received
                     </th>
-                    <th className="px-2 py-1 font-semibold">Payment %</th>
-                    <th className="px-2 py-1 font-semibold">Status</th>
-                    <th className="px-2 py-1 font-semibold">Seller Name</th>
-                    <th className="w-24 px-2 py-1 text-center font-semibold">
+                    <th className="px-2 py-2 font-semibold">Payment %</th>
+                    <th className="px-2 py-2 font-semibold">Status</th>
+                    <th className="px-2 py-2 font-semibold">Seller Name</th>
+                    <th className="w-24 px-2 py-2 text-center font-semibold col-actions">
                       Actions
                     </th>
                   </tr>
@@ -414,25 +414,25 @@ export default function ForComplianceList() {
                   {filteredRows.map((row) => (
                     <tr
                       key={row.contractNumber}
-                      className="border-b border-gray-100 text-gray-600 hover:bg-gray-50"
+                      className="border-b border-gray-100 text-gray-600 transition-colors hover:bg-primary-25/50"
                     >
-                      <td className="px-3 py-2">
+                      <td className="px-4 py-1">
                         <Checkbox size="sm" />
                       </td>
-                      <td className="px-2 py-2 font-medium text-gray-900">
+                      <td className="px-2 py-1 font-medium text-gray-900">
                         {row.contractNumber}
                       </td>
-                      <td className="px-2 py-2">{row.accountNo}</td>
-                      <td className="px-2 py-2">
+                      <td className="px-2 py-1">{row.accountNo}</td>
+                      <td className="px-2 py-1">
                         {row.clientName}
                       </td>
-                      <td className="px-2 py-2">{row.paymentReceived}</td>
-                      <td className="px-2 py-2">{row.paymentPercent.toFixed(2)}%</td>
-                      <td className="px-2 py-2">
+                      <td className="px-2 py-1">{row.paymentReceived}</td>
+                      <td className="px-2 py-1">{row.paymentPercent.toFixed(2)}%</td>
+                      <td className="px-2 py-1">
                         <StatusPill status={row.status} />
                       </td>
-                      <td className="px-2 py-2">{row.sellerName}</td>
-                      <td className="px-2 py-2">
+                      <td className="px-2 py-1">{row.sellerName}</td>
+                      <td className="px-2 py-1 col-actions">
                         <div className="flex items-center justify-center">
                           <RowActionButton
                             aria-label={`View ${row.contractNumber} compliance details`}

@@ -32,7 +32,6 @@ export default function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(2);
   const [loginType, setLoginType] = useState<"admin" | "user">("user");
 
@@ -49,20 +48,15 @@ export default function Login() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    setError("");
   }
 
+  // UI prototype: no validation, Login always goes to the dashboard.
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsLoading(true);
-    setError("");
 
     setTimeout(() => {
-      if (formData.email && formData.password) {
-        navigate({ screen: "dashboard" });
-      } else {
-        setError("Email and password are required");
-      }
+      navigate({ screen: "dashboard" });
       setIsLoading(false);
     }, 500);
   }
@@ -144,12 +138,8 @@ export default function Login() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="rounded-md bg-error-50 p-3 text-sm text-error-700">
-                  {error}
-                </div>
-              )}
+            {/* noValidate: skip the browser's own required / email-format checks too. */}
+            <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
               {/* Email/User ID Field */}
               <div className="space-y-1.5">
@@ -171,7 +161,6 @@ export default function Login() {
                       ? "Email address"
                       : "Enter your User ID"
                   }
-                  required
                 />
               </div>
 
@@ -200,7 +189,6 @@ export default function Login() {
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="Password"
-                      required
                       clearable={false}
                     />
                     <button

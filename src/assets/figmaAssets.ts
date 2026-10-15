@@ -20,6 +20,17 @@ import resortPoolPhoto from "./property-photos/resort-pool.webp";
 import deckPoolPhoto from "./property-photos/deck-pool.webp";
 import poolClubhouseNightPhoto from "./property-photos/pool-clubhouse-night.webp";
 import aerialNightPhoto from "./property-photos/aerial-night.webp";
+import asteriaResidencesPhoto from "./property-photos/asteria-residences.webp";
+import accoladePlacePhoto from "./property-photos/accolade-place.webp";
+import alderResidencesPhoto from "./property-photos/alder-residences.jpg";
+import aleaResidencesPhoto from "./property-photos/alea-residences.webp";
+import galleryHillsideVilla from "./property-photos/gallery/hillside-villa-pool.jpg";
+import galleryResortPool from "./property-photos/gallery/resort-pool-garden.jpg";
+import galleryCityTowers from "./property-photos/gallery/city-towers.jpg";
+import gallerySkylineTowers from "./property-photos/gallery/skyline-towers.jpg";
+import galleryModernHouse from "./property-photos/gallery/modern-house-pool.jpg";
+import galleryWhiteVilla from "./property-photos/gallery/white-villa-pool.jpg";
+import galleryTuscanVilla from "./property-photos/gallery/tuscan-villa-pool.jpg";
 import noImageAvailablePng from "./no-image-available.png";
 import noImageAvailableGraphicSvg from "./no-image-available-graphic.svg";
 import thumbnailPhoto1Png from "./selfie-examples/too-far.jpg";
@@ -60,9 +71,26 @@ export const projectPhotoUrls: Record<string, string> = {
   "The Valeron Tower": deckPoolPhoto, // high-rise tower
   "Arista Place": poolClubhouseNightPhoto,
   "Anissa Heights": aerialNightPhoto,
+  "Asteria Residences": asteriaResidencesPhoto, // supplied by the user for this project
+  "Accolade Place": accoladePlacePhoto, // supplied by the user for this project
+  "Alder Residences": alderResidencesPhoto, // supplied by the user for this project
+  "Alea Residences": aleaResidencesPhoto, // supplied by the user for this project
   "The Aston Place": deckPoolPhoto,
   "The Atherton": poolClubhouseNightPhoto,
 };
+
+// Sample photos for the Project Details gallery: shown after each project's
+// own photo (#2 onward), so the client sees a project can have several
+// images. Dummy content supplied by the user, the same for every project.
+export const projectGallerySampleUrls: string[] = [
+  galleryHillsideVilla,
+  galleryResortPool,
+  galleryCityTowers,
+  gallerySkylineTowers,
+  galleryModernHouse,
+  galleryWhiteVilla,
+  galleryTuscanVilla,
+];
 
 // "No Image Available" graphic (house icon + diagonal line + wordmark, all
 // one vector) used on the Unit Availability Details "Property Unit Image"
