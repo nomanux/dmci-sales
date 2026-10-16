@@ -156,7 +156,7 @@ export default function UnitStyleTable({
                     <th className="px-2 py-2 font-semibold">Property Notes</th>
                     <th
                       className={
-                        (showHoldAction ? "w-[300px]" : "w-[200px]") +
+                        (showHoldAction ? "w-[272px]" : "w-[192px]") +
                         " col-actions px-2 py-2 text-center font-semibold"
                       }
                     >
@@ -194,23 +194,26 @@ export default function UnitStyleTable({
                       )}
                       <td className="px-2 py-1">{row.notes ?? "-"}</td>
                       <td className="px-2 py-1 col-actions">
-                        <div className="flex items-center justify-center gap-3">
+                        <div className="flex items-center justify-center gap-1.5">
                           <RowActionButton
                             aria-label={`View ${row.code} details`}
-                            icon={<EyeIcon className="h-6 w-6" />}
+                            size="sm"
+                            icon={<EyeIcon className="h-[22px] w-[22px]" />}
                             label="View"
                           />
                           <RowActionButton
                             aria-label={`View ${row.code} image`}
                             onClick={() => setPreviewRow(row)}
-                            icon={<ImageIcon className="h-6 w-6" />}
+                            size="sm"
+                            icon={<ImageIcon className="h-[22px] w-[22px]" />}
                             label="Image"
                           />
                           {showHoldAction && (
                             <RowActionButton
                               aria-label={`Put ${row.buildingUnit} on hold`}
                               disabled={row.status === "Sold"}
-                              icon={<PauseCircleIcon className="h-6 w-6" />}
+                              size="sm"
+                            icon={<PauseCircleIcon className="h-[22px] w-[22px]" />}
                               label="Hold"
                             />
                           )}

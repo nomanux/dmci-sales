@@ -319,7 +319,7 @@ export default function UnitAvailabilityList() {
                       <th className="px-2 py-2 font-semibold">Unit Location</th>
                       <th className="px-2 py-2 text-right font-semibold">Price</th>
                       <th className="px-2 py-2 font-semibold">Property Unit</th>
-                      <th className="w-[300px] px-2 py-2 text-center font-semibold col-actions">
+                      <th className="w-[272px] px-2 py-2 text-center font-semibold col-actions">
                         Actions
                       </th>
                     </tr>
@@ -346,7 +346,7 @@ export default function UnitAvailabilityList() {
                         <td className="px-2 py-1 text-right tabular-nums">{formatPrice(row.price)}</td>
                         <td className="px-2 py-1">{row.propertyUnit}</td>
                         <td className="px-2 py-1 col-actions">
-                          <div className="flex items-center justify-center gap-3">
+                          <div className="flex items-center justify-center gap-1.5">
                             <RowActionButton
                               aria-label={`View ${row.buildingUnit} details`}
                               onClick={() =>
@@ -355,18 +355,21 @@ export default function UnitAvailabilityList() {
                                   itemId: row.propertyUnit,
                                 })
                               }
-                              icon={<EyeIcon className="h-6 w-6" />}
+                              size="sm"
+                            icon={<EyeIcon className="h-[22px] w-[22px]" />}
                               label="View"
                             />
                             <RowActionButton
                               aria-label={`View ${row.buildingUnit} image`}
                               onClick={() => setPreviewRow(row)}
-                              icon={<ImageIcon className="h-6 w-6" />}
+                              size="sm"
+                            icon={<ImageIcon className="h-[22px] w-[22px]" />}
                               label="Image"
                             />
                             <RowActionButton
                               aria-label={`Put ${row.buildingUnit} on hold`}
-                              icon={<PauseCircleIcon className="h-6 w-6" />}
+                              size="sm"
+                            icon={<PauseCircleIcon className="h-[22px] w-[22px]" />}
                               label="Hold"
                             />
                           </div>

@@ -184,6 +184,12 @@
   th.col-actions {
     z-index: 2;
     background-color: theme("colors.gray.50");
+    /* Its opaque background covers the header row's bottom rule, so draw
+       that rule here too (plus the left divider and edge shadow). */
+    box-shadow:
+      inset 0 -1px 0 theme("colors.gray.200"),
+      inset 1px 0 0 theme("colors.gray.100"),
+      -8px 0 8px -8px rgba(16, 24, 40, 0.16);
   }
 
   tr:hover > td.col-actions {
