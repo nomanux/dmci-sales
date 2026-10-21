@@ -115,7 +115,7 @@ function Blank({ width, label }: { width: string; label: string }) {
   );
 }
 
-const CELL = "border border-gray-300 px-4 py-[7px] align-top";
+const CELL = "border border-gray-200 px-4 py-2 align-top";
 
 function RequirementRows({ rows }: { rows: Row[] }) {
   return (
@@ -123,8 +123,8 @@ function RequirementRows({ rows }: { rows: Row[] }) {
       {rows.map(([requirement, newBuyer, repeatBuyer], i) => (
         <tr key={i}>
           <td className={CELL}>{requirement}</td>
-          <td className={CELL + " text-center"}>{newBuyer}</td>
-          <td className={CELL + " text-center"}>{repeatBuyer}</td>
+          <td className={CELL + " text-center text-gray-600"}>{newBuyer}</td>
+          <td className={CELL + " text-center text-gray-600"}>{repeatBuyer}</td>
         </tr>
       ))}
     </>
@@ -146,7 +146,7 @@ export default function TermsStep({
 
   // Fills the visible area so only the text panel scrolls (one scrollbar), not the page too.
   return (
-    <section className="w-full md:max-h-full bg-white rounded-none md:rounded-[16px] flex flex-col border border-[#e4e8f0]">
+    <section className="antialiased w-full md:max-h-full bg-white rounded-none md:rounded-[16px] flex flex-col border border-[#e4e8f0]">
       <StepHeader title="Terms and Conditions" className="px-4 md:px-8 pt-6 pb-6">
         Please read the terms and conditions carefully before proceeding next step.
       </StepHeader>
@@ -157,7 +157,7 @@ export default function TermsStep({
           tabIndex={0}
           role="region"
           aria-label="Terms and conditions text"
-          className="max-h-[60vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto rounded-xl bg-gray-50 px-4 py-5 md:px-6 md:py-6 text-sm md:text-base leading-6 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          className="max-h-[60vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto rounded-xl bg-gray-50 px-4 py-5 md:px-6 md:py-6 text-sm md:text-[15px] leading-6 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
         >
           <TermsAgreementText />
         </div>
@@ -199,14 +199,14 @@ export function TermsAgreementText() {
     </p>
   
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[560px] border-collapse bg-white text-sm leading-5 text-[#22262f] [&_b]:font-semibold">
+      <table className="w-full min-w-[560px] border-collapse bg-white text-[13px] leading-5 text-gray-700 md:text-sm [&_b]:font-semibold [&_b]:text-gray-900">
         <colgroup>
           <col className="w-1/2" />
           <col className="w-1/4" />
           <col className="w-1/4" />
         </colgroup>
         <thead>
-          <tr className="text-gray-800">
+          <tr className="bg-gray-50 text-gray-900">
             <th scope="col" className={CELL + " font-semibold"}>
               Documentary Requirements
             </th>
@@ -221,7 +221,7 @@ export function TermsAgreementText() {
         <tbody>
           <RequirementRows rows={REQUIREMENTS} />
           <tr>
-            <th scope="colgroup" colSpan={3} className={CELL + " text-center font-semibold text-gray-800"}>
+            <th scope="colgroup" colSpan={3} className={CELL + " bg-gray-50 text-center font-semibold text-gray-900"}>
               ADDITIONAL REQUIREMENTS FOR PURCHASE UNDER A COMPANY/CORPORATION
             </th>
           </tr>
@@ -229,7 +229,7 @@ export function TermsAgreementText() {
         </tbody>
         <tfoot>
           <tr>
-            <td colSpan={3} className={CELL}>
+            <td colSpan={3} className={CELL + " text-gray-500"}>
               *** Buyer is qualified as a repeat buyer if it satisfies the following conditions: (1) with an
               active account in DMCI Homes. (2) has complete documentary requirements in the last purchased, and
               (3) has less than 10 years since the title of the past purchased units has been transferred to

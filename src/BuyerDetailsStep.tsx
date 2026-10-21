@@ -385,7 +385,7 @@ function PhoneField({
     <Field label={label} required={required}>
       <div className="flex gap-1.5">
         {/* Native <select> sits invisibly over the flag so the OS picker still handles input. */}
-        <div className="select-trigger select-sm relative w-16 shrink-0 focus-within:border-primary-500">
+        <div className="select-trigger select-sm relative w-16 shrink-0 focus-within:border-brand-400">
           {country.code === "PH" ? (
             <PhilippinesFlag />
           ) : (
@@ -475,7 +475,7 @@ function RadioGroup({
             checked={value === option.value}
             onChange={() => onChange(option.value)}
           />
-          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white transition-colors peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 peer-focus-visible:ring-offset-2">
+          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white transition-colors peer-checked:border-brand-600 peer-checked:bg-brand-600 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-400 peer-focus-visible:ring-offset-2">
             <span className="h-1.5 w-1.5 rounded-full bg-white" />
           </span>
           {option.label}
@@ -544,7 +544,7 @@ function MultiSelect({
             setOpen((o) => !o);
           }
         }}
-        className={`flex min-h-8 w-full cursor-pointer items-center gap-2 rounded-lg border bg-white px-3 py-1 focus:outline-none focus-visible:border-primary-500 ${
+        className={`flex min-h-8 w-full cursor-pointer items-center gap-2 rounded-lg border bg-white px-3 py-1 focus:outline-none focus-visible:border-brand-400 ${
           open ? "border-primary-500" : "border-gray-300"
         }`}
       >

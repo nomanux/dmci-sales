@@ -63,14 +63,14 @@ export default function PropertyCard({
             </span>
           ))}
 
-          <span className="font-medium text-gray-500">Available</span>
+          <span className="font-normal text-gray-500">Available</span>
           {card.available.map((value, i) => (
             <span key={i} className="text-center text-gray-900">
               {value}
             </span>
           ))}
 
-          <span className="font-medium text-gray-500">Sold</span>
+          <span className="font-normal text-gray-500">Sold</span>
           {card.sold.map((value, i) => (
             <span key={i} className="text-center text-gray-900">
               {value}

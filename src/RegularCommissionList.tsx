@@ -248,7 +248,7 @@ export default function RegularCommissionList() {
 
           {/* Compact seller bar: icon + seller ID on the left, the seller's
               ledger reports as small buttons (same light-blue look) on the right. */}
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+          <div className="card flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5">
             <div className="flex min-w-0 items-center gap-2.5">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-25 text-primary-500">
                 <UserCheckIcon className="h-4 w-4" />
@@ -263,7 +263,7 @@ export default function RegularCommissionList() {
                 <button
                   key={label}
                   type="button"
-                  className="h-7 cursor-pointer rounded-md border border-primary-50 bg-blue-50 px-2.5 text-xs font-semibold text-primary-500 transition-colors hover:border-primary-100 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  className="h-7 cursor-pointer rounded-md border border-primary-50 bg-blue-50 px-2.5 text-xs font-semibold text-primary-500 transition-colors hover:border-primary-100 hover:bg-primary-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
                 >
                   {label}
                 </button>
@@ -273,7 +273,7 @@ export default function RegularCommissionList() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
-          <div className="flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+          <div className="card flex w-full flex-1 flex-col overflow-hidden">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-4 pt-1">
               <RecordTabs
                 tabs={["My commission", "Teams Commission"]}
@@ -286,7 +286,7 @@ export default function RegularCommissionList() {
                   placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+                  className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-brand-400 focus:outline-none"
                 />
                 <FilterTrigger
                   activeFilterCount={activeFilterCount}
@@ -297,10 +297,7 @@ export default function RegularCommissionList() {
               </div>
             </div>
             <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]">
-              <table
-                className="w-full min-w-[1040px] border-collapse"
-                style={{ fontSize: "13px" }}
-              >
+              <table className="w-full min-w-[1040px] border-collapse text-[13px]">
                 <thead className="table-head">
                   <tr className="text-left">
                     <th className="w-10 px-4 py-2">
@@ -350,7 +347,8 @@ export default function RegularCommissionList() {
                                 itemId: row.contractNo,
                               })
                             }
-                            icon={<EyeIcon className="h-6 w-6" />}
+                            size="sm"
+                            icon={<EyeIcon className="h-[22px] w-[22px]" />}
                             label="View"
                           />
                         </div>
@@ -380,7 +378,7 @@ export default function RegularCommissionList() {
               placeholder="Enter client name"
               value={clientNameFilter}
               onChange={(e) => setClientNameFilter(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-500 focus:border-brand-400 focus:outline-none"
             />
           </div>
 
@@ -393,7 +391,7 @@ export default function RegularCommissionList() {
               placeholder="Enter seller name"
               value={sellerNameFilter}
               onChange={(e) => setSellerNameFilter(e.target.value)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+              className="rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder-gray-500 focus:border-brand-400 focus:outline-none"
             />
           </div>
 
@@ -432,13 +430,13 @@ export default function RegularCommissionList() {
                 type="date"
                 value={reservationDateStart}
                 onChange={(e) => setReservationDateStart(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
+                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
               />
               <input
                 type="date"
                 value={reservationDateEnd}
                 onChange={(e) => setReservationDateEnd(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none"
+                className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none"
               />
             </div>
           </div>

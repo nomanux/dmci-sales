@@ -101,7 +101,7 @@ export default function DataPrivacyStep({
 
   // Fills the visible area so only the text panel scrolls (one scrollbar), not the page too.
   return (
-    <section className="w-full md:max-h-full bg-white rounded-none md:rounded-[16px] flex flex-col border border-[#e4e8f0]">
+    <section className="antialiased w-full md:max-h-full bg-white rounded-none md:rounded-[16px] flex flex-col border border-[#e4e8f0]">
       <StepHeader
         title="Data Privacy Policy"
         className="px-4 md:px-8 pt-6 pb-6"
@@ -116,7 +116,7 @@ export default function DataPrivacyStep({
           tabIndex={0}
           role="region"
           aria-label="Data privacy policy text"
-          className="max-h-[60vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto rounded-xl bg-gray-50 px-4 py-5 md:px-6 md:py-6 text-sm md:text-base leading-6 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+          className="max-h-[60vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto rounded-xl bg-gray-50 px-4 py-5 md:px-6 md:py-6 text-sm md:text-[15px] leading-6 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
         >
           <PrivacyPolicyText />
         </div>
@@ -138,8 +138,8 @@ export default function DataPrivacyStep({
 /** The policy body (incl. Conforme) — shared with the Review & Submit step. */
 export function PrivacyPolicyText() {
   return (
-    <div className="flex flex-col gap-4 text-sm font-normal leading-5">
-      <h2 className="m-0 text-base font-semibold leading-6 text-gray-900">
+    <div className="flex flex-col gap-4">
+      <h2 className="m-0 text-base font-semibold leading-6 text-gray-900 md:text-lg md:leading-7">
         DMCI HOMES Data Privacy Policy
       </h2>
       <p className="m-0">
@@ -175,13 +175,13 @@ export function PrivacyPolicyText() {
 
       {CONTACTS.map((contact) => (
         <div key={contact.title} className="flex flex-col gap-1.5 pt-3">
-          <h3 className="m-0 text-lg font-semibold leading-7 text-gray-900">
+          <h3 className="m-0 text-base font-semibold leading-6 text-gray-900">
             {contact.title}
           </h3>
           <p className="m-0">
             {contact.lines.map(([label, value]) => (
               <span key={label} className="block">
-                <b className="font-semibold">{label}</b>
+                <b className="font-medium text-gray-700">{label}</b>
                 {value}
               </span>
             ))}
@@ -206,7 +206,7 @@ export function PrivacyPolicyText() {
         unauthorized or accidental access or disclosure, alteration or
         destruction. We put in effect safeguards such as:
       </p>
-      <ol className="m-0 list-decimal pl-6">
+      <ol className="m-0 flex list-decimal flex-col gap-1.5 pl-6 marker:text-gray-400">
         <li>
           Keeping and protecting your information using a secured server behind
           a firewall, deploying encryption on computing devices and physical
@@ -239,7 +239,7 @@ export function PrivacyPolicyText() {
 
       {/* Conforme */}
       <div className="flex flex-col gap-1.5 pt-3">
-        <h3 className="m-0 text-lg font-semibold leading-7 text-gray-900">
+        <h3 className="m-0 text-base font-semibold leading-6 text-gray-900">
           Conforme
         </h3>
         <ul className="m-0 grid list-none grid-cols-1 gap-5 p-0 md:grid-cols-2">

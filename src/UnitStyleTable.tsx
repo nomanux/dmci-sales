@@ -126,7 +126,7 @@ export default function UnitStyleTable({
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
-          <div className="flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+          <div className="card flex w-full flex-1 flex-col overflow-hidden">
             <TableCardHeader
               leftSlot={
                 <ListSearchFilter

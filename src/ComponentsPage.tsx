@@ -142,7 +142,7 @@ function Swatch({ label, children }: { label: string; children: React.ReactNode 
 
 function Section({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-5 rounded-xl border border-gray-200 bg-white p-6 shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+    <section className="card flex flex-col gap-5 p-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-base font-semibold text-gray-900">{title}</h2>
         <p className="text-sm text-gray-600">{description}</p>
@@ -400,8 +400,8 @@ function RightDrawerDemo() {
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-gray-900">Expiry Date</label>
             <div className="flex gap-2">
-              <input type="date" className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none" />
-              <input type="date" className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none" />
+              <input type="date" className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none" />
+              <input type="date" className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-400 focus:outline-none" />
             </div>
           </div>
           <div className="flex flex-col gap-1">

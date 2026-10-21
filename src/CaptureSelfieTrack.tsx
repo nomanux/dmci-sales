@@ -1192,7 +1192,7 @@ export default function CaptureSelfieTrack() {
                               type="button"
                               aria-label={"View example: " + attempt.label}
                               onClick={() => setPreviewIndex(index)}
-                              className={`relative w-full cursor-zoom-in overflow-hidden bg-white min-w-0 border-0 outline outline-[1.4px] -outline-offset-[1.4px] rounded-lg p-0.5 transition-transform duration-150 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 ${
+                              className={`relative w-full cursor-zoom-in overflow-hidden bg-white min-w-0 border-0 outline outline-[1.4px] -outline-offset-[1.4px] rounded-lg p-0.5 transition-transform duration-150 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${
                                 attempt.status === "accepted"
                                   ? "outline-[#079455]"
                                   : "outline-[#f02b2b]"

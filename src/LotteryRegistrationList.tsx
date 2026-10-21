@@ -393,14 +393,14 @@ export default function LotteryRegistrationList() {
         <LiveBatchBanner />
 
         <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
-          <div className="flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+          <div className="card flex w-full flex-1 flex-col overflow-hidden">
             <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-3">
               <input
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+                className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-brand-400 focus:outline-none"
               />
               <FilterTrigger
                 activeFilterCount={activeFilterCount}

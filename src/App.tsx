@@ -1,5 +1,8 @@
 import { NavigationProvider, useNavigation } from "./NavigationContext";
 import Login from "./Login";
+import Login0 from "./Login0";
+import ProfilePage from "./ProfilePage";
+import ChangePasswordPage from "./ChangePasswordPage";
 import Dashboard from "./Dashboard";
 import PropertiesListView from "./PropertiesListView";
 import ProjectDetails from "./ProjectDetails";
@@ -33,6 +36,12 @@ function Screens() {
   switch (route.screen) {
     case "login":
       return <Login />;
+    case "login0":
+      return <Login0 />;
+    case "profile":
+      return <ProfilePage />;
+    case "change-password":
+      return <ChangePasswordPage />;
     case "dashboard":
       return <Dashboard />;
     case "properties":

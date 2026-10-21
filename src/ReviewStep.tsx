@@ -176,14 +176,14 @@ const PEP_CONNECTION: Pair[] = [
 /** Label : value list, two pairs per row on desktop. `wide` = one pair per row. */
 function Pairs({ pairs, wide = false }: { pairs: Pair[]; wide?: boolean }) {
   return (
-    <dl className={`m-0 grid grid-cols-1 gap-x-6 gap-y-2 ${wide ? "" : "md:grid-cols-2"}`}>
+    <dl className={`m-0 grid grid-cols-1 gap-x-6 gap-y-2.5 ${wide ? "" : "md:grid-cols-2"}`}>
       {pairs.map(([label, value]) => (
         <div key={label} className="flex min-w-0 gap-2 text-sm leading-5">
-          <dt className="w-[116px] md:w-[150px] shrink-0 font-semibold text-gray-500">{label}</dt>
-          <span aria-hidden="true" className="text-gray-500">
+          <dt className="w-[116px] md:w-[180px] shrink-0 text-gray-500">{label}</dt>
+          <span aria-hidden="true" className="text-gray-400">
             :
           </span>
-          <dd className="m-0 min-w-0 break-words text-gray-900">{value}</dd>
+          <dd className="m-0 min-w-0 break-words font-medium text-gray-900">{value}</dd>
         </div>
       ))}
     </dl>
@@ -278,7 +278,7 @@ function WithPhotos({ photos, children }: { photos: { label: string; src: string
       <div className="flex flex-row gap-4 md:w-[144px] md:flex-col">
         {photos.map((photo) => (
           <figure key={photo.label} className="m-0 flex flex-col gap-2">
-            <figcaption className="text-sm font-semibold leading-5 text-gray-500">{photo.label}</figcaption>
+            <figcaption className="text-sm leading-5 text-gray-500">{photo.label}</figcaption>
             <img
               src={photo.src}
               alt={photo.alt}
@@ -349,7 +349,7 @@ function AgreementPreview({ title, agreement, children }: { title: string; agree
     <section className="flex flex-col gap-4 -mx-2 md:mx-0 rounded-xl border border-gray-200 bg-gray-50 px-2 py-4 md:p-5">
       <h3 className="m-0 text-base leading-6 md:text-xl md:leading-[30px] font-semibold text-brand-500">{title}</h3>
       <div
-        className={`relative text-sm leading-5 text-gray-600 ${expanded ? "" : "max-h-[112px] overflow-hidden"}`}
+        className={`relative text-sm leading-6 text-gray-600 ${expanded ? "" : "max-h-[112px] overflow-hidden"}`}
       >
         {children}
         {!expanded && (
@@ -392,7 +392,7 @@ export default function ReviewStep({
   }, [confirmed, onReadyChange]);
 
   return (
-    <section className="w-full md:max-h-full bg-white rounded-none md:rounded-[16px] flex flex-col border border-[#e4e8f0]">
+    <section className="antialiased w-full md:max-h-full bg-white rounded-none md:rounded-[16px] flex flex-col border border-[#e4e8f0]">
       <StepHeader title="Review & Submit" className="px-4 md:px-8 pt-6 pb-6">
         Review the details below to ensure they are correct and up to date before submission.
       </StepHeader>
@@ -420,7 +420,7 @@ export default function ReviewStep({
                       "Account Type",
                       <>
                         <b className="font-semibold">Private Individual (Adult)</b>
-                        <span className="block text-gray-600">
+                        <span className="block font-normal text-gray-600">
                           I am a private individual OR a representative of a private partnership.
                         </span>
                       </>,
@@ -594,7 +594,9 @@ export default function ReviewStep({
           <h3 className="m-0 text-base leading-6 md:text-xl md:leading-[30px] font-semibold text-brand-500">
             Customer Acceptance Policy &amp; Client Consent
           </h3>
-          <ConsentPolicyText />
+          <div className="text-sm leading-6 text-gray-600">
+            <ConsentPolicyText />
+          </div>
           <div className="flex flex-col gap-3">
             {CONSENTS.map((consent) => (
               <ReadOnlyCheck key={consent}>{consent}</ReadOnlyCheck>

@@ -388,3 +388,61 @@ export function MoreHorizontalIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function UserIcon({ className }: IconProps) {
+  return (
+    <svg className={className} {...lucideProps}>
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  );
+}
+
+export function LockIcon({ className }: IconProps) {
+  return (
+    <svg className={className} {...lucideProps}>
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+export function LockOpenIcon({ className }: IconProps) {
+  return (
+    <svg className={className} {...lucideProps}>
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+    </svg>
+  );
+}
+
+export function EyeOffIcon({ className }: IconProps) {
+  return (
+    <svg className={className} {...lucideProps}>
+      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+      <path d="m2 2 20 20" />
+    </svg>
+  );
+}
+
+export function UploadIcon({ className }: IconProps) {
+  return (
+    <svg className={className} {...lucideProps}>
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" x2="12" y1="3" y2="15" />
+    </svg>
+  );
+}
+
+export function LogOutIcon({ className }: IconProps) {
+  return (
+    <svg className={className} {...lucideProps}>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" x2="9" y1="12" y2="12" />
+    </svg>
+  );
+}

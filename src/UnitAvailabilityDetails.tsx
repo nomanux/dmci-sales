@@ -47,7 +47,7 @@ export default function UnitAvailabilityDetails() {
       <div className="flex w-full flex-col gap-4 px-5 py-3">
         <PageBackHeading title="Details" onBack={() => navigate({ screen: "unit-availability" })} />
 
-        <section className="flex w-full flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+        <section className="card flex w-full flex-col gap-4 p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-xl font-semibold text-primary-500">{unitCode.toUpperCase()}</h2>
             <DownloadPdfButton />
@@ -63,7 +63,7 @@ export default function UnitAvailabilityDetails() {
           </div>
         </section>
 
-        <section className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+        <section className="card flex w-full items-center justify-between px-6 py-5">
           <span className="text-sm text-gray-500">List Price:</span>
           <span className="text-base font-bold text-gray-900">Php 8,695,000.00</span>
         </section>

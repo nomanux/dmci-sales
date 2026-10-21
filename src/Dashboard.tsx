@@ -113,7 +113,7 @@ export default function Dashboard() {
         </div>
 
         {/* Unit Holding Summary card */}
-        <section className="flex w-full flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-[0_1px_2px_rgba(10,13,18,0.05)] sm:gap-4 sm:rounded-xl sm:p-5">
+        <section className="card flex w-full flex-col gap-4 rounded-lg p-4 sm:gap-4 sm:rounded-xl sm:p-5">
           <h2 className="text-sm font-semibold text-gray-900 sm:text-base">Unit Holding Summary</h2>
 
           <div className="flex flex-col gap-4 sm:gap-5 lg:flex-row">
@@ -219,7 +219,7 @@ export default function Dashboard() {
         </section>
 
         {/* Commission Registry card */}
-        <section className="flex w-full flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-[0_1px_2px_rgba(10,13,18,0.05)] sm:gap-4 sm:rounded-xl sm:p-5">
+        <section className="card flex w-full flex-col gap-4 rounded-lg p-4 sm:gap-4 sm:rounded-xl sm:p-5">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <h2 className="text-sm font-semibold text-gray-900 sm:text-base">COMMISSION REGISTRY</h2>
             <span className="text-xs font-semibold text-gray-600 sm:text-sm">(19/08/2025 - 25/02/2026)</span>

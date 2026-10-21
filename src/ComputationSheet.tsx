@@ -79,7 +79,7 @@ export default function ComputationSheet() {
             </Button>
           </div>
 
-          <div className="w-full rounded-xl border border-gray-200 bg-white p-4 shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+          <div className="card w-full p-4">
             <div className="flex max-w-5xl flex-col gap-5">
               {/* Reservation info */}
               <div className="grid grid-cols-1 gap-x-10 gap-y-2 sm:grid-cols-2">

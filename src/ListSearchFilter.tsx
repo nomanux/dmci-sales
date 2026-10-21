@@ -89,7 +89,7 @@ export default function ListSearchFilter({
             onSearchChange?.(e.target.value);
           }}
           aria-label="Search"
-          className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+          className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-brand-400 focus:outline-none"
         />
         <FilterTrigger
           activeFilterCount={activeCount}

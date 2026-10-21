@@ -218,6 +218,8 @@ const config: Config = {
         full: "9999px",
       },
       boxShadow: {
+        // Facebook-style card: no border, one short crisp shadow under the card.
+        card: "0 1px 2px 0 rgba(0, 0, 0, 0.2)",
         xs: "0 1px 2px 0 rgba(10, 13, 18, 0.05)",
         sm: "0 1px 3px 0 rgba(10, 13, 18, 0.1), 0 1px 2px 0 rgba(10, 13, 18, 0.06)",
         md: "0 4px 6px -1px rgba(10, 13, 18, 0.1), 0 2px 4px -1px rgba(10, 13, 18, 0.06)",

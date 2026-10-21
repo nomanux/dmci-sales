@@ -114,7 +114,7 @@ function range(start: number, end: number) {
 // swap in a real entity/project/building list once there's a backend to
 // source one from.
 const ENTITY_OPTIONS = [
-  { value: "dpdi", label: "DMCI Project Developers Insc." },
+  { value: "dpdi", label: "DMCI Project Developers Inc." },
 ];
 const PROJECT_OPTIONS = [
   { value: "agp-amina", label: "Allegra Garden Palace - Amina" },
@@ -177,7 +177,7 @@ export default function LotteryUnitPicker() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
-          <div className="flex min-h-0 w-full flex-1 flex-col rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+          <div className="card flex min-h-0 w-full flex-1 flex-col">
             <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-6 py-3">
               <div className="flex items-center gap-2">
                 <input
@@ -185,7 +185,7 @@ export default function LotteryUnitPicker() {
                   placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+                  className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-brand-400 focus:outline-none"
                 />
                 <button
                   type="button"

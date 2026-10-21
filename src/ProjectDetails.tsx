@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Layout, { PageBackHeading } from "./Layout";
-import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
+import { BuildingIcon, ChevronLeftIcon, ChevronRightIcon } from "./icons";
 import { Badge } from "./StatusBadge";
 import { useNavigation, type Screen } from "./NavigationContext";
 import PropertyCard, { type PropertyCardData } from "./PropertyCard";
@@ -17,6 +17,9 @@ import {
  * into each resource table for this project.
  * Source: Figma file NcMe5sSgPs65q3Ed2rV1Kv, node 173418:205335.
  */
+
+// Main page cards use the shared `.card` surface (tailwind.css).
+const MAIN_CARD = "card flex w-full flex-col gap-4 p-5";
 
 const RESOURCE_TABS: { label: string; screen: Screen }[] = [
   { label: "Tower", screen: "tower" },
@@ -36,7 +39,9 @@ const PROJECT_INFO: {
   { label: "Project Code", value: "ACE" },
   { label: "Project Type", value: "Mid-rise" },
   { label: "Project Status", value: "Ready for Occupancy", kind: "status" },
-  { label: "No. of Building/s", value: "1" },
+  // Filled in per project from its buildings list, so it always matches the
+  // number of cards under "Building Information".
+  { label: "No. of Building/s", value: "" },
   { label: "Floor/s per Tower", value: "6" },
   { label: "Total Unit/s", value: "435" },
   {
@@ -46,6 +51,52 @@ const PROJECT_INFO: {
     kind: "wide",
   },
 ];
+
+interface BuildingInfo {
+  name: string;
+  rfoDate: string;
+  totalFloors: number;
+  units: number;
+  code: string;
+}
+
+// A project can have one building or many (ten or more). Sample data for a
+// few projects; the rest get a generated list so every count can be shown.
+const BUILDINGS: Record<string, BuildingInfo[]> = {
+  "Acacia Estates": [
+    { name: "Ivory", rfoDate: "07/31/2024", totalFloors: 6, units: 435, code: "ACE-00A" },
+  ],
+  "Allegra Garden Place": [
+    { name: "Amina", rfoDate: "07/31/2024", totalFloors: 62, units: 2715, code: "AGP-00A" },
+    { name: "Soraya", rfoDate: "07/31/2025", totalFloors: 61, units: 1989, code: "AGP-00B" },
+  ],
+};
+
+const SAMPLE_BUILDING_NAMES = [
+  "Amina", "Soraya", "Celeste", "Dahlia", "Elara",
+  "Freya", "Gemma", "Helena", "Iris", "Juno",
+];
+
+function getBuildings(project: string): BuildingInfo[] {
+  if (BUILDINGS[project]) return BUILDINGS[project];
+  // Stable 1-10 count from the project name, so each project looks different.
+  const hash = [...project].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+  const count = (hash % 10) + 1;
+  const prefix = project
+    .replace(/^The\s+/i, "")
+    .split(/\s+/)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 3);
+  return Array.from({ length: count }, (_, i) => ({
+    name: SAMPLE_BUILDING_NAMES[i % SAMPLE_BUILDING_NAMES.length],
+    rfoDate: `07/31/${2024 + (i % 3)}`,
+    totalFloors: 20 + ((hash + i * 7) % 45),
+    units: 400 + ((hash * (i + 3)) % 2400),
+    code: `${prefix}-00${String.fromCharCode(65 + i)}`,
+  }));
+}
 
 interface OverviewRow {
   code: string;
@@ -341,6 +392,12 @@ function GalleryLightbox({
 export default function ProjectDetails() {
   const { route, navigate } = useNavigation();
   const project = route.project ?? "Acacia Estates";
+  const buildings = getBuildings(project);
+  const projectInfo = PROJECT_INFO.map((row) =>
+    row.label === "No. of Building/s"
+      ? { ...row, value: String(buildings.length) }
+      : row,
+  );
 
   return (
     <Layout
@@ -356,13 +413,13 @@ export default function ProjectDetails() {
       ]}
       orgBadge
     >
-      <div className="flex w-full flex-col gap-4 px-5 py-3">
+      <div className="flex w-full flex-col gap-5 px-5 py-3">
         <PageBackHeading
           title="Project Details"
           onBack={() => navigate({ screen: "properties" })}
         />
 
-        <section className="flex w-full flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+        <section className={MAIN_CARD}>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-2xl font-bold text-primary-500">{project}</h2>
             <div className="flex flex-wrap gap-2">
@@ -389,7 +446,7 @@ export default function ProjectDetails() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,42%)] lg:gap-x-8">
             <div className="flex min-w-0 flex-col gap-4">
               <dl className="m-0 grid grid-cols-1 gap-x-6 gap-y-3 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 sm:grid-cols-2 xl:grid-cols-3">
-                {PROJECT_INFO.map((row) => (
+                {projectInfo.map((row) => (
                   <div
                     key={row.label}
                     className={
@@ -471,9 +528,58 @@ export default function ProjectDetails() {
 
             <ProjectGallery key={project} project={project} />
           </div>
+
+          {/* One card per building; the grid wraps, so 1 or 10+ both fit. */}
+          <div className="flex flex-col gap-3 rounded-xl bg-gray-50 p-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-semibold text-gray-900">
+                Building Information
+              </h3>
+              <span className="rounded-full border border-brand-200 bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-600">
+                {buildings.length} {buildings.length === 1 ? "Building" : "Buildings"}
+              </span>
+            </div>
+            <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {buildings.map((building, index) => (
+                <li
+                  key={building.code}
+                  className="card flex flex-col gap-3 p-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                      <BuildingIcon className="h-5 w-5" />
+                    </span>
+                    <div className="flex min-w-0 flex-col">
+                      <span className="text-xs font-semibold text-gray-900">
+                        Building No {index + 1}
+                      </span>
+                      <span className="truncate text-sm text-gray-600">
+                        {building.name}
+                      </span>
+                    </div>
+                  </div>
+                  <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-[13px]">
+                    {[
+                      ["RFO Date", building.rfoDate],
+                      ["Total Floors", building.totalFloors],
+                      ["No. Of Units", building.units],
+                      ["Building Code", building.code],
+                    ].map(([label, value]) => (
+                      <div key={label} className="contents">
+                        <dt className="text-gray-500">{label}</dt>
+                        <dd className="m-0 truncate font-medium text-gray-900">
+                          {value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
 
-        <section className="flex w-full flex-col gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+        <section className={MAIN_CARD}>
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold text-gray-900">
               Recently Viewed

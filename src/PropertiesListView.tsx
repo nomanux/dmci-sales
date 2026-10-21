@@ -288,7 +288,7 @@ function TableView({
   });
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+    <div className="card flex h-full w-full flex-col overflow-hidden">
       <TableCardHeader
         leftSlot={
           <div className="flex items-center gap-2">
@@ -297,7 +297,7 @@ function TableView({
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+              className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-brand-400 focus:outline-none"
             />
             <FilterTrigger
               activeFilterCount={activeFilterCount}
@@ -420,7 +420,7 @@ function GridView({
   });
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+    <div className="card flex h-full w-full flex-col overflow-hidden">
       <TableCardHeader
         leftSlot={
           <div className="flex items-center gap-2">
@@ -429,7 +429,7 @@ function GridView({
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-primary-500 focus:outline-none"
+              className="w-56 rounded-md border border-gray-300 px-2.5 py-1.5 text-xs placeholder-gray-500 focus:border-brand-400 focus:outline-none"
             />
             <FilterTrigger
               activeFilterCount={activeFilterCount}

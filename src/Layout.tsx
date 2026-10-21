@@ -101,7 +101,8 @@ function Clock() {
 import "./tailwind.css";
 import "./Dashboard.css";
 import { dmciLogoUrl } from "./assets/figmaAssets";
-import { useNavigation } from "./NavigationContext";
+import { useNavigation, type Route } from "./NavigationContext";
+import { CURRENT_USER, getInitials, useProfilePhoto } from "./currentUser";
 import EntitySelectionModal, {
   type SelectedEntity,
 } from "./EntitySelectionModal";
@@ -117,6 +118,9 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronsUpDownIcon,
+  UserIcon,
+  LockOpenIcon,
+  LogOutIcon,
   MenuIcon,
   XIcon,
   type IconProps,
@@ -180,6 +184,9 @@ const ICON_ACTIVE = "text-primary-500";
 const ICON_IDLE = "text-gray-500 group-hover:text-gray-700";
 const SUB_ACTIVE = "bg-brand-25 font-semibold text-primary-500";
 const SUB_IDLE = "font-normal text-gray-600 hover:bg-brand-25/60 hover:text-gray-900";
+// Keyboard (Tab) focus only, not on mouse click. Drawn inside the button
+// (negative offset) so the sidebar's scroll area doesn't clip it.
+const NAV_FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-400 ";
 
 function NavItem({
   icon: Icon,
@@ -200,7 +207,8 @@ function NavItem({
       onClick={(e) => onClick?.(e)}
       title={collapsed ? label : undefined}
       className={
-        "group flex h-10 w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors " +
+        NAV_FOCUS +
+          "group flex h-10 w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors " +
         (collapsed ? "lg:justify-center lg:px-0 " : "") +
         (active ? NAV_ACTIVE : NAV_IDLE)
       }
@@ -242,6 +250,7 @@ function NavDropdown({
         onClick={() => !collapsed && setOpen((v) => !v)}
         title={collapsed ? label : undefined}
         className={
+          NAV_FOCUS +
           "group flex h-10 w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors " +
           (collapsed ? "lg:justify-center lg:px-0 " : "") +
           // Expanded, the active sub-item carries the highlight, so the parent
@@ -279,7 +288,8 @@ function NavDropdown({
               onClick={(e) => item.onClick?.(e)}
               disabled={!item.onClick}
               className={
-                "relative w-full rounded-md px-2 py-1.5 text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent " +
+                NAV_FOCUS +
+          "relative w-full rounded-md px-2 py-1.5 text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent " +
                 (item.onClick ? "cursor-pointer " : "") +
                 (item.label === activeSubItem
                   ? SUB_ACTIVE +
@@ -307,7 +317,8 @@ function NavDropdown({
                 onClick={(e) => item.onClick?.(e)}
                 disabled={!item.onClick}
                 className={
-                  "w-full rounded-md px-2 py-1.5 text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent " +
+                  NAV_FOCUS +
+          "w-full rounded-md px-2 py-1.5 text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent " +
                   (item.onClick ? "cursor-pointer " : "") +
                   (item.label === activeSubItem ? SUB_ACTIVE : SUB_IDLE)
                 }
@@ -322,14 +333,154 @@ function NavDropdown({
   );
 }
 
+export function UserAvatar({ className = "" }: { className?: string }) {
+  const photo = useProfilePhoto();
+  return (
+    <div
+      className={
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-100 bg-brand-25 font-semibold text-brand-600 " +
+        className
+      }
+    >
+      {photo ? (
+        <img src={photo} alt="" className="h-full w-full object-cover" />
+      ) : (
+        getInitials(CURRENT_USER.name)
+      )}
+    </div>
+  );
+}
+
+const MENU_ITEM =
+  "flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-sm font-medium text-gray-700 hover:bg-brand-25/60 hover:text-gray-900";
+
+/**
+ * AccountMenu — the user card pinned to the bottom of the sidebar. Clicking
+ * it opens View Profile / Change Password / Sign Out: beside the sidebar on
+ * desktop, above the card in the mobile drawer. Closes on outside click,
+ * Escape, or picking an item.
+ */
+function AccountMenu({
+  collapsed,
+  go,
+}: {
+  collapsed: boolean;
+  go: (route: Route, event?: React.MouseEvent) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const pick = (route: Route) => (e: React.MouseEvent) => {
+    setOpen(false);
+    go(route, e);
+  };
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Account menu"
+        title={collapsed ? CURRENT_USER.name : undefined}
+        onClick={() => setOpen((v) => !v)}
+        className={
+          "flex w-full cursor-pointer items-center gap-2 rounded-xl border bg-white p-3 text-left shadow-[0_1px_1px_rgba(10,13,18,0.05)] transition-colors hover:bg-gray-50 " +
+          (open ? "border-brand-200 " : "border-gray-200 ") +
+          (collapsed ? "lg:justify-center lg:p-2" : "")
+        }
+      >
+        <UserAvatar className="h-10 w-10 text-sm" />
+        <span
+          className={
+            "flex min-w-0 flex-1 flex-col text-sm leading-5 " +
+            (collapsed ? "lg:hidden" : "")
+          }
+        >
+          <span className="truncate font-semibold text-gray-900">
+            {CURRENT_USER.name}
+          </span>
+          <span className="truncate text-xs leading-[18px] text-gray-500">
+            {CURRENT_USER.role}
+          </span>
+        </span>
+        <ChevronsUpDownIcon
+          className={"h-5 w-5 shrink-0 text-gray-500 " + (collapsed ? "lg:hidden" : "")}
+        />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Account"
+          className="absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg lg:bottom-0 lg:left-full lg:right-auto lg:mb-0 lg:ml-3 lg:w-64"
+        >
+          <div className="flex flex-col gap-0.5 p-1.5">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={pick({ screen: "profile" })}
+              className={MENU_ITEM}
+            >
+              <UserIcon className="h-[18px] w-[18px] text-gray-500" />
+              View Profile
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={pick({ screen: "change-password" })}
+              className={MENU_ITEM}
+            >
+              <LockOpenIcon className="h-[18px] w-[18px] text-gray-500" />
+              Change Password
+            </button>
+          </div>
+          <div className="border-t border-gray-200 bg-gray-50 p-1.5">
+            <button
+              type="button"
+              role="menuitem"
+              onClick={pick({ screen: "login" })}
+              className={MENU_ITEM}
+            >
+              <LogOutIcon className="h-[18px] w-[18px] text-gray-500" />
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export interface BreadcrumbItem {
   label: string;
   onClick?: () => void;
 }
 
 export interface LayoutProps {
-  /** Which top-level sidebar section is highlighted. */
-  active: NavKey;
+  /** Which top-level sidebar section is highlighted. Omit for pages outside the nav (Profile, Change Password). */
+  active?: NavKey;
   /** Which sub-item (for Properties / Commissions) is highlighted, if any. */
   activeSubItem?: string;
   /** Breadcrumb trail shown in the topbar. Last item is emphasized and not clickable. */
@@ -371,7 +522,7 @@ export default function Layout({
   const [entityModalOpen, setEntityModalOpen] = useState(false);
   const [selectedEntity, setSelectedEntity] = useState<SelectedEntity>({
     code: "DPDI",
-    name: "DMCI Project Developers Insc.",
+    name: "DMCI Project Developers Inc.",
   });
 
   // Helper to convert route to URL for new tab support
@@ -399,6 +550,8 @@ export default function Layout({
       "compliance-details": "/commission/compliance/details",
       "lottery-registration": "/lottery/registration",
       "lottery-unit-picker": "/lottery/unit-picker",
+      profile: "/profile",
+      "change-password": "/profile/change-password",
     };
     const path = screenPaths[route.screen] ?? "/dashboard";
     const params = new URLSearchParams();
@@ -549,7 +702,7 @@ export default function Layout({
           in-flow column from lg upward. */}
       <aside
         className={
-          "fixed inset-y-0 left-0 z-40 w-64 shrink-0 -translate-x-full transition-all duration-200 ease-in-out lg:static lg:z-auto lg:translate-x-0 " +
+          "fixed inset-y-0 left-0 z-40 w-64 shrink-0 -translate-x-full transition-all duration-200 ease-in-out lg:relative lg:z-20 lg:translate-x-0 " +
           (collapsed ? "lg:w-[76px]" : "lg:w-60") +
           " " +
           (sidebarOpen ? "translate-x-0" : "")
@@ -628,44 +781,7 @@ export default function Layout({
               "flex flex-col gap-4 px-4 pb-4 " + (collapsed ? "lg:px-2" : "")
             }
           >
-            <div
-              className={
-                "relative flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-3 shadow-[0_1px_1px_rgba(10,13,18,0.05)] " +
-                (collapsed ? "lg:justify-center lg:p-2" : "")
-              }
-            >
-              <div
-                className={
-                  "flex flex-1 items-center gap-2 " +
-                  (collapsed ? "lg:flex-none lg:justify-center" : "")
-                }
-              >
-                <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-100 bg-brand-25 text-sm font-semibold text-brand-600">
-                  OR
-                </div>
-                <div
-                  className={
-                    "flex min-w-0 flex-col text-sm leading-5 " +
-                    (collapsed ? "lg:hidden" : "")
-                  }
-                >
-                  <span className="truncate font-semibold text-gray-900">
-                    Super Admin
-                  </span>
-                  <span className="truncate text-xs leading-[18px] text-gray-500">Admin</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                aria-label="Account menu"
-                className={
-                  "absolute right-[5px] top-[5px] flex h-8 w-8 cursor-pointer items-center justify-center rounded-md text-gray-500 hover:bg-gray-50 " +
-                  (collapsed ? "lg:hidden" : "")
-                }
-              >
-                <ChevronsUpDownIcon className="h-5 w-5" />
-              </button>
-            </div>
+            <AccountMenu collapsed={collapsed} go={go} />
           </div>
         </div>
       </aside>

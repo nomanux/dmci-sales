@@ -11,6 +11,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 export type Screen =
   | "login"
+  | "login0"
+  | "profile"
+  | "change-password"
   | "dashboard"
   | "properties"
   | "project-details"
@@ -60,6 +63,10 @@ const DEFAULT_ROUTE: Route = { screen: "login" };
 // reconstruct the exact route (deep-link/refresh/share all just work).
 const SCREEN_PATHS: Record<Screen, string> = {
   login: "/login",
+  // Original login design, kept for before/after comparison with /login.
+  login0: "/login0",
+  profile: "/profile",
+  "change-password": "/profile/change-password",
   dashboard: "/dashboard",
   properties: "/properties",
   "project-details": "/properties/details",

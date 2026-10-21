@@ -201,7 +201,7 @@ export default function FilterBar({
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <section className="w-full rounded-xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(10,13,18,0.05)]">
+    <section className="card w-full">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
