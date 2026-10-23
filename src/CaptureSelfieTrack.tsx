@@ -8,7 +8,7 @@ import DataPrivacyStep from "./DataPrivacyStep";
 import ConsentStep from "./ConsentStep";
 import ReviewStep from "./ReviewStep";
 import StepHeader from "./StepHeader";
-import { ChevronLeftIcon, ChevronRightIcon } from "./icons";
+import ExamplePhotoPreview, { type ExamplePhoto } from "./ExamplePhotoPreview";
 import {
   COUNTDOWN_DELAY_MS,
   COUNTDOWN_FROM,
@@ -260,121 +260,11 @@ const THUMBNAIL_ATTEMPTS: ThumbnailAttempt[] = [
   { id: "attempt-5", photo: thumbnailOverexposedUrl, label: "Overexposed", status: "rejected" },
   { id: "attempt-4", photo: thumbnailPhoto4Url, label: "Good example", status: "accepted" },
 ];
-
-/**
- * Full-size preview of a "Check your photo" example: dark backdrop, the
- * photo large, its verdict underneath, arrows (and ←/→ keys) to step
- * through the examples. Closes on ✕, Esc or a tap outside the photo.
- */
-function ExamplePhotoPreview({
-  index,
-  onIndexChange,
-  onClose,
-}: {
-  index: number;
-  onIndexChange: (index: number) => void;
-  onClose: () => void;
-}) {
-  const count = THUMBNAIL_ATTEMPTS.length;
-  const attempt = THUMBNAIL_ATTEMPTS[index];
-  const accepted = attempt.status === "accepted";
-  const step = (delta: number) => onIndexChange((index + delta + count) % count);
-  const stepRef = useRef(step);
-  stepRef.current = step;
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
-      else if (event.key === "ArrowLeft") stepRef.current(-1);
-      else if (event.key === "ArrowRight") stepRef.current(1);
-    };
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [onClose]);
-
-  const navButton =
-    "flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95";
-
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={"Example photo: " + attempt.label}
-      onClick={onClose}
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 p-4 md:p-8"
-    >
-      <button
-        type="button"
-        aria-label="Close preview"
-        onClick={onClose}
-        className={navButton + " absolute right-4 top-4"}
-      >
-        <CloseIcon className="h-5 w-5" />
-      </button>
-
-      <div className="flex w-full max-w-3xl items-center gap-2 md:gap-4">
-        <button
-          type="button"
-          aria-label="Previous example"
-          onClick={(e) => {
-            e.stopPropagation();
-            step(-1);
-          }}
-          className={navButton}
-        >
-          <ChevronLeftIcon className="h-5 w-5" />
-        </button>
-
-        <figure
-          onClick={(e) => e.stopPropagation()}
-          className="m-0 flex min-w-0 flex-1 flex-col items-center gap-3"
-        >
-          <img
-            src={attempt.photo}
-            alt={attempt.label + " example"}
-            className={
-              "block max-h-[75dvh] w-full rounded-xl object-contain outline outline-2 -outline-offset-2 " +
-              (accepted ? "outline-[#079455]" : "outline-[#f02b2b]")
-            }
-          />
-          <figcaption className="flex items-center gap-3">
-            <span
-              className={
-                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold leading-5 text-white " +
-                (accepted ? "bg-[#079455]" : "bg-[#f02b2b]")
-              }
-            >
-              <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25">
-                {accepted ? <CheckIcon /> : <XIcon />}
-              </span>
-              {attempt.label}
-            </span>
-            <span className="text-xs font-medium text-white/70">
-              {index + 1} / {count}
-            </span>
-          </figcaption>
-        </figure>
-
-        <button
-          type="button"
-          aria-label="Next example"
-          onClick={(e) => {
-            e.stopPropagation();
-            step(1);
-          }}
-          className={navButton}
-        >
-          <ChevronRightIcon className="h-5 w-5" />
-        </button>
-      </div>
-    </div>
-  );
-}
+const PREVIEW_EXAMPLES: ExamplePhoto[] = THUMBNAIL_ATTEMPTS.map(({ photo, label, status }) => ({
+  photo,
+  label,
+  accepted: status === "accepted",
+}));
 
 const TOTAL_STEPS = 8;
 const BUYER_PROPERTY_STEP = 1;
@@ -772,12 +662,17 @@ export default function CaptureSelfieTrack() {
       </header>
 
       <div className="flex-1 min-h-0 flex flex-col md:flex-row justify-center items-start gap-0 md:gap-4 md:px-4 md:py-3">
-        {/* Phones: label and segments on one line, thin segments. */}
-        <div className="md:hidden w-full bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3">
-          <span className="shrink-0 text-xs font-semibold text-gray-900">
-            {currentStep}/{TOTAL_STEPS} steps
-          </span>
-          <div className="flex flex-1 gap-1">
+        {/* Phones: current step name and count above thin segments. */}
+        <div className="md:hidden w-full bg-white border-b border-gray-200 px-4 py-2 flex flex-col gap-1.5">
+          <div className="flex items-baseline justify-between gap-3">
+            <span aria-current="step" className="min-w-0 truncate text-sm font-semibold leading-5 text-gray-900">
+              {steps[currentStep - 1]?.name}
+            </span>
+            <span className="shrink-0 text-xs font-medium text-gray-500">
+              Step {currentStep} of {TOTAL_STEPS}
+            </span>
+          </div>
+          <div className="flex gap-1">
             {Array.from({ length: TOTAL_STEPS }).map((_, idx) => (
               <div
                 key={idx}
@@ -1178,7 +1073,7 @@ export default function CaptureSelfieTrack() {
                     <canvas ref={canvasRef} className="hidden" />
                     <canvas ref={detectionCanvasRef} className="hidden" />
 
-                    <div className="flex flex-col gap-2 flex-shrink-0 mt-1 md:mt-2 p-3 bg-white border border-gray-200 rounded-2xl md:order-last">
+                    <div className="flex flex-col gap-2 flex-shrink-0 mt-1 md:mt-2 md:order-last">
                       <p className="m-0 text-xs leading-4 font-semibold text-gray-900">
                         Check your photo
                       </p>
@@ -1514,6 +1409,7 @@ export default function CaptureSelfieTrack() {
 
       {previewIndex !== null && (
         <ExamplePhotoPreview
+          examples={PREVIEW_EXAMPLES}
           index={previewIndex}
           onIndexChange={setPreviewIndex}
           onClose={() => setPreviewIndex(null)}

@@ -131,14 +131,12 @@ export { default as plusBrandIconUrl } from "./plus-brand.svg";
 export { default as plusWhiteIconUrl } from "./plus-white.svg";
 export { default as dotSeparatorUrl } from "./dot-separator.svg";
 
-// Identity Verification step (node 167635:167877). The four example-ID
-// thumbnails are flattened 1x crops of the frame render (each is ~190 pattern
-// layers in Figma, and instance children can't be exported on their own);
-// used as captioned good/bad examples under the upload area.
-export { default as idExampleTiltedUrl } from "./id-example-tilted.png";
-export { default as idExampleHandUrl } from "./id-example-hand.png";
-export { default as idExampleBlurryUrl } from "./id-example-blurry.png";
-export { default as idExampleGoodUrl } from "./id-example-good.png";
+// Identity Verification step (node 167635:167877): good/bad example-ID photos
+// shown as captioned examples under the upload area (840×560 WebP, 3:2).
+export { default as idExampleTiltedUrl } from "./id-example-tilted.webp";
+export { default as idExampleHandUrl } from "./id-example-hand.webp";
+export { default as idExampleBlurryUrl } from "./id-example-blurry.webp";
+export { default as idExampleGoodUrl } from "./id-example-good.webp";
 
 // Data Privacy step (node 167635:167885): clock beside each signer's "Signed on" time.
 export { default as clockIconUrl } from "./clock.svg";

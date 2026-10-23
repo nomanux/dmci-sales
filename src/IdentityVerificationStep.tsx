@@ -4,6 +4,7 @@ import DatePicker from "./DatePicker";
 import Input from "./Input";
 import Select from "./Select";
 import StepHeader from "./StepHeader";
+import ExamplePhotoPreview, { type ExamplePhoto } from "./ExamplePhotoPreview";
 import {
   idCardImageUrl,
   idExampleBlurryUrl,
@@ -48,11 +49,16 @@ const PANEL_HINTS: Record<Phase, string> = {
 };
 
 const EXAMPLES = [
-  { src: idExampleGoodUrl, ok: true, caption: "Flat, clear, full card", alt: "ID photographed flat with all corners visible" },
-  { src: idExampleTiltedUrl, ok: false, caption: "Tilted or glare", alt: "ID photographed at an angle with glare" },
-  { src: idExampleHandUrl, ok: false, caption: "Fingers covering", alt: "Fingers covering part of the ID" },
+  { src: idExampleGoodUrl, ok: true, caption: "Clear & flat", alt: "ID photographed flat with all corners visible" },
+  { src: idExampleTiltedUrl, ok: false, caption: "Tilted", alt: "ID photographed at an angle" },
+  { src: idExampleHandUrl, ok: false, caption: "Covered", alt: "Fingers covering part of the ID" },
   { src: idExampleBlurryUrl, ok: false, caption: "Blurry", alt: "Blurry photo of an ID" },
 ];
+const PREVIEW_EXAMPLES: ExamplePhoto[] = EXAMPLES.map(({ src, caption, ok }) => ({
+  photo: src,
+  label: caption,
+  accepted: ok,
+}));
 
 const READ_DELAY_MS = 2200;
 
@@ -83,8 +89,8 @@ const CheckIcon = ({ size = 14 }: { size?: number }) => (
     <path d="M5 12l5 5 9-10" />
   </svg>
 );
-const CrossIcon = () => (
-  <svg width={14} height={14} viewBox="0 0 24 24" strokeWidth={3} {...strokeProps}>
+const CrossIcon = ({ size = 14 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" strokeWidth={3} {...strokeProps}>
     <path d="M6 6l12 12M18 6L6 18" />
   </svg>
 );
@@ -170,6 +176,8 @@ export function IdUploadPanel({
   onReadyChange,
   onGray = false,
   compact = false,
+  mobileDetailsAfterUpload = false,
+  hideTakePhoto = false,
 }: {
   /** Fires with true once the ID has been read, false otherwise. */
   onReadyChange?: (ready: boolean) => void;
@@ -177,12 +185,18 @@ export function IdUploadPanel({
   onGray?: boolean;
   /** Upload + read + preview only — no ID details panel, privacy note or example photos (step 2 ID boxes). */
   compact?: boolean;
+  /** Mobile only: keep the ID details panel hidden until an ID is uploaded (step 3). */
+  mobileDetailsAfterUpload?: boolean;
+  /** Drop the "Take a photo" button, leaving Browse files only (step 3). */
+  hideTakePhoto?: boolean;
 }) {
   const uid = useId();
   const [phase, setPhase] = useState<Phase>("empty");
   const [preview, setPreview] = useState(idCardImageUrl);
   const [fileMeta, setFileMeta] = useState("umid-front.png · 211 KB");
   const [dragging, setDragging] = useState(false);
+  // Example photo open in the full-size preview, by index.
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const [idType, setIdType] = useState("umid");
   const [idNumber, setIdNumber] = useState("");
@@ -280,13 +294,15 @@ export function IdUploadPanel({
                   </svg>
                   Browse files
                 </ButtonLike>
-                <ButtonLike variant="outline" onClick={() => cameraInputRef.current?.click()}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" strokeWidth={2} {...strokeProps}>
-                    <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
-                    <circle cx="12" cy="13" r="3.5" />
-                  </svg>
-                  Take a photo
-                </ButtonLike>
+                {!hideTakePhoto && (
+                  <ButtonLike variant="outline" onClick={() => cameraInputRef.current?.click()}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" strokeWidth={2} {...strokeProps}>
+                      <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
+                      <circle cx="12" cy="13" r="3.5" />
+                    </svg>
+                    Take a photo
+                  </ButtonLike>
+                )}
               </div>
             </div>
           )}
@@ -361,11 +377,11 @@ export function IdUploadPanel({
           />
         </section>
 
-        {/* Right: ID details */}
+        {/* Right: ID details — hidden on mobile until an ID is uploaded. */}
         {!compact && (
         <section
           aria-labelledby={uid + "-details"}
-          className={`flex flex-col gap-4 rounded-xl border p-4 md:p-5 transition-colors ${
+          className={`${phase === "empty" && mobileDetailsAfterUpload ? "hidden md:flex" : "flex"} flex-col gap-4 rounded-xl border p-4 md:p-5 transition-colors ${
             panelQuiet && !onGray ? "border-gray-100 bg-gray-50" : "border-gray-200 bg-white"
           }`}
         >
@@ -455,34 +471,60 @@ export function IdUploadPanel({
 
       {/* Example photos — upload guidance, so hidden once the ID has been read */}
       {!compact && phase !== "done" && (
-        <section aria-labelledby={uid + "-tips"} className="flex flex-col gap-3 border-t border-gray-200 pt-5">
+        <section aria-labelledby={uid + "-tips"} className="flex flex-col gap-2 border-t border-gray-200 pt-4">
           <h2 id={uid + "-tips"} className="m-0 text-sm font-semibold leading-5 text-gray-900">
             Get the details read right the first time
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {EXAMPLES.map((example) => (
-              <figure key={example.caption} className="m-0 flex flex-col gap-1.5">
-                <img
-                  src={example.src}
-                  alt={example.alt}
-                  width={221}
-                  height={130}
-                  className={`block w-full h-auto rounded-lg border-2 ${
-                    example.ok ? "border-success-500" : "border-error-200"
+          <div className="grid max-w-[560px] grid-cols-4 gap-2">
+            {EXAMPLES.map((example, index) => (
+              <figure key={example.caption} className="m-0 flex flex-col gap-1">
+                {/* Same frame as the Live Selfie step's "Check your photo" examples; opens the full-size preview. */}
+                <button
+                  type="button"
+                  aria-label={"View example: " + example.caption}
+                  onClick={() => setPreviewIndex(index)}
+                  className={`relative block w-full cursor-zoom-in overflow-hidden rounded-lg border-0 bg-white p-0.5 outline outline-[1.4px] -outline-offset-[1.4px] transition-transform duration-150 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${
+                    example.ok ? "outline-[#079455]" : "outline-[#f02b2b]"
                   }`}
-                />
+                >
+                  <img
+                    src={example.src}
+                    alt={example.alt}
+                    width={840}
+                    height={560}
+                    loading="lazy"
+                    className="block aspect-[3/2] w-full rounded-md object-cover"
+                  />
+                  <span
+                    aria-hidden="true"
+                    className={`absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-white outline outline-1 outline-white ${
+                      example.ok ? "bg-[#079455]" : "bg-[#f02b2b]"
+                    }`}
+                  >
+                    {example.ok ? <CheckIcon size={10} /> : <CrossIcon size={10} />}
+                  </span>
+                </button>
                 <figcaption
-                  className={`flex items-center gap-1 text-xs font-medium ${
+                  className={`flex items-center gap-1 text-xs font-medium leading-[18px] ${
                     example.ok ? "text-success-700" : "text-error-600"
                   }`}
                 >
-                  {example.ok ? <CheckIcon /> : <CrossIcon />}
+                  {example.ok ? <CheckIcon size={12} /> : <CrossIcon size={12} />}
                   {example.caption}
                 </figcaption>
               </figure>
             ))}
           </div>
         </section>
+      )}
+
+      {previewIndex !== null && (
+        <ExamplePhotoPreview
+          examples={PREVIEW_EXAMPLES}
+          index={previewIndex}
+          onIndexChange={setPreviewIndex}
+          onClose={() => setPreviewIndex(null)}
+        />
       )}
     </div>
   );
@@ -506,7 +548,7 @@ export default function IdentityVerificationStep({
       {/* Only the card body scrolls; the title stays put. */}
       <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
         <div className="px-4 md:px-8 pb-6">
-          <IdUploadPanel onReadyChange={onReadyChange} />
+          <IdUploadPanel onReadyChange={onReadyChange} mobileDetailsAfterUpload hideTakePhoto />
         </div>
       </div>
     </section>

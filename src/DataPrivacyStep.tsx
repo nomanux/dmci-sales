@@ -104,19 +104,19 @@ export default function DataPrivacyStep({
     <section className="antialiased w-full md:max-h-full bg-white rounded-none md:rounded-[16px] flex flex-col border border-[#e4e8f0]">
       <StepHeader
         title="Data Privacy Policy"
-        className="px-4 md:px-8 pt-6 pb-6"
+        className="px-4 md:px-8 pt-5 pb-4 md:pt-6 md:pb-6"
       >
         Please read the Data Privacy Policy carefully before processing next
         step.
       </StepHeader>
 
-      <div className="px-4 md:px-8 pb-6 flex flex-1 min-h-0 flex-col gap-6">
+      <div className="px-4 md:px-8 pb-4 md:pb-6 flex flex-1 min-h-0 flex-col gap-4 md:gap-6">
         {/* Scrollable policy text */}
         <div
           tabIndex={0}
           role="region"
           aria-label="Data privacy policy text"
-          className="max-h-[60vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto rounded-xl bg-gray-50 px-4 py-5 md:px-6 md:py-6 text-sm md:text-[15px] leading-6 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+          className="max-h-[50vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto rounded-xl bg-gray-50 px-3 py-3 md:px-6 md:py-6 text-[13px] leading-5 md:text-[15px] md:leading-6 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
         >
           <PrivacyPolicyText />
         </div>
