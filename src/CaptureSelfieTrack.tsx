@@ -646,7 +646,7 @@ export default function CaptureSelfieTrack() {
 
   return (
     <div
-      className="flex flex-col h-screen w-full  font-sans overflow-hidden bg-[#f5f7fb]"
+      className="flex flex-col h-[100dvh] w-full font-sans overflow-hidden bg-[#f5f7fb]"
       style={{ "--footer-h": footerHeight + "px" } as CSSProperties}
     >
       <header className="bg-white border-b border-gray-200 flex justify-center">
