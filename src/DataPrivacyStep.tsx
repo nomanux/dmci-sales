@@ -116,7 +116,7 @@ export default function DataPrivacyStep({
           tabIndex={0}
           role="region"
           aria-label="Data privacy policy text"
-          className="max-h-[50vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto rounded-xl bg-gray-50 px-3 py-3 md:px-6 md:py-6 text-[13px] leading-5 md:text-[15px] md:leading-6 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
+          className="max-h-[50vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 md:px-6 md:py-6 text-[13px] leading-5 md:text-[15px] md:leading-6 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
         >
           <PrivacyPolicyText />
         </div>

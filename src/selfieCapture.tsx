@@ -329,20 +329,22 @@ export function usePhoneOrientation() {
 }
 
 /**
- * Turns the screen to landscape for the user (Android Chrome: needs full
- * screen first). Resolves false where the browser can't (iPhone Safari).
+ * Turns the screen to landscape for the user where the browser allows it
+ * without full screen (e.g. an installed web app). Browser full screen is
+ * avoided on purpose: Android Chrome then shows its own "To exit full screen,
+ * drag from the top…" banner over the camera. Resolves false otherwise
+ * (regular Chrome tab, iPhone Safari), and the user is asked to turn the
+ * phone sideways themselves.
  */
 export async function lockLandscape(): Promise<boolean> {
   const orientation = screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> };
-  // Desktop screens can't rotate: skip, so a narrow desktop window doesn't flash into full screen.
+  // Desktop screens can't rotate.
   if (!window.matchMedia("(pointer: coarse)").matches) return false;
-  if (!orientation?.lock || !document.documentElement.requestFullscreen) return false;
+  if (!orientation?.lock) return false;
   try {
-    if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
     await orientation.lock("landscape");
     return true;
   } catch {
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     return false;
   }
 }
@@ -353,7 +355,6 @@ export function releaseLandscape() {
   } catch {
     // nothing was locked
   }
-  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
 }
 
 /**

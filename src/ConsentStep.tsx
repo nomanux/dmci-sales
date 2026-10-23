@@ -38,7 +38,7 @@ export default function ConsentStep({
       <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
       <div className="px-4 md:px-8 pb-6 flex flex-col gap-6">
         {/* Same panel and text scale as the Terms and Data Privacy steps. */}
-        <div className="rounded-xl bg-gray-50 px-4 py-5 md:px-6 md:py-6 text-sm md:text-[15px] leading-6 text-gray-600">
+        <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-5 md:px-6 md:py-6 text-sm md:text-[15px] leading-6 text-gray-600">
           <ConsentPolicyText />
         </div>
 
