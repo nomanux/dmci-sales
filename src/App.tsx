@@ -29,6 +29,7 @@ import ReservationPayment from "./ReservationPayment";
 import RAForm from "./RAForm";
 import CaptureSelfieStep from "./CaptureSelfieStep";
 import CaptureSelfieTrack from "./CaptureSelfieTrack";
+import RAFormV2 from "./RAFormV2";
 
 function Screens() {
   const { route } = useNavigation();
@@ -94,6 +95,8 @@ function Screens() {
       return <CaptureSelfieStep />;
     case "capture-selfie-track":
       return <CaptureSelfieTrack />;
+    case "ra-form-v2":
+      return <RAFormV2 />;
     default:
       return <Login />;
   }
@@ -104,8 +107,12 @@ export default function App() {
   const getInitialRoute = () => {
     if (typeof window !== "undefined") {
       const path = window.location.pathname;
-      if (path === "/ra-form" || path === "/capture-selfie-track") {
-        return { screen: "capture-selfie-track" as const };
+      const step = new URLSearchParams(window.location.search).get("step") ?? "buyer-property";
+      if (path === "/ra-form" || path === "/ra-form1" || path === "/capture-selfie-track") {
+        return { screen: "capture-selfie-track" as const, step };
+      }
+      if (path === "/ra-form2") {
+        return { screen: "ra-form-v2" as const, step };
       }
     }
     return undefined;

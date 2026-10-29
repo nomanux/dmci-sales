@@ -277,6 +277,25 @@ const CONSENT_STEP = 7;
 const REVIEW_STEP = 8;
 // Steps that have a screen in this prototype; the rest can't be opened yet.
 const STEPS_WITH_CONTENT = [BUYER_PROPERTY_STEP, BUYER_DETAILS_STEP, IDENTITY_STEP, SELFIE_STEP, TERMS_STEP, PRIVACY_STEP, CONSENT_STEP, REVIEW_STEP];
+// URL slug per step (index = step - 1), shown as /ra-form1?step=<slug> so the
+// address bar tracks the current step and a refresh reopens it.
+const STEP_SLUGS = [
+  "buyer-property",
+  "representative-details",
+  "identity-verification",
+  "live-selfie",
+  "terms-and-conditions",
+  "data-privacy",
+  "consent-and-acceptance",
+  "review-and-submit",
+];
+
+function readStepFromUrl(): number {
+  if (typeof window === "undefined") return BUYER_PROPERTY_STEP;
+  const slug = new URLSearchParams(window.location.search).get("step");
+  const step = slug ? STEP_SLUGS.indexOf(slug) + 1 : 0;
+  return STEPS_WITH_CONTENT.includes(step) ? step : BUYER_PROPERTY_STEP;
+}
 
 export default function CaptureSelfieTrack() {
   // Phones: the live camera only runs full screen in landscape (an upright
@@ -294,7 +313,14 @@ export default function CaptureSelfieTrack() {
   const [faceFit, setFaceFit] = useState<FaceFit>("none");
   const faceDetected = faceFit === "ok";
   const [idHeld, setIdHeld] = useState(false);
-  const [currentStep, setCurrentStep] = useState(BUYER_PROPERTY_STEP);
+  const [currentStep, setCurrentStep] = useState(readStepFromUrl);
+  // Mirror the step into the URL. replaceState keeps the router's history
+  // depth, so browser Back still leaves the form rather than stepping through it.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("step", STEP_SLUGS[currentStep - 1]);
+    window.history.replaceState(window.history.state, "", url);
+  }, [currentStep]);
   // Step 3 reports when the uploaded ID has been read; Next waits for it.
   const [identityReady, setIdentityReady] = useState(false);
   // Step 5 reports when both acknowledgements are ticked.

@@ -39,7 +39,8 @@ export type Screen =
   | "payment-method"
   | "ra-form"
   | "capture-selfie-step"
-  | "capture-selfie-track";
+  | "capture-selfie-track"
+  | "ra-form-v2";
 
 export interface Route {
   screen: Screen;
@@ -47,6 +48,8 @@ export interface Route {
   project?: string;
   /** Row identifier for context, used by the Unit Availability / Unit Holding detail screens. */
   itemId?: string;
+  /** Current step slug for multi-step screens (the RA form track). */
+  step?: string;
 }
 
 interface NavigationContextValue {
@@ -90,16 +93,18 @@ const SCREEN_PATHS: Record<Screen, string> = {
   "lottery-registration": "/lottery/registration",
   "lottery-unit-picker": "/lottery/unit-picker",
   "payment-method": "/payment-method",
-  // The 8-step CRF/RA track lives at /ra-form; the older single-file RA form
-  // moved to /ra-form-legacy.
+  // The 8-step CRF/RA track: v1 at /ra-form1, v2 (a copy to iterate on) at
+  // /ra-form2. The older single-file RA form moved to /ra-form-legacy.
   "ra-form": "/ra-form-legacy",
   "capture-selfie-step": "/capture-selfie-step",
-  "capture-selfie-track": "/ra-form",
+  "capture-selfie-track": "/ra-form1",
+  "ra-form-v2": "/ra-form2",
 };
 
 const PATH_TO_SCREEN: Record<string, Screen> = {
   ...(Object.fromEntries(Object.entries(SCREEN_PATHS).map(([screen, path]) => [path, screen])) as Record<string, Screen>),
-  // Old bookmarks: opens the track and the URL is rewritten to /ra-form.
+  // Old bookmarks: open v1 and the URL is rewritten to /ra-form1.
+  "/ra-form": "capture-selfie-track",
   "/capture-selfie-track": "capture-selfie-track",
 };
 
@@ -108,6 +113,7 @@ function routeToUrl(route: Route): string {
   const params = new URLSearchParams();
   if (route.project) params.set("project", route.project);
   if (route.itemId) params.set("itemId", route.itemId);
+  if (route.step) params.set("step", route.step);
   const query = params.toString();
   return query ? `${path}?${query}` : path;
 }
@@ -120,6 +126,8 @@ function urlToRoute(pathname: string, search: string): Route {
   if (project) route.project = project;
   const itemId = params.get("itemId");
   if (itemId) route.itemId = itemId;
+  const step = params.get("step");
+  if (step) route.step = step;
   return route;
 }
 
