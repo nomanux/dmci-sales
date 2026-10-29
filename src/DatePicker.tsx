@@ -102,7 +102,9 @@ export default function DatePicker({
   const [viewDate, setViewDate] = useState(selectedDate ?? today);
 
   useEffect(() => {
-    if (open) setViewDate(selectedDate ?? today);
+    // With nothing picked yet, start on today — or on max when today is past it.
+    const latest = parseISO(max);
+    if (open) setViewDate(selectedDate ?? (latest && today > latest ? latest : today));
     // Only reset the visible month when the panel opens, not on every keystroke/value change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
@@ -128,10 +130,15 @@ export default function DatePicker({
   const minDate = parseISO(min);
   const maxDate = parseISO(max);
   const grid = useMemo(() => buildMonthGrid(viewDate.getFullYear(), viewDate.getMonth()), [viewDate]);
-  const yearOptions = useMemo(
-    () => Array.from({ length: 21 }, (_, i) => today.getFullYear() - 10 + i),
-    [today]
-  );
+  // ±10 years around today, or the min/max range when given (e.g. a date of
+  // birth decades back), always including the year on screen.
+  const viewYear = viewDate.getFullYear();
+  const yearOptions = useMemo(() => {
+    const first = Math.min(minDate ? minDate.getFullYear() : today.getFullYear() - 10, viewYear);
+    const last = Math.max(maxDate ? maxDate.getFullYear() : today.getFullYear() + 10, viewYear);
+    return Array.from({ length: last - first + 1 }, (_, i) => first + i);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [today, min, max, viewYear]);
 
   function commit(date: Date) {
     const iso = toISO(date);

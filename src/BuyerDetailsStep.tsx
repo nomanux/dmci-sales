@@ -173,7 +173,7 @@ const FUND_SOURCES = toOptions(
   "Other",
 );
 
-const PHONE_COUNTRIES = [
+export const PHONE_COUNTRIES = [
   { code: "PH", flag: "🇵🇭", dial: "+63", placeholder: "+63 (900) 000-0000" },
   { code: "US", flag: "🇺🇸", dial: "+1", placeholder: "+1 (555) 000-0000" },
   { code: "SG", flag: "🇸🇬", dial: "+65", placeholder: "+65 0000 0000" },
@@ -183,7 +183,7 @@ const PHONE_COUNTRIES = [
 
 // Windows has no flag-emoji glyphs (🇵🇭 renders as the letters "PH"), so the
 // default country's flag is drawn here to match the design on every OS.
-function PhilippinesFlag() {
+export function PhilippinesFlag() {
   return (
     <svg
       width="20"

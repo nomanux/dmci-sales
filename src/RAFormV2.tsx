@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Button from "./Button";
-import BuyerDetailsStep from "./BuyerDetailsStep";
+import RepresentativeDetailsStepV2 from "./RepresentativeDetailsStepV2";
 import BuyerPropertyStep from "./BuyerPropertyStep";
 import IdentityVerificationStep from "./IdentityVerificationStep";
 import TermsStep from "./TermsStep";
@@ -788,7 +788,7 @@ export default function RAFormV2() {
         {/* self-stretch (and flex-1 when stacked on mobile) pins main to the
             viewport height so long steps scroll inside it; under the row's
             items-start it would otherwise grow to its content and get clipped. */}
-        <main ref={mainRef} className="w-full md:w-[1024px] min-h-0 max-md:flex-1 self-stretch flex justify-center items-start overflow-y-auto pb-[var(--footer-h)]">
+        <main ref={mainRef} className="w-full md:w-[1024px] min-h-0 max-md:flex-1 self-stretch flex justify-center items-start overflow-y-auto pb-[var(--footer-h)] [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
           {/* Fill-height steps scroll inside their card, so the wrapper is pinned
               to the viewport. Step 2 scrolls the page instead: its wrapper must
               grow with it, or main's footer padding lands mid-content and the
@@ -797,7 +797,7 @@ export default function RAFormV2() {
           {currentStep === BUYER_PROPERTY_STEP ? (
             <BuyerPropertyStep />
           ) : currentStep === BUYER_DETAILS_STEP ? (
-            <BuyerDetailsStep />
+            <RepresentativeDetailsStepV2 />
           ) : currentStep === IDENTITY_STEP ? (
             <IdentityVerificationStep onReadyChange={setIdentityReady} />
           ) : currentStep === TERMS_STEP ? (
