@@ -3,7 +3,6 @@ import * as ReactDOM from "react-dom/client";
 import "./tailwind.css";
 import "./disabled-row.css";
 import App from "./App";
-import CaptureSelfieStep from "./CaptureSelfieStep";
 import ComponentsPage from "./ComponentsPage";
 
 // Standalone URL routes that bypass the dashboard shell entirely — checked
@@ -13,7 +12,6 @@ import ComponentsPage from "./ComponentsPage";
 const path = window.location.pathname.replace(/\/+$/, "") || "/";
 console.log("path", path);
 function Root() {
-  if (path === "/selfie-capture") return <CaptureSelfieStep />;
   if (path === "/component") return <ComponentsPage />;
   return <App />;
 }

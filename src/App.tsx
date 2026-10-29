@@ -27,7 +27,6 @@ import LotteryUnitPicker from "./LotteryUnitPicker";
 import ComputationSheet from "./ComputationSheet";
 import ReservationPayment from "./ReservationPayment";
 import RAForm from "./RAForm";
-import CaptureSelfieStep from "./CaptureSelfieStep";
 import CaptureSelfieTrack from "./CaptureSelfieTrack";
 import RAFormV2 from "./RAFormV2";
 
@@ -91,8 +90,6 @@ function Screens() {
       return <ReservationPayment />;
     case "ra-form":
       return <RAForm />;
-    case "capture-selfie-step":
-      return <CaptureSelfieStep />;
     case "capture-selfie-track":
       return <CaptureSelfieTrack />;
     case "ra-form-v2":

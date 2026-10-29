@@ -38,7 +38,6 @@ export type Screen =
   | "lottery-unit-picker"
   | "payment-method"
   | "ra-form"
-  | "capture-selfie-step"
   | "capture-selfie-track"
   | "ra-form-v2";
 
@@ -96,7 +95,6 @@ const SCREEN_PATHS: Record<Screen, string> = {
   // The 8-step CRF/RA track: v1 at /ra-form1, v2 (a copy to iterate on) at
   // /ra-form2. The older single-file RA form moved to /ra-form-legacy.
   "ra-form": "/ra-form-legacy",
-  "capture-selfie-step": "/capture-selfie-step",
   "capture-selfie-track": "/ra-form1",
   "ra-form-v2": "/ra-form2",
 };
