@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "./icons";
 
 /**
@@ -94,6 +95,8 @@ export default function DatePicker({
   const [open, setOpen] = useState(false);
   const [internalValue, setInternalValue] = useState(defaultValue ?? "");
   const containerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [panelStyle, setPanelStyle] = useState<CSSProperties>({ visibility: "hidden" });
   const today = useMemo(() => new Date(), []);
 
   const selectedValue = value ?? internalValue;
@@ -112,7 +115,8 @@ export default function DatePicker({
   useEffect(() => {
     if (!open) return;
     function handlePointerDown(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (!containerRef.current?.contains(target) && !panelRef.current?.contains(target)) {
         setOpen(false);
       }
     }
@@ -124,6 +128,40 @@ export default function DatePicker({
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  // The panel is portaled to <body> with fixed positioning so scroll areas and
+  // overflow-hidden cards can't clip it. It opens below the trigger, or above
+  // when there isn't room, and follows the trigger on scroll/resize.
+  useLayoutEffect(() => {
+    if (!open) {
+      setPanelStyle({ visibility: "hidden" });
+      return;
+    }
+    function updatePosition() {
+      const trigger = containerRef.current?.getBoundingClientRect();
+      const panel = panelRef.current;
+      if (!trigger || !panel) return;
+      const gap = 4;
+      const margin = 8;
+      const panelHeight = panel.offsetHeight;
+      const panelWidth = panel.offsetWidth;
+      const spaceBelow = window.innerHeight - trigger.bottom - margin;
+      const spaceAbove = trigger.top - margin;
+      const openUp = spaceBelow < panelHeight + gap && spaceAbove > spaceBelow;
+      const top = openUp
+        ? Math.max(margin, trigger.top - gap - panelHeight)
+        : Math.min(trigger.bottom + gap, window.innerHeight - margin - panelHeight);
+      const left = Math.min(Math.max(margin, trigger.left), window.innerWidth - margin - panelWidth);
+      setPanelStyle({ position: "fixed", top, left, marginTop: 0, zIndex: 50 });
+    }
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
     };
   }, [open]);
 
@@ -175,8 +213,14 @@ export default function DatePicker({
         <CalendarIcon className="h-4 w-4 shrink-0 text-gray-400" />
       </button>
 
-      {open && (
-        <div className="date-picker-panel" role="dialog" aria-label={ariaLabel ?? "Choose date"}>
+      {open && createPortal(
+        <div
+          ref={panelRef}
+          style={panelStyle}
+          className="date-picker-panel"
+          role="dialog"
+          aria-label={ariaLabel ?? "Choose date"}
+        >
           <div className="flex items-center justify-between px-3 pt-3">
             <button
               type="button"
@@ -267,7 +311,8 @@ export default function DatePicker({
               Today
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

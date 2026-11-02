@@ -84,7 +84,7 @@ export default function BuyerPropertyStep() {
         </div>
 
         {/* Reservation Agreement */}
-        <div className="bg-reservation-bg flex flex-col overflow-hidden px-1.5 pb-1.5 rounded-2xl">
+        <div className="bg-reservation-bg flex flex-col px-1.5 pb-1.5 rounded-2xl">
           <h3 className="m-0 py-1.5 text-center text-base font-semibold text-reservation-heading">
             Reservation Agreement
           </h3>

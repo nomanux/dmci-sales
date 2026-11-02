@@ -346,15 +346,42 @@ function SelectField({
 function DateField({
   label,
   required = false,
+  value,
+  onChange,
+  max,
 }: {
   label: string;
   required?: boolean;
+  value?: string;
+  onChange?: (value: string) => void;
+  max?: string;
 }) {
   return (
     <Field label={label} required={required}>
-      <DatePicker size="sm" aria-label={label} placeholder="MM/DD/YYYY" />
+      <DatePicker
+        size="sm"
+        aria-label={label}
+        placeholder="MM/DD/YYYY"
+        value={value}
+        onChange={onChange}
+        max={max}
+      />
     </Field>
   );
+}
+
+/** ISO "yyyy-mm-dd" for the latest birth date of someone who is 18 today. */
+function adultCutoffISO(): string {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() - 18);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return d.getFullYear() + "-" + m + "-" + day;
+}
+
+/** True when an ISO date of birth is set and that person is under 18 today. */
+function isMinor(dob: string | undefined): boolean {
+  return !!dob && dob > adultCutoffISO();
 }
 
 function TextArea({
@@ -786,6 +813,8 @@ function PersonalDetailsFields({
   optional = [],
   civilStatus,
   onCivilStatusChange,
+  dob,
+  onDobChange,
   nationalityHint = false,
 }: {
   fields: PersonalFieldKey[];
@@ -793,6 +822,8 @@ function PersonalDetailsFields({
   optional?: PersonalFieldKey[];
   civilStatus?: string;
   onCivilStatusChange?: (value: string) => void;
+  dob?: string;
+  onDobChange?: (value: string) => void;
   nationalityHint?: boolean;
 }) {
   const required = (key: PersonalFieldKey) => !optional.includes(key);
@@ -839,7 +870,13 @@ function PersonalDetailsFields({
         );
       case "dob":
         return (
-          <DateField key={key} label="Date of Birth" required={required(key)} />
+          <DateField
+            key={key}
+            label="Date of Birth"
+            required={required(key)}
+            value={dob}
+            onChange={onDobChange}
+          />
         );
       case "religion":
         return (
@@ -1214,6 +1251,91 @@ function SpouseInformation({ onWhiteCard = false }: { onWhiteCard?: boolean }) {
           </div>
           {onWhiteCard && <Divider />}
           <OccupationFields subject="spouse" onGrayBackground />
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Collapsible gray block shown when the primary buyer is under 18. */
+function GuardianInformation() {
+  const [expanded, setExpanded] = useState(true);
+  const [civilStatus, setCivilStatus] = useState<string>();
+  const [spouseAsRepresentative, setSpouseAsRepresentative] = useState(false);
+
+  return (
+    <div className="-mx-2 md:mx-0 flex flex-col gap-6 rounded-xl bg-gray-50 px-2 py-4 md:p-5">
+      <button
+        type="button"
+        aria-expanded={expanded}
+        onClick={() => setExpanded((e) => !e)}
+        className="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-left"
+      >
+        <span className="text-base leading-6 md:text-lg md:leading-7 font-semibold text-brand-500">
+          Guardian Information
+        </span>
+        <span className="flex h-8 w-8 items-center justify-center text-brand-700">
+          {expanded ? (
+            <ChevronUpIcon className="h-5 w-5" />
+          ) : (
+            <ChevronDownIcon className="h-5 w-5" />
+          )}
+        </span>
+      </button>
+
+      {expanded && (
+        <>
+          <div className="flex flex-col gap-3">
+            <SectionHeading title="Personal Details" size="md" />
+            <div className={GRID_3}>
+              <SelectField label="Prefix" required options={PREFIXES} />
+              <TextField
+                label="First Name"
+                required
+                placeholder="Enter first name"
+              />
+              <MiddleNameField />
+              <TextField
+                label="Last Name"
+                required
+                placeholder="Enter last name"
+              />
+              <SelectField
+                label="Suffix"
+                options={SUFFIXES}
+                placeholder="Select suffix"
+              />
+              {/* A guardian has to be an adult. */}
+              <DateField label="Date of Birth" required max={adultCutoffISO()} />
+              <TextField
+                label="Email Address"
+                required
+                type="email"
+                placeholder="demomail@gmail.com"
+              />
+              <PhoneField label="Mobile" required />
+              <SelectField
+                label="Nationality"
+                required
+                options={NATIONALITIES}
+              />
+              <SelectField
+                label="Civil Status"
+                required
+                options={CIVIL_STATUSES}
+                value={civilStatus}
+                onChange={setCivilStatus}
+              />
+            </div>
+          </div>
+          <IdUploadCard title="Guardian ID (Front Side)" />
+          {civilStatus === "Married" && (
+            <CheckboxField
+              label="Do you want to add your spouse as a representative?"
+              checked={spouseAsRepresentative}
+              onChange={(e) => setSpouseAsRepresentative(e.target.checked)}
+            />
+          )}
         </>
       )}
     </div>
@@ -1634,6 +1756,8 @@ export default function BuyerDetailsStep() {
   // Optional parts (spouse, co-buyers, representative, PEP) start hidden and
   // appear only once the buyer chooses Married / Yes / Add Co-buyer.
   const [civilStatus, setCivilStatus] = useState<string>();
+  // A buyer under 18 needs a guardian (shown just before the co-buyers).
+  const [dob, setDob] = useState<string>();
   const [ownership, setOwnership] = useState<string>();
   const [mailingSource, setMailingSource] = useState("primary");
   const [mailingAddress, setMailingAddress] = useState("home");
@@ -1773,6 +1897,8 @@ export default function BuyerDetailsStep() {
               ]}
               civilStatus={civilStatus}
               onCivilStatusChange={setCivilStatus}
+              dob={dob}
+              onDobChange={setDob}
               nationalityHint
             />
           </div>
@@ -1944,6 +2070,13 @@ export default function BuyerDetailsStep() {
           {civilStatus === "Married" && (
             <>
               <SpouseInformation />
+              <Divider />
+            </>
+          )}
+
+          {isMinor(dob) && (
+            <>
+              <GuardianInformation />
               <Divider />
             </>
           )}

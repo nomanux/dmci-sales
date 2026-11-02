@@ -198,7 +198,7 @@ const RAForm = () => {
         </div>
 
         {/* Reservation Agreement Section */}
-        <div className="bg-reservation-bg flex flex-col items-start overflow-hidden pb-1.5 pt-0 px-1.5 relative rounded-2xl">
+        <div className="bg-reservation-bg flex flex-col items-start pb-1.5 pt-0 px-1.5 relative rounded-2xl">
           {/* Header */}
           <div className="flex gap-3 items-center justify-center py-1.5 rounded-none shrink-0 w-full">
             <h3 className="text-base font-semibold text-reservation-heading">

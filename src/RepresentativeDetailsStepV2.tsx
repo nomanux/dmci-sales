@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ChangeEvent,
   type InputHTMLAttributes,
   type ReactNode,
 } from "react";
@@ -426,18 +427,28 @@ function PhoneField(props: TextFieldProps) {
 function yearsAgo(years: number) {
   const d = new Date();
   d.setFullYear(d.getFullYear() - years);
-  return d.toISOString().slice(0, 10);
+  // Local date, not toISOString (UTC), so the cutoff doesn't slip a day in Manila.
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/** Date of birth, picked from the shared DatePicker. Buyers must be 18 to 110, so other days are greyed out. */
+/** True when an ISO date of birth is set and that person is under 18 today. */
+const isMinor = (dob: string) => !!dob && dob > yearsAgo(18);
+
+/**
+ * Date of birth, picked from the shared DatePicker. Days outside 18 to 110
+ * years ago are greyed out; the primary buyer passes allowMinor, since a
+ * buyer under 18 can still reserve with a guardian.
+ */
 function BirthDateField({
   value,
   defaultValue = "",
   onValueChange,
+  allowMinor = false,
 }: {
   value?: string;
   defaultValue?: string;
   onValueChange?: (iso: string) => void;
+  allowMinor?: boolean;
 }) {
   const [own, setOwn] = useState(defaultValue);
   const v = value ?? own;
@@ -450,7 +461,7 @@ function BirthDateField({
         aria-label="Date of birth"
         placeholder="MM/DD/YYYY"
         min={yearsAgo(110)}
-        max={yearsAgo(18)}
+        max={allowMinor ? yearsAgo(0) : yearsAgo(18)}
         value={v}
         onChange={(iso) => {
           setOwn(iso);
@@ -849,6 +860,15 @@ function DocIcon() {
   );
 }
 
+const formatSize = (bytes: number) =>
+  bytes > 1048576 ? (bytes / 1048576).toFixed(1) + " MB" : Math.round(bytes / 1024) + " KB";
+
+/**
+ * Drop zone for an ID or document. Once a file is picked it turns into a
+ * full-width preview card (image, or a file row for PDFs) with the file
+ * name and size, Replace and Remove — same look as the Identity
+ * Verification step.
+ */
 function UploadDrop({
   title,
   help,
@@ -860,48 +880,90 @@ function UploadDrop({
   icon: ReactNode;
   onUploaded?: () => void;
 }) {
-  const [file, setFile] = useState("");
+  const [file, setFile] = useState<{ name: string; size: number; url: string } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const finish = (name: string) => {
-    setFile(name);
+  const cameraRef = useRef<HTMLInputElement>(null);
+
+  // Free the preview URL when the file changes or the field unmounts.
+  useEffect(() => () => {
+    if (file?.url) URL.revokeObjectURL(file.url);
+  }, [file]);
+
+  const pick = (f: File | undefined) => {
+    if (!f) return;
+    setFile({ name: f.name, size: f.size, url: f.type.startsWith("image/") ? URL.createObjectURL(f) : "" });
     onUploaded?.();
   };
+  const onInput = (e: ChangeEvent<HTMLInputElement>) => {
+    pick(e.target.files?.[0]);
+    // Let the same file be picked again after Remove.
+    e.target.value = "";
+  };
+
   return (
-    <div
-      className={`flex flex-wrap items-center gap-3.5 rounded-xl border p-3.5 ${
-        file ? "border-success-200 bg-success-50" : "border-dashed border-brand-200 bg-[#f7f9fe]"
-      }`}
-    >
-      <span
-        className={`grid size-11 flex-shrink-0 place-items-center rounded-full ${
-          file ? "bg-success-100 text-success-600" : "bg-brand-100 text-brand-400"
-        }`}
-      >
-        {icon}
-      </span>
-      <div className="min-w-[180px] flex-1">
-        <b className="block font-semibold text-gray-900">{file ? `Uploaded: ${file}` : title}</b>
-        <span className="text-xs leading-4 text-gray-500">{help}</span>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <Button size="sm" onClick={() => inputRef.current?.click()}>
-          Browse files
-        </Button>
-        <Button size="sm" variant="secondary-color" onClick={() => finish("photo from camera")}>
-          Take a photo
-        </Button>
-      </div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/jpeg,image/png,application/pdf"
-        hidden
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) finish(f.name);
-        }}
-      />
-    </div>
+    <>
+      {file ? (
+        <div className="flex w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white">
+          {file.url ? (
+            <img src={file.url} alt={`Uploaded ${file.name}`} className="block h-auto w-full bg-gray-50" />
+          ) : (
+            <div className="flex items-center gap-3 bg-gray-50 p-4 text-gray-700">
+              <span className="grid size-11 flex-shrink-0 place-items-center rounded-full bg-brand-100 text-brand-400">
+                <DocIcon />
+              </span>
+              <b className="min-w-0 truncate font-semibold">{file.name}</b>
+            </div>
+          )}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 px-4 py-3">
+            <span className="min-w-0 flex-1 truncate text-sm text-gray-600">
+              {file.name} · {formatSize(file.size)}
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+              >
+                <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4" />
+                </svg>
+                Replace
+              </button>
+              <button
+                type="button"
+                aria-label="Remove file"
+                onClick={() => setFile(null)}
+                className="inline-flex size-8 cursor-pointer items-center justify-center rounded-lg border border-gray-300 bg-white text-error-600 transition-colors hover:bg-error-50"
+              >
+                <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3.5 rounded-xl border border-dashed border-brand-200 bg-[#f7f9fe] p-3.5">
+          <span className="grid size-11 flex-shrink-0 place-items-center rounded-full bg-brand-100 text-brand-400">
+            {icon}
+          </span>
+          <div className="min-w-[180px] flex-1">
+            <b className="block font-semibold text-gray-900">{title}</b>
+            <span className="text-xs leading-4 text-gray-500">{help}</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" onClick={() => inputRef.current?.click()}>
+              Browse files
+            </Button>
+            <Button size="sm" variant="secondary-color" onClick={() => cameraRef.current?.click()}>
+              Take a photo
+            </Button>
+          </div>
+        </div>
+      )}
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,application/pdf" hidden onChange={onInput} />
+      <input ref={cameraRef} type="file" accept="image/*" capture="environment" hidden onChange={onInput} />
+    </>
   );
 }
 
@@ -1715,9 +1777,59 @@ function PepPanel({ number, onRemove }: { number: number; onRemove?: () => void 
   );
 }
 
+/** Shown as its own section when the primary buyer is under 18. */
+function GuardianFields() {
+  const [name, setName] = useState<Name>({ fn: "", mn: "", ln: "" });
+  const [civilStatus, setCivilStatus] = useState("");
+  const [spouseAsRep, setSpouseAsRep] = useState(false);
+  return (
+    <>
+      <Note>The buyer is under 18, so a parent or legal guardian must sign with them.</Note>
+      <SubHead>Personal details</SubHead>
+      <NameRow value={name} onChange={(n) => setName((p) => ({ ...p, ...n }))} />
+      <div className={G3}>
+        <SelectField label="Title" options={TITLES} />
+        <SelectField label="Suffix" options={SUFFIXES} optional defaultValue="None" />
+        <BirthDateField />
+      </div>
+      <div className={G3}>
+        <TextField label="Email" format="email" type="email" inputMode="email" placeholder="name@gmail.com" />
+        <PhoneField label="Mobile number" format="mobile" placeholder="917 123 4567" />
+        <ComboField label="Nationality" items={CITIZENSHIPS} defaultValue="Filipino" />
+      </div>
+      <div className={G3}>
+        <SelectField label="Civil status" options={CIVIL_STATUSES} value={civilStatus} onValueChange={setCivilStatus} />
+      </div>
+      <Field label="Guardian ID (front side)">
+        <UploadDrop
+          title="Upload or scan their ID"
+          help="JPG, PNG, WebP or HEIC, up to 10 MB. The ID must match the declared citizenship."
+          icon={<IdCardIcon />}
+        />
+      </Field>
+      {civilStatus === "Married" && (
+        <CheckRow boxed checked={spouseAsRep} onChange={setSpouseAsRep}>
+          Do you want to add your spouse as a representative?
+        </CheckRow>
+      )}
+    </>
+  );
+}
+
 /* ================= sections ================= */
 
-type SectionId = "company" | "personal" | "contact" | "present" | "home" | "work" | "mailing" | "purchase" | "cob" | "rep";
+type SectionId =
+  | "company"
+  | "personal"
+  | "contact"
+  | "present"
+  | "home"
+  | "work"
+  | "mailing"
+  | "purchase"
+  | "guardian"
+  | "cob"
+  | "rep";
 
 // `nav` is the short name for the side list; `title` heads the section itself.
 const SECTIONS: { id: SectionId; title: string; nav: string; optional?: boolean }[] = [
@@ -1729,6 +1841,7 @@ const SECTIONS: { id: SectionId; title: string; nav: string; optional?: boolean 
   { id: "work", title: "Occupation information", nav: "Work and income" },
   { id: "mailing", title: "Preferred mailing address", nav: "Mailing address" },
   { id: "purchase", title: "Reason for buying and source of awareness", nav: "Why you are buying" },
+  { id: "guardian", title: "Guardian information", nav: "Guardian" },
   { id: "cob", title: "Co-buyer information", nav: "Co-buyer (optional)", optional: true },
   { id: "rep", title: "Representative information and PEP", nav: "Representative and PEP" },
 ];
@@ -1830,6 +1943,8 @@ export default function RepresentativeDetailsStepV2() {
   const [company, setCompany] = useState("");
   const [name, setName] = useState<Name>({ fn: "Maria", mn: "Santos", ln: "Dela Cruz" });
   const [email, setEmail] = useState("");
+  // A buyer under 18 needs a guardian (its own section, before co-buyers).
+  const [dob, setDob] = useState("1988-03-14");
   const [present, setPresent] = useState<Addr>(EMPTY_ADDR);
   const [sameAddr, setSameAddr] = useState(true);
   const [homeCity, setHomeCity] = useState("");
@@ -1849,7 +1964,9 @@ export default function RepresentativeDetailsStepV2() {
   const nextId = useRef(2);
 
   const isCompany = clientType === "Company representative";
-  const visible = SECTIONS.filter((s) => s.id !== "company" || isCompany);
+  const visible = SECTIONS.filter(
+    (s) => (s.id !== "company" || isCompany) && (s.id !== "guardian" || isMinor(dob)),
+  );
 
   // Recount each section's missing answers whenever a field's data-req flips
   // or fields mount/unmount (see the note at the top of the file).
@@ -1934,6 +2051,7 @@ export default function RepresentativeDetailsStepV2() {
     work: occupation,
     mailing: `${mailMethod} · ${mailAddress}`,
     purchase: `${plural(countOf(reasons), "reason", "reasons")} · ${plural(countOf(sources), "source", "sources")}`,
+    guardian: "Guardian added",
     cob: coBuyers.length ? coBuyers.map((c) => c.name || "Co-buyer").join(", ") : "No co-buyer",
     rep:
       (isPep === "No" ? "Not a PEP" : plural(pepIds.length, "PEP entry", "PEP entries")) +
@@ -1978,7 +2096,7 @@ export default function RepresentativeDetailsStepV2() {
         <div className={G3}>
           <SelectField label="Title" options={TITLES} />
           <SelectField label="Suffix" options={SUFFIXES} optional defaultValue="None" />
-          <BirthDateField defaultValue="1988-03-14" />
+          <BirthDateField value={dob} onValueChange={setDob} allowMinor />
         </div>
         <div className={G3}>
           <ChipField label="Gender" options={["Female", "Male"]} defaultValue="Female" />
@@ -2109,6 +2227,7 @@ export default function RepresentativeDetailsStepV2() {
         </>
       );
     },
+    guardian: () => <GuardianFields />,
     cob: () => (
       <>
         <p className="m-0 text-gray-600">
