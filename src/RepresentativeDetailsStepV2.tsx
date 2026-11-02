@@ -227,8 +227,9 @@ function applyMask(format: Format | undefined, v: string): string {
   }
 }
 
-// True once the section's Continue was pressed with answers missing: from then
-// on every field in it shows its error, not only the ones the buyer touched.
+// When true, every field shows its error, not only the ones the buyer touched.
+// Nothing provides it now that sections have no Continue button; fields show
+// errors once touched.
 const ShowErrors = createContext(false);
 
 function useFieldError(error: string, value: string) {
@@ -1854,9 +1855,7 @@ function Section({
   open,
   missing,
   summary,
-  showErrors,
   onToggle,
-  onContinue,
   children,
 }: {
   id: SectionId;
@@ -1866,9 +1865,7 @@ function Section({
   open: boolean;
   missing?: number;
   summary: string;
-  showErrors: boolean;
   onToggle: () => void;
-  onContinue: () => void;
   children: ReactNode;
 }) {
   const done = missing === 0;
@@ -1913,14 +1910,7 @@ function Section({
       </button>
       {/* Closed sections stay mounted (only hidden) so their answers are kept. */}
       <div data-section-body={id} className={open ? "px-4 pb-4 md:pl-[60px] md:pr-5" : "hidden"}>
-        <ShowErrors.Provider value={showErrors}>
-          <div className={STACK}>{children}</div>
-        </ShowErrors.Provider>
-        <div className="mt-4 flex justify-end border-t border-gray-100 pt-3">
-          <Button size="sm" onClick={onContinue}>
-            Continue
-          </Button>
-        </div>
+        <div className={STACK}>{children}</div>
       </div>
     </section>
   );
@@ -1935,7 +1925,6 @@ export default function RepresentativeDetailsStepV2() {
   const [openIds, setOpenIds] = useState<Set<SectionId>>(() => new Set(["personal"]));
   // The one section the side list highlights: the last one opened or moved to.
   const [activeId, setActiveId] = useState<SectionId>("personal");
-  const [errorIds, setErrorIds] = useState<Set<SectionId>>(() => new Set());
   const [missing, setMissing] = useState<Partial<Record<SectionId, number>>>({});
   const [toastMsg, setToastMsg] = useState<{ text: string; key: number } | null>(null);
 
@@ -2019,26 +2008,6 @@ export default function RepresentativeDetailsStepV2() {
       else next.add(id);
       return next;
     });
-  };
-  const continueFrom = (id: SectionId) => {
-    const bad = rootRef.current?.querySelectorAll<HTMLElement>(`[data-section-body="${id}"] [data-req="missing"]`);
-    if (bad?.length) {
-      setErrorIds((s) => new Set(s).add(id));
-      bad[0].querySelector<HTMLElement>("input:not(:disabled), button")?.focus();
-      toast(`${bad.length} ${bad.length === 1 ? "answer needs" : "answers need"} attention`);
-      return;
-    }
-    const next = visible[visible.findIndex((s) => s.id === id) + 1];
-    setOpenIds((s) => {
-      const n = new Set(s);
-      n.delete(id);
-      if (next) n.add(next.id);
-      return n;
-    });
-    if (next) {
-      setActiveId(next.id);
-      scrollTo(next.id);
-    } else toast("All sections complete");
   };
 
   const mailSourceOptions = ["Primary buyer", ...coBuyers.map((_, i) => `Co-buyer #${i + 1}`)];
@@ -2331,7 +2300,7 @@ export default function RepresentativeDetailsStepV2() {
             Check your details and complete the rest.
           </StepHeader>
 
-          <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-2.5 md:grid-cols-2">
             {[
               ["Private individual", "I am a private individual or a representative of a private partnership."],
               ["Company representative", "I represent a company or corporation."],
@@ -2343,20 +2312,20 @@ export default function RepresentativeDetailsStepV2() {
                   type="button"
                   aria-pressed={on}
                   onClick={() => setClientType(value)}
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3.5 text-left transition-colors ${
+                  className={`flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2 text-left transition-colors ${
                     on ? "border-brand-500 bg-brand-25" : "border-gray-300 bg-white hover:border-brand-200 hover:bg-brand-25"
                   }`}
                 >
                   <span
-                    className={`mt-0.5 grid size-[18px] flex-shrink-0 place-items-center rounded-full border-[1.5px] ${
+                    className={`mt-0.5 grid size-4 flex-shrink-0 place-items-center rounded-full border-[1.5px] ${
                       on ? "border-brand-600 bg-brand-600" : "border-gray-300 bg-white"
                     }`}
                   >
                     {on && <span className="size-1.5 rounded-full bg-white" />}
                   </span>
-                  <span>
-                    <strong className="block text-[15px] font-semibold text-gray-900">{value}</strong>
-                    <small className="text-xs leading-[18px] text-gray-600">{hint}</small>
+                  <span className="min-w-0">
+                    <strong className="block text-sm font-semibold leading-5 text-gray-900">{value}</strong>
+                    <small className="block text-xs leading-4 text-gray-600">{hint}</small>
                   </span>
                 </button>
               );
@@ -2387,9 +2356,7 @@ export default function RepresentativeDetailsStepV2() {
             open={openIds.has(s.id)}
             missing={missing[s.id]}
             summary={summaries[s.id]}
-            showErrors={errorIds.has(s.id)}
             onToggle={() => toggleSection(s.id)}
-            onContinue={() => continueFrom(s.id)}
           >
             {bodies[s.id]()}
           </Section>
