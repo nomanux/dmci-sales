@@ -392,7 +392,7 @@ export default function LotteryRegistrationList() {
 
         <LiveBatchBanner />
 
-        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
+        <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-3">
           <div className="card flex w-full flex-1 flex-col overflow-hidden">
             <div className="flex items-center gap-2 border-b border-gray-200 px-4 py-3">
               <input

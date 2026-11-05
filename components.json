@@ -20,7 +20,7 @@
     "@liniqo": {
       "url": "https://liniqo.com/r/{name}.json",
       "headers": {
-        "Authorization": "Bearer ${LINIQO_LICENSE_KEY}"
+        "Authorization": "Bearer ${LINIQO-9D7A5BA4-38C8-4AAD-83C8-9C6CF93D6C65}"
       }
     }
   }
