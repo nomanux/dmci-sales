@@ -30,9 +30,8 @@ export default function NoResults() {
           data-liniqo="desk-lamp"
           data-key="lq1.Ivh8pZgDVHQzF9Ba6ibATej_z341TXkrG7YwraOGrz8hyRIqF6aJvE58MEu2zumrAcHzuuxdhLZm-GLFQpjCtLIkJJbgFmHTFKmZ0l_57yy4cj6Oo6kwgw"
           data-accent="#07389d"
-          data-line="#07389d"
           aria-hidden="true"
-          className="aspect-square w-full max-w-[280px] md:max-w-[400px] [&_svg_.hi]:!stroke-brand-500"
+          className="aspect-[5/4] w-full max-w-[280px] md:max-w-[400px] [&_svg_.hi]:!stroke-brand-500 [&_svg_path:not(.hi):not(.sil)]:!stroke-brand-200 [&_svg_path.sil]:!stroke-[#7f9be0]"
         />
         <h1 className="m-0 mt-4 text-xl font-semibold text-gray-900 sm:text-2xl">No results found</h1>
         <p className="m-0 mt-2 max-w-md text-sm text-gray-600 sm:text-base">
