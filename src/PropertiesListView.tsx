@@ -475,8 +475,8 @@ function GridView({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 py-1.5">
-                    <NoPhotoFigure className="min-h-0 w-full flex-1" />
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-1">
+                    <NoPhotoFigure className="h-16 w-auto shrink-0" />
                     <span className="text-xs font-medium text-gray-500">
                       No photo available
                     </span>
