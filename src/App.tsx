@@ -29,6 +29,7 @@ import ReservationPayment from "./ReservationPayment";
 import RAForm from "./RAForm";
 import CaptureSelfieTrack from "./CaptureSelfieTrack";
 import RAFormV2 from "./RAFormV2";
+import NoResults from "./NoResults";
 
 function Screens() {
   const { route } = useNavigation();
@@ -94,6 +95,8 @@ function Screens() {
       return <CaptureSelfieTrack />;
     case "ra-form-v2":
       return <RAFormV2 />;
+    case "no-results":
+      return <NoResults />;
     default:
       return <Login />;
   }

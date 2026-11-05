@@ -39,7 +39,8 @@ export type Screen =
   | "payment-method"
   | "ra-form"
   | "capture-selfie-track"
-  | "ra-form-v2";
+  | "ra-form-v2"
+  | "no-results";
 
 export interface Route {
   screen: Screen;
@@ -97,6 +98,7 @@ const SCREEN_PATHS: Record<Screen, string> = {
   "ra-form": "/ra-form-legacy",
   "capture-selfie-track": "/ra-form1",
   "ra-form-v2": "/ra-form2",
+  "no-results": "/no-results",
 };
 
 const PATH_TO_SCREEN: Record<string, Screen> = {
