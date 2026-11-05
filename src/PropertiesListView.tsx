@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "./Layout";
+import NoPhotoFigure from "./NoPhotoFigure";
 import type { FilterField } from "./FilterBar";
 import Pagination from "./Pagination";
 import Checkbox from "./Checkbox";
@@ -15,7 +16,6 @@ import {
 import FilterTrigger from "./FilterTrigger";
 import { useNavigation, type Screen } from "./NavigationContext";
 import {
-  noImageAvailableUrl,
   projectPhotoUrls,
 } from "./assets/figmaAssets";
 
@@ -134,6 +134,12 @@ interface GridCard {
 }
 
 const GRID_CARDS: GridCard[] = [
+  // Sample with no photo, to preview the interactive placeholder.
+  {
+    name: "Sample Project (No Photo)",
+    available: [24, 12, 3],
+    sold: [310, 188, 42],
+  },
   {
     name: "Accolade Place",
     available: [0, 9, 0],
@@ -469,11 +475,12 @@ function GridView({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <img
-                    src={noImageAvailableUrl}
-                    alt="No image available"
-                    className="max-h-full max-w-full object-contain p-4"
-                  />
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 py-1.5">
+                    <NoPhotoFigure className="min-h-0 w-full flex-1" />
+                    <span className="text-xs font-medium text-gray-500">
+                      No photo available
+                    </span>
+                  </div>
                 )}
               </div>
             </div>

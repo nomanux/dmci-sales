@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import InteractiveApartment from "./InteractiveApartment";
 import { createPortal } from "react-dom";
 import Layout, { PageBackHeading } from "./Layout";
 import { BuildingIcon, ChevronLeftIcon, ChevronRightIcon } from "./icons";
@@ -161,6 +162,22 @@ const RECENTLY_VIEWED: PropertyCardData[] = [
     sold: [523, 523, 523],
   },
 ];
+
+/** Stands in for the gallery when a project has no photo: an apartment block that reacts to the pointer. */
+function NoProjectPhoto() {
+  return (
+    <div className="order-first flex min-w-0 flex-col lg:order-none">
+      <div className="relative flex aspect-video w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-white p-4 lg:aspect-auto lg:min-h-[200px] lg:flex-1">
+        {/* Faded so it reads as a stand-in, not as a picture of the project. */}
+        <InteractiveApartment
+          label="Placeholder illustration of an apartment block"
+          className="min-h-0 flex-1 opacity-50 hover:opacity-100"
+        />
+        <span className="shrink-0 text-lg font-medium text-gray-500">No photo available</span>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Project photo gallery: one large photo with ‹ › arrows and a "1 / 8"
@@ -526,7 +543,11 @@ export default function ProjectDetails() {
               </div>
             </div>
 
-            <ProjectGallery key={project} project={project} />
+            {projectPhotoUrls[project] ? (
+              <ProjectGallery key={project} project={project} />
+            ) : (
+              <NoProjectPhoto />
+            )}
           </div>
 
           {/* One card per building; the grid wraps, so 1 or 10+ both fit. */}

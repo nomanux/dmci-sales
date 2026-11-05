@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import Button from "./Button";
 import Layout from "./Layout";
+import { useLiniqoEmbed } from "./LiniqoFigure";
 import { useNavigation } from "./NavigationContext";
 
 /**
@@ -10,18 +10,9 @@ import { useNavigation } from "./NavigationContext";
  * sealed embed token, not the licence key, so it is safe to ship.
  */
 
-const EMBED_SRC = "https://liniqo.com/live/embed.js";
-
 export default function NoResults() {
   const { navigate, back, canGoBack } = useNavigation();
-
-  useEffect(() => {
-    if (document.querySelector(`script[src="${EMBED_SRC}"]`)) return;
-    const script = document.createElement("script");
-    script.src = EMBED_SRC;
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
+  useLiniqoEmbed();
 
   return (
     <Layout breadcrumb={["No results"]}>
