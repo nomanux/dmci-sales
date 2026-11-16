@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
 const CELL_ANIM_MS = 420;
 
@@ -106,6 +106,7 @@ import { CURRENT_USER, getInitials, useProfilePhoto } from "./currentUser";
 import EntitySelectionModal, {
   type SelectedEntity,
 } from "./EntitySelectionModal";
+import { LayoutGroup, motion, useReducedMotion } from "motion/react";
 import {
   LayoutDashboardIcon,
   Building2Icon,
@@ -113,6 +114,9 @@ import {
   FileTextIcon,
   UsersIcon,
   TicketIcon,
+  type AnimatedIconProps,
+} from "./AnimatedNavIcons";
+import {
   ChevronDownIcon,
   ChevronUpIcon,
   ChevronLeftIcon,
@@ -123,7 +127,6 @@ import {
   LogOutIcon,
   MenuIcon,
   XIcon,
-  type IconProps,
 } from "./icons";
 
 /**
@@ -148,7 +151,7 @@ export type NavKey =
 interface NavLeaf {
   key: NavKey;
   label: string;
-  icon: (props: IconProps) => React.JSX.Element;
+  icon: (props: AnimatedIconProps) => React.JSX.Element;
   onClick?: () => void;
 }
 
@@ -160,7 +163,7 @@ interface NavSubItem {
 interface NavBranch {
   key: NavKey;
   label: string;
-  icon: (props: IconProps) => React.JSX.Element;
+  icon: (props: AnimatedIconProps) => React.JSX.Element;
   items: NavSubItem[];
 }
 
@@ -174,52 +177,98 @@ function isBranch(item: NavLeaf | NavBranch): item is NavBranch {
 // Hierarchy: top level medium/gray-700 > sub-items regular/gray-600; the
 // selected main menu and sub-item are semibold in the primary color. Icons
 // sit a shade lighter than their labels (gray-500, still 4.8:1 on white).
-const NAV_ACTIVE =
-  "relative bg-brand-25 font-semibold text-primary-500 before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-full before:bg-primary-500";
-const NAV_IDLE = "font-medium text-gray-700 hover:bg-brand-25/60 hover:text-gray-900";
+// The tints are drawn by NavPill, so they glide from row to row.
+const NAV_ACTIVE = "relative font-semibold text-primary-500";
+const NAV_IDLE = "relative font-medium text-gray-700 hover:text-gray-900";
 // Parent of the active sub-item (expanded): primary text, no tint (the
 // sub-item carries the background highlight).
-const NAV_PARENT_ACTIVE = "font-semibold text-primary-500 hover:bg-brand-25/60";
+const NAV_PARENT_ACTIVE = "relative font-semibold text-primary-500";
 const ICON_ACTIVE = "text-primary-500";
 const ICON_IDLE = "text-gray-500 group-hover:text-gray-700";
+// Flyout (icon rail) sub-items keep plain CSS tints; the inline list uses pills.
 const SUB_ACTIVE = "bg-brand-25 font-semibold text-primary-500";
 const SUB_IDLE = "font-normal text-gray-600 hover:bg-brand-25/60 hover:text-gray-900";
+const SUB_ROW_ACTIVE = "font-semibold text-primary-500";
+const SUB_ROW_IDLE = "font-normal text-gray-600 hover:text-gray-900";
 // Keyboard (Tab) focus only, not on mouse click. Drawn inside the button
 // (negative offset) so the sidebar's scroll area doesn't clip it.
 const NAV_FOCUS = "focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-brand-400 ";
 
+const PILL_ACTIVE =
+  "bg-brand-25 before:absolute before:inset-y-2.5 before:left-0 before:w-[3px] before:rounded-r-full before:bg-primary-500";
+const PILL_SUB_ACTIVE = "bg-brand-25";
+const PILL_HOVER = "bg-brand-25/60";
+const PILL_SPRING = { type: "spring", stiffness: 520, damping: 42, mass: 0.8 } as const;
+
+/**
+ * Which sidebar row the pointer (or keyboard focus) is on. One hover pill
+ * follows it from row to row, and that row's icon plays its animation.
+ */
+const NavHoverContext = createContext<{
+  hover: string | null;
+  setHover: (key: string | null) => void;
+}>({ hover: null, setHover: () => {} });
+
+/**
+ * NavPill — a row's tint. Pills that share an id glide to the next row
+ * instead of blinking off and on (motion's layoutId).
+ */
+function NavPill({ id, className }: { id: string; className: string }) {
+  const reduced = useReducedMotion();
+  return (
+    <motion.span
+      aria-hidden="true"
+      layoutId={id}
+      transition={reduced ? { duration: 0 } : PILL_SPRING}
+      className={"pointer-events-none absolute inset-0 rounded-xl " + className}
+    />
+  );
+}
+
 function NavItem({
+  navKey,
   icon: Icon,
   label,
   active,
   onClick,
   collapsed,
 }: {
-  icon: (props: IconProps) => React.JSX.Element;
+  navKey: string;
+  icon: (props: AnimatedIconProps) => React.JSX.Element;
   label: string;
   active?: boolean;
   onClick?: (e?: React.MouseEvent) => void;
   collapsed?: boolean;
 }) {
+  const { hover, setHover } = useContext(NavHoverContext);
+  const hovered = hover === navKey;
   return (
     <button
       type="button"
       onClick={(e) => onClick?.(e)}
+      onPointerEnter={() => setHover(navKey)}
+      onFocus={() => setHover(navKey)}
       title={collapsed ? label : undefined}
       className={
         NAV_FOCUS +
-          "group flex h-10 w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors " +
+          "group flex h-10 w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left text-sm transition-colors " +
         (collapsed ? "lg:justify-center lg:px-0 " : "") +
         (active ? NAV_ACTIVE : NAV_IDLE)
       }
     >
-      <Icon className={"h-4 w-4 shrink-0 transition-colors " + (active ? ICON_ACTIVE : ICON_IDLE)} />
-      <span className={collapsed ? "lg:hidden" : ""}>{label}</span>
+      {active && <NavPill id="nav-active" className={PILL_ACTIVE} />}
+      {hovered && !active && <NavPill id="nav-hover" className={PILL_HOVER} />}
+      <Icon
+        play={hovered}
+        className={"relative h-4 w-4 shrink-0 transition-colors " + (active ? ICON_ACTIVE : ICON_IDLE)}
+      />
+      <span className={"relative " + (collapsed ? "lg:hidden" : "")}>{label}</span>
     </button>
   );
 }
 
 function NavDropdown({
+  navKey,
   icon: Icon,
   label,
   items,
@@ -228,7 +277,8 @@ function NavDropdown({
   defaultOpen,
   collapsed,
 }: {
-  icon: (props: IconProps) => React.JSX.Element;
+  navKey: string;
+  icon: (props: AnimatedIconProps) => React.JSX.Element;
   label: string;
   items: NavSubItem[];
   active?: boolean;
@@ -238,6 +288,10 @@ function NavDropdown({
 }) {
   const [open, setOpen] = useState(!!defaultOpen || !!active);
   const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const { hover, setHover } = useContext(NavHoverContext);
+  const hovered = hover === navKey;
+  // On the icon rail the parent carries the full active style.
+  const railActive = !!active && !!collapsed;
 
   return (
     <div
@@ -248,21 +302,28 @@ function NavDropdown({
       <button
         type="button"
         onClick={() => !collapsed && setOpen((v) => !v)}
+        onPointerEnter={() => setHover(navKey)}
+        onFocus={() => setHover(navKey)}
         title={collapsed ? label : undefined}
         className={
           NAV_FOCUS +
-          "group flex h-10 w-full cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors " +
+          "group flex h-10 w-full cursor-pointer items-center gap-2.5 rounded-xl px-2 py-1.5 text-left text-sm transition-colors " +
           (collapsed ? "lg:justify-center lg:px-0 " : "") +
           // Expanded, the active sub-item carries the highlight, so the parent
           // only darkens; on the icon rail it gets the full active style.
           (active ? (collapsed ? NAV_ACTIVE : NAV_PARENT_ACTIVE) : NAV_IDLE)
         }
       >
-        <Icon className={"h-4 w-4 shrink-0 transition-colors " + (active ? ICON_ACTIVE : ICON_IDLE)} />
-        <span className={"flex-1 " + (collapsed ? "lg:hidden" : "")}>
+        {railActive && <NavPill id="nav-active" className={PILL_ACTIVE} />}
+        {hovered && !railActive && <NavPill id="nav-hover" className={PILL_HOVER} />}
+        <Icon
+          play={hovered}
+          className={"relative h-4 w-4 shrink-0 transition-colors " + (active ? ICON_ACTIVE : ICON_IDLE)}
+        />
+        <span className={"relative flex-1 " + (collapsed ? "lg:hidden" : "")}>
           {label}
         </span>
-        <span className={"text-gray-400 " + (collapsed ? "lg:hidden" : "")}>
+        <span className={"relative text-gray-400 " + (collapsed ? "lg:hidden" : "")}>
           {open ? (
             <ChevronUpIcon className="h-4 w-4 shrink-0" />
           ) : (
@@ -281,25 +342,33 @@ function NavDropdown({
             (collapsed ? "lg:hidden" : "")
           }
         >
-          {items.map((item) => (
-            <button
-              key={item.label}
-              type="button"
-              onClick={(e) => item.onClick?.(e)}
-              disabled={!item.onClick}
-              className={
-                NAV_FOCUS +
-          "relative w-full rounded-md px-2 py-1.5 text-left text-[13px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent " +
-                (item.onClick ? "cursor-pointer " : "") +
-                (item.label === activeSubItem
-                  ? SUB_ACTIVE +
-                    " before:absolute before:inset-y-1 before:-left-[9px] before:w-[2px] before:rounded-full before:bg-brand-500"
-                  : SUB_IDLE)
-              }
-            >
-              {item.label}
-            </button>
-          ))}
+          {items.map((item) => {
+            const subKey = `${navKey}:${item.label}`;
+            const subActive = item.label === activeSubItem;
+            return (
+              <button
+                key={item.label}
+                type="button"
+                onClick={(e) => item.onClick?.(e)}
+                onPointerEnter={() => item.onClick && setHover(subKey)}
+                onFocus={() => setHover(subKey)}
+                disabled={!item.onClick}
+                className={
+                  NAV_FOCUS +
+            "relative w-full rounded-xl px-2 py-1.5 text-left text-[13px] transition-colors disabled:cursor-not-allowed disabled:opacity-50 " +
+                  (item.onClick ? "cursor-pointer " : "") +
+                  (subActive
+                    ? SUB_ROW_ACTIVE +
+                      " before:absolute before:inset-y-1 before:-left-[9px] before:w-[2px] before:rounded-full before:bg-brand-500"
+                    : SUB_ROW_IDLE)
+                }
+              >
+                {subActive && <NavPill id="nav-sub-active" className={PILL_SUB_ACTIVE} />}
+                {hover === subKey && !subActive && <NavPill id="nav-hover" className={PILL_HOVER} />}
+                <span className="relative">{item.label}</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -510,6 +579,7 @@ export default function Layout({
   const { navigate, route: currentRoute } = useNavigation();
   const mainRef = useRef<HTMLElement>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [navHover, setNavHover] = useState<string | null>(null);
   // Desktop-only: collapses the static sidebar to an icon-only rail. Mobile
   // keeps its own off-canvas drawer (sidebarOpen) untouched.
   const [collapsed, setCollapsedState] = useState(initialCollapsed);
@@ -743,7 +813,13 @@ export default function Layout({
               </button>
             </div>
 
+            <NavHoverContext.Provider value={{ hover: navHover, setHover: setNavHover }}>
+            <LayoutGroup id="sidebar-nav">
             <nav
+              onPointerLeave={() => setNavHover(null)}
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setNavHover(null);
+              }}
               className={
                 "flex flex-1 flex-col items-start gap-1 px-4 " +
                 (collapsed ? "lg:px-2" : "")
@@ -753,6 +829,7 @@ export default function Layout({
                 isBranch(item) ? (
                   <NavDropdown
                     key={item.key}
+                    navKey={item.key}
                     icon={item.icon}
                     label={item.label}
                     items={item.items}
@@ -765,6 +842,7 @@ export default function Layout({
                 ) : (
                   <NavItem
                     key={item.key}
+                    navKey={item.key}
                     icon={item.icon}
                     label={item.label}
                     active={active === item.key}
@@ -774,6 +852,8 @@ export default function Layout({
                 ),
               )}
             </nav>
+            </LayoutGroup>
+            </NavHoverContext.Provider>
           </div>
 
           <div

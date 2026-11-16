@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lease Contracts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#06318a; --brand-500:#07389d; --brand-25:#f0f5ff; --brand-50:#d4e1fc;
+    --t1:#111827; --t2:#374151; --t3:#4b5563; --t4:#6b7280;
+    --b1:#d1d5db; --b2:#e5e7eb; --bg:#f9fafb; --white:#fff;
+    --ok:#067647; --ok-bg:#ecfdf3; --ok-bd:#abefc6; --ok-solid:#17b26a;
+    --blue:#175cd3; --blue-bg:#eff8ff; --blue-bd:#b2ddff;
+    --warn:#b54708; --warn-bg:#fffaeb; --warn-bd:#fedf89;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--t1)}
+  .page{max-width:1240px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:16px}
+  .review{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;background:#fff;border:1px dashed var(--b1);border-radius:10px;font-size:13px;color:var(--t3)}
+  .review b{color:var(--t1)}
+  .review button{font:500 13px Inter,sans-serif;padding:6px 12px;border-radius:999px;border:1px solid var(--b1);background:#fff;color:var(--t2);cursor:pointer;min-height:32px}
+  .review button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+  .top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+  h1{margin:0;font-size:24px;line-height:32px;font-weight:600}
+  .sub{margin:2px 0 0;font-size:14px;color:var(--t3)}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .search{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border:1px solid var(--b1);border-radius:8px;background:#fff;color:var(--t4);font-size:14px;width:200px}
+  .search input{border:0;outline:0;font:400 14px Inter,sans-serif;width:100%;color:var(--t1)}
+  .btn{min-height:40px;padding:8px 16px;border-radius:8px;font:600 14px Inter,sans-serif;cursor:pointer;border:1px solid;display:inline-flex;align-items:center;gap:8px}
+  .btn-p{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn-s{background:#fff;border-color:var(--b1);color:var(--t2)}
+  .card{background:#fff;border:1px solid var(--b2);border-radius:12px;box-shadow:0 1px 2px rgba(10,13,18,.05);overflow:hidden}
+  .tabs{display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--b2);overflow-x:auto}
+  .tab{padding:14px 12px;font-size:14px;font-weight:500;color:var(--t3);border-bottom:2px solid transparent;white-space:nowrap;display:flex;gap:6px;align-items:center}
+  .tab.on{color:var(--brand-500);font-weight:600;border-color:var(--brand-500)}
+  .count{font-size:12px;padding:0 7px;border-radius:999px;border:1px solid var(--b2);background:var(--bg);color:var(--t2)}
+  .tab.on .count{background:var(--brand-25);border-color:var(--brand-50);color:var(--brand-500)}
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:900px}
+  th{text-align:left;font-size:12px;font-weight:500;color:var(--t3);background:var(--bg);padding:12px 16px;border-bottom:1px solid var(--b2)}
+  td{padding:14px 16px;border-bottom:1px solid var(--b2);color:var(--t3)}
+  tr:last-child td{border-bottom:0}
+  td:first-child{color:var(--t1);font-weight:500}
+  tbody tr{cursor:pointer} tbody tr:hover{background:var(--bg)} tbody tr.sel{background:var(--brand-25)}
+  .pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid;white-space:nowrap}
+  .p-brand{background:var(--brand-25);border-color:var(--brand-50);color:var(--brand-500)}
+  .p-ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+  .p-blue{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+  .p-gray{background:var(--bg);border-color:var(--b2);color:var(--t2)}
+  .link{background:none;border:0;padding:6px 0;font:600 14px Inter,sans-serif;color:var(--brand-500);cursor:pointer}
+  .pager{display:flex;justify-content:center;align-items:center;gap:8px;padding:14px;border-top:1px solid var(--b2);font-size:14px;color:var(--t2)}
+
+  .dh{padding:18px 24px;border-bottom:1px solid var(--b2);display:flex;flex-direction:column;gap:4px}
+  .dh-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .dh h2{margin:0;font-size:18px;font-weight:600}
+  .meta{font-size:13px;color:var(--t3)}
+  .db{padding:20px 24px;display:flex;flex-wrap:wrap;gap:28px}
+  .fields{flex:1 1 360px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 24px;margin:0;align-content:start}
+  .fields dt{font-size:13px;color:var(--t3);margin-bottom:4px}
+  .fields dd{margin:0;font-size:15px;font-weight:600;color:var(--t1)}
+  .stage{flex:1 1 420px;max-width:480px;display:flex;flex-direction:column;gap:14px}
+  .cap{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--t3)}
+  .steps{list-style:none;margin:0;padding:0;display:flex}
+  .step{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;font-size:13px;color:var(--t3);text-align:center}
+  .step::before{content:"";position:absolute;top:13px;left:-50%;width:100%;height:2px;background:var(--b1);z-index:0}
+  .step:first-child::before{display:none}
+  .step.done::before,.step.now::before{background:var(--ok-solid)}
+  .step.now::before{background:var(--brand-500)}
+  .dot{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;border:2px solid var(--b1);background:#fff;display:flex;align-items:center;justify-content:center}
+  .step.done .dot{background:var(--ok-solid);border-color:var(--ok-solid)}
+  .step.now .dot{background:var(--brand-500);border-color:var(--brand-500);box-shadow:0 0 0 4px var(--brand-25)}
+  .step.now .dot::after{content:"";width:10px;height:10px;border-radius:50%;background:#fff}
+  .step.now{color:var(--brand-500);font-weight:600}
+  .step.done{color:var(--t1)}
+  .note{display:flex;gap:10px;padding:12px 14px;border-radius:8px;font-size:13px;line-height:19px}
+  .note svg{flex:none;margin-top:1px}
+  .note b{display:block;font-size:14px;margin-bottom:2px}
+  .n-info{background:var(--brand-25);color:var(--brand)}
+  .n-ok{background:var(--ok-bg);color:var(--ok)}
+  .n-warn{background:var(--warn-bg);color:var(--warn)}
+  .df{padding:14px 24px;border-top:1px solid var(--b2);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+  .df .hint{flex:1 1 260px;font-size:13px;color:var(--t3)}
+  dialog{border:0;border-radius:16px;padding:0;max-width:420px;width:calc(100% - 32px);box-shadow:0 24px 48px -12px rgba(10,13,18,.18)}
+  dialog::backdrop{background:rgba(3,7,18,.5)}
+  .dlg{padding:24px;display:flex;flex-direction:column;gap:8px}
+  .dlg h3{margin:0;font-size:18px} .dlg p{margin:0;font-size:14px;color:var(--t3);line-height:20px}
+  .dlg-f{display:flex;gap:10px;justify-content:flex-end;padding:0 24px 24px}
+  button:focus-visible,input:focus-visible{outline:3px solid rgba(7,56,157,.24);outline-offset:1px}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="review" role="group" aria-label="Preview contract status">
+    <b>Preview status:</b>
+    <button type="button" data-preview="0">Draft</button>
+    <button type="button" data-preview="1">Released</button>
+    <button type="button" data-preview="2">Signed</button>
+    <span>Or click a table row.</span>
+  </div>
+
+  <div class="top">
+    <div><h1>Lease Contracts</h1><p class="sub">26 items are available</p></div>
+    <div class="actions">
+      <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="search" placeholder="Search" aria-label="Search contracts"></label>
+      <button type="button" class="btn btn-s"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4"/></svg>Filter</button>
+      <button type="button" class="btn btn-s"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <span class="tab on" role="tab" aria-selected="true">All <span class="count">26</span></span>
+      <span class="tab" role="tab">RTO <span class="count">9</span></span>
+      <span class="tab" role="tab">Leasing: DMCI owned <span class="count">10</span></span>
+      <span class="tab" role="tab">Leasing: non-DMCI owned <span class="count">7</span></span>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th scope="col">Contract</th><th scope="col">Application</th><th scope="col">Client</th><th scope="col">Type</th><th scope="col">Unit</th><th scope="col">Advance rental</th><th scope="col">Status</th><th scope="col">Billing</th><th scope="col">Action</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="pager">Total 26 items</div>
+  </div>
+
+  <section class="card" aria-labelledby="dTitle">
+    <div class="dh">
+      <div class="dh-top"><h2 id="dTitle"></h2><span id="dBadge" class="pill"></span></div>
+      <span class="meta" id="dMeta"></span>
+    </div>
+    <div class="db">
+      <dl class="fields">
+        <div><dt>Client</dt><dd id="fClient"></dd></div>
+        <div><dt>Unit</dt><dd id="fUnit"></dd></div>
+        <div><dt>Advance rental</dt><dd id="fRent"></dd></div>
+        <div><dt>Billing</dt><dd>Generated in D365</dd></div>
+        <div><dt>Lease term</dt><dd id="fTerm"></dd></div>
+        <div><dt>Last update</dt><dd id="fUpdate"></dd></div>
+      </dl>
+      <div class="stage">
+        <span class="cap">Contract stage</span>
+        <ol class="steps" id="steps" aria-label="Contract stage"></ol>
+        <div class="note" id="stageNote"></div>
+      </div>
+    </div>
+    <div class="df">
+      <span class="hint" id="hint"></span>
+      <button type="button" class="btn btn-s" id="btnView">View contract</button>
+      <button type="button" class="btn btn-p" id="btnRelease">Release contract</button>
+      <button type="button" class="btn btn-p" id="btnDocs">Open Docs-in</button>
+    </div>
+  </section>
+</div>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="dlg">
+    <h3 id="dlgTitle">Release this contract?</h3>
+    <p>The client sees the contract in their portal and can sign it. You can't edit the draft after release.</p>
+  </div>
+  <div class="dlg-f">
+    <button type="button" class="btn btn-s" id="dlgCancel">Cancel</button>
+    <button type="button" class="btn btn-p" id="dlgOk">Release contract</button>
+  </div>
+</dialog>
+
+<script>
+  const STEPS = ["Draft", "Released", "Signed", "Docs-in", "Turnover"];
+  const data = [
+    { lc: "LC-0001", app: "TIS-0007", client: "Eva Lim", type: "RTO", unit: "Unit 0612", rent: "PHP 25,000", status: 0, term: "[TERM]", update: "Draft created · Nov 1, 2026" },
+    { lc: "LC-0002", app: "TIS-0008", client: "Gil Yap", type: "DMCI owned", unit: "Unit 0901", rent: "PHP 28,000", status: 1, term: "[TERM]", update: "Released · Nov 3, 2026" },
+    { lc: "LC-0003", app: "TIS-0005", client: "Ben Tan", type: "non-DMCI", unit: "Unit 1101", rent: "PHP 26,000", status: 2, term: "[TERM]", update: "Signed by client · Nov 5, 2026" }
+  ];
+  const STATUS = [
+    { label: "Draft", pill: "p-gray",
+      note: ["n-info", "Ready for release", "The client already sees the SOA. Release the contract so the client can sign it in the portal."],
+      hint: "Check the draft in D365 before you release it.", release: true, docs: false },
+    { label: "Released", pill: "p-blue",
+      note: ["n-warn", "Waiting for the client's signature", "The client gets an email and in-app notice to sign. This updates to Signed once they do."],
+      hint: "No action needed until the client signs.", release: false, docs: false },
+    { label: "Signed", pill: "p-ok",
+      note: ["n-ok", "Next: Docs-in", "Collect the original copies. The unit status becomes Leased when the contract is created."],
+      hint: "Open Docs-in to track the original copies.", release: false, docs: true }
+  ];
+  const $ = id => document.getElementById(id);
+  let current = 0;
+  const icon = { "n-info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>', "n-warn": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', "n-ok": '<circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/>' };
+
+  function renderRows() {
+    $("rows").innerHTML = data.map((d, i) => {
+      const s = STATUS[d.status];
+      return `<tr class="${i === current ? "sel" : ""}" data-i="${i}"><td>${d.lc}</td><td>${d.app}</td><td>${d.client}</td><td><span class="pill p-brand">${d.type}</span></td><td>${d.unit}</td><td>${d.rent}</td><td><span class="pill ${s.pill}">${s.label}</span></td><td><span class="pill p-ok">Generated</span></td><td><button type="button" class="link" data-i="${i}">Open</button></td></tr>`;
+    }).join("");
+  }
+  function renderDetail() {
+    const d = data[current], s = STATUS[d.status];
+    $("dTitle").textContent = `${d.lc} · Lease contract`;
+    $("dBadge").textContent = s.label; $("dBadge").className = "pill " + s.pill;
+    $("dMeta").textContent = `${d.app} · ${d.client} · ${d.type}`;
+    $("fClient").textContent = d.client; $("fUnit").textContent = d.unit;
+    $("fRent").textContent = d.rent + " (reservation paid)"; $("fTerm").textContent = d.term; $("fUpdate").textContent = d.update;
+    $("steps").innerHTML = STEPS.map((st, i) => {
+      const cls = i < d.status ? "done" : i === d.status ? "now" : "";
+      const check = i < d.status ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>' : "";
+      return `<li class="step ${cls}" ${i === d.status ? 'aria-current="step"' : ""}><span class="dot">${check}</span>${st}</li>`;
+    }).join("");
+    const [nc, nt, nb] = s.note;
+    $("stageNote").className = "note " + nc;
+    $("stageNote").innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">${icon[nc]}</svg><div><b>${nt}</b>${nb}</div>`;
+    $("hint").textContent = s.hint;
+    $("btnRelease").hidden = !s.release; $("btnDocs").hidden = !s.docs;
+    document.querySelectorAll("[data-preview]").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.preview === d.status && current === +b.dataset.preview)));
+  }
+  function open(i) { current = i; renderRows(); renderDetail(); }
+
+  $("rows").addEventListener("click", e => { const t = e.target.closest("[data-i]"); if (t) open(+t.dataset.i); });
+  document.querySelectorAll("[data-preview]").forEach(b => b.addEventListener("click", () => { const i = +b.dataset.preview; data[i].status = i; open(i); }));
+  $("btnRelease").addEventListener("click", () => $("dlg").showModal());
+  $("dlgCancel").addEventListener("click", () => $("dlg").close());
+  $("dlgOk").addEventListener("click", () => { const d = data[current]; d.status = 1; d.update = "Released · Nov 16, 2026"; $("dlg").close(); open(current); });
+
+  open(0);
+</script>
+</body>
+</html>

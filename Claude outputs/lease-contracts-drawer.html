@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lease Contracts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#06318a; --brand-500:#07389d; --brand-700:#052b78; --brand-25:#f0f5ff; --brand-50:#d4e1fc;
+    --t1:#111827; --t2:#374151; --t3:#4b5563; --t4:#6b7280;
+    --b1:#d1d5db; --b2:#e5e7eb; --b3:#f3f4f6; --bg:#f9fafb;
+    --ok:#067647; --ok-bg:#ecfdf3; --ok-bd:#abefc6; --ok-solid:#17b26a;
+    --blue:#175cd3; --blue-bg:#eff8ff; --blue-bd:#b2ddff;
+    --warn:#b54708; --warn-bg:#fffaeb; --warn-bd:#fedf89;
+    --indigo:#3538cd; --indigo-bg:#eef4ff; --indigo-bd:#c7d7fe;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--t1)}
+  button{font-family:inherit}
+  button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid rgba(7,56,157,.28);outline-offset:1px}
+
+  .shell{display:flex;min-height:100%}
+  .side{flex:none;width:240px;background:#fff;border-right:1px solid var(--b2);display:flex;flex-direction:column;padding:20px 16px;gap:4px}
+  .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;color:var(--brand-500);margin:0 0 20px 4px;text-decoration:none}
+  .grp{font-size:12px;font-weight:600;color:var(--t4);margin:14px 8px 6px;text-transform:uppercase;letter-spacing:.03em}
+  .nav{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;font-size:14px;font-weight:500;color:var(--t2);text-decoration:none}
+  .nav svg{color:var(--t4)}
+  .nav:hover{background:var(--bg)}
+  .nav[aria-current="page"]{background:var(--bg);color:var(--brand-500);font-weight:600}
+  .nav[aria-current="page"] svg{color:var(--brand-500)}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:64px;border-bottom:1px solid var(--b2);display:flex;align-items:center;padding:0 24px}
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--t3)}
+  .crumbs span[aria-current]{background:#fff;border-radius:6px;padding:4px 8px;color:var(--brand-500);font-weight:600}
+  .content{padding:24px;display:flex;flex-direction:column;gap:20px}
+  @media (max-width:900px){.side{display:none}}
+
+  .ph{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+  h1{margin:0;font-size:24px;line-height:32px;font-weight:600}
+  .sub{margin:2px 0 0;font-size:14px;color:var(--t3)}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .search{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 12px;border:1px solid var(--b1);border-radius:8px;background:#fff;color:var(--t4);width:240px}
+  .search input{border:0;outline:0;font:400 14px Inter,sans-serif;width:100%;color:var(--t1);background:transparent}
+  .btn{min-height:40px;padding:8px 16px;border-radius:8px;font:600 14px Inter,sans-serif;cursor:pointer;border:1px solid;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 1px 2px rgba(10,13,18,.05)}
+  .btn-p{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn-p:hover{background:var(--brand-700)}
+  .btn-s{background:#fff;border-color:var(--b1);color:var(--t2)}
+  .btn-s:hover{background:var(--bg)}
+
+  .card{background:#fff;border:1px solid var(--b2);border-radius:12px;box-shadow:0 1px 3px rgba(10,13,18,.06);overflow:hidden}
+  .tabs{display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--b2);overflow-x:auto}
+  .tab{padding:14px 12px 12px;font:500 14px Inter,sans-serif;color:var(--t3);border:0;border-bottom:2px solid transparent;background:none;white-space:nowrap;display:flex;gap:8px;align-items:center;cursor:pointer}
+  .tab[aria-selected="true"]{color:var(--brand-500);font-weight:600;border-color:var(--brand-500)}
+  .count{font-size:12px;padding:0 8px;border-radius:999px;border:1px solid var(--b2);background:var(--bg);color:var(--t2);line-height:20px}
+  .tab[aria-selected="true"] .count{background:var(--brand-25);border-color:var(--brand-50);color:var(--brand-500)}
+  .filters{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--b2);flex-wrap:wrap}
+  .filters .lbl{font-size:14px;font-weight:500;color:var(--t3)}
+  .seg{display:inline-flex;gap:2px;padding:3px;background:var(--b3);border-radius:8px}
+  .seg button{border:0;background:none;padding:6px 12px;border-radius:6px;font:600 14px Inter,sans-serif;color:var(--t3);cursor:pointer;display:flex;gap:6px;align-items:center;min-height:32px}
+  .seg button span{font-size:12px;font-weight:500;color:var(--t4)}
+  .seg button[aria-pressed="true"]{background:#fff;color:var(--t1);box-shadow:0 1px 3px rgba(10,13,18,.1)}
+  .tablewrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:960px}
+  th{text-align:left;font-size:12px;font-weight:500;color:var(--t3);background:var(--bg);padding:12px 20px;border-bottom:1px solid var(--b2);white-space:nowrap}
+  td{padding:14px 20px;border-bottom:1px solid var(--b2);color:var(--t3);white-space:nowrap}
+  td.lead{color:var(--t1);font-weight:500}
+  td.num{font-variant-numeric:tabular-nums}
+  th.act,td.act{text-align:right}
+  tbody tr:hover{background:var(--bg)}
+  tbody tr.sel{background:var(--brand-25)}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid;white-space:nowrap;line-height:18px}
+  .pill .d{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .p-brand{background:var(--brand-25);border-color:var(--brand-50);color:var(--brand-500)}
+  .p-indigo{background:var(--indigo-bg);border-color:var(--indigo-bd);color:var(--indigo)}
+  .p-gray{background:var(--bg);border-color:var(--b2);color:var(--t2)}
+  .p-ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+  .p-blue{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+  .p-warn{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn)}
+  .link{background:none;border:0;padding:8px 4px;font:600 14px Inter,sans-serif;color:var(--brand-500);cursor:pointer;border-radius:6px}
+  .link:hover{color:var(--brand-700);text-decoration:underline}
+  .empty{padding:40px;text-align:center;color:var(--t4);font-size:14px}
+  .pager{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px;font-size:14px;color:var(--t3);border-top:1px solid var(--b2)}
+
+  /* Drawer */
+  .overlay{position:fixed;inset:0;background:rgba(3,7,18,.45);opacity:0;pointer-events:none;transition:opacity .2s}
+  .overlay.open{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(520px,100%);background:#fff;box-shadow:-24px 0 48px -12px rgba(10,13,18,.18);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;visibility:hidden}
+  .drawer.open{transform:none;visibility:visible}
+  @media (prefers-reduced-motion:reduce){.drawer,.overlay{transition:none}}
+  .dh{display:flex;align-items:flex-start;gap:12px;padding:20px 24px;border-bottom:1px solid var(--b2)}
+  .dh-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+  .dh h2{margin:0;font-size:18px;line-height:28px;font-weight:600}
+  .dh p{margin:0;font-size:14px;color:var(--t3)}
+  .x{flex:none;width:40px;height:40px;border-radius:8px;border:0;background:none;color:var(--t4);cursor:pointer;display:flex;align-items:center;justify-content:center;margin:-6px -8px 0 0}
+  .x:hover{background:var(--bg);color:var(--t2)}
+  .db{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:24px}
+  .sec-t{margin:0 0 12px;font-size:14px;font-weight:600;color:var(--t1)}
+  .summary{border:1px solid var(--b2);border-radius:10px;background:var(--bg);padding:14px 16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;margin:0}
+  .summary dt{font-size:12px;color:var(--t4);margin-bottom:2px}
+  .summary dd{margin:0;font-size:14px;font-weight:500;color:var(--t1)}
+
+  .vsteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+  .vs{display:flex;gap:14px}
+  .rail{display:flex;flex-direction:column;align-items:center;flex:none;width:24px}
+  .dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--b1);background:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+  .line{flex:1;width:2px;min-height:18px;background:var(--b2);margin:4px 0}
+  .vs.done .dot{background:var(--ok-solid);border-color:var(--ok-solid)}
+  .vs.done .line{background:var(--ok-solid)}
+  .vs.now .dot{background:var(--brand-500);border-color:var(--brand-500);box-shadow:0 0 0 4px var(--brand-25)}
+  .vs.now .dot::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+  .vs-txt{display:flex;flex-direction:column;gap:2px;padding:1px 0 16px}
+  .vs-txt b{font-size:14px;font-weight:500;color:var(--t1)}
+  .vs.now .vs-txt b{font-weight:600;color:var(--brand-500)}
+  .vs.todo .vs-txt b{color:var(--t4)}
+  .vs-txt span{font-size:13px;color:var(--t3)}
+
+  .note{display:flex;gap:12px;padding:14px 16px;border-radius:10px;font-size:13px;line-height:19px;border:1px solid}
+  .note svg{flex:none;margin-top:1px}
+  .note b{display:block;font-size:14px;margin-bottom:2px}
+  .n-info{background:var(--brand-25);border-color:var(--brand-50);color:var(--brand)}
+  .n-warn{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn)}
+  .n-ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+
+  .soa{width:100%;border-collapse:collapse;font-size:13px;min-width:0}
+  .soa th{padding:8px 12px;font-size:12px}
+  .soa td{padding:10px 12px}
+  .soa-wrap{border:1px solid var(--b2);border-radius:10px;overflow:hidden}
+  .file{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--b2);border-radius:10px}
+  .file-ic{width:40px;height:40px;border-radius:8px;background:#fef3f2;color:#d92d20;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none}
+  .file-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:14px}
+  .file-txt span{font-size:12px;color:var(--t4)}
+
+  .df{display:flex;gap:12px;padding:16px 24px;border-top:1px solid var(--b2);background:#fff}
+  .df .btn{flex:1}
+  [hidden]{display:none!important}
+
+  dialog{border:0;border-radius:16px;padding:0;max-width:420px;width:calc(100% - 32px);box-shadow:0 24px 48px -12px rgba(10,13,18,.25)}
+  dialog::backdrop{background:rgba(3,7,18,.5)}
+  .cf{padding:24px;display:flex;flex-direction:column;gap:12px}
+  .cf-ic{width:48px;height:48px;border-radius:50%;background:var(--brand-25);color:var(--brand-500);display:flex;align-items:center;justify-content:center;border:8px solid #f8faff}
+  .cf h3{margin:0;font-size:18px} .cf p{margin:0;font-size:14px;line-height:20px;color:var(--t3)}
+  .cf ul{margin:0;padding-left:18px;font-size:14px;line-height:22px;color:var(--t2)}
+  .cf-f{display:flex;gap:12px;padding:0 24px 24px}
+  .cf-f .btn{flex:1}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 16px;border-radius:10px;font-size:14px;box-shadow:0 12px 24px rgba(0,0,0,.2)}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side" aria-label="Main navigation">
+    <a class="logo" href="#"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="6" fill="#07389d"/><path d="M8 21V10l6-4 6 4v11M12 21v-5h4v5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>DMCI HOMES</a>
+    <span class="grp">General</span>
+    <a class="nav" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17v-5M12 17V7M16 17v-3"/></svg>Dashboard</a>
+    <a class="nav" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0114 0"/></svg>User Management</a>
+    <a class="nav" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Payment Histories</a>
+    <span class="grp">RTO / Leasing</span>
+    <a class="nav" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>RTO Applications</a>
+    <a class="nav" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>Reservation Operations</a>
+    <a class="nav" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M9 15l2 2 4-4"/></svg>Docs-in Review</a>
+    <a class="nav" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="17" cy="15" r="2"/></svg>Credit Review</a>
+    <a class="nav" href="#" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M8 13h8M8 17h5"/></svg>Lease Contracts</a>
+    <a class="nav" href="#"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/></svg>Turnover Schedule</a>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <nav class="crumbs" aria-label="Breadcrumb"><span>Dashboard</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg><span aria-current="page">Lease Contracts</span></nav>
+    </header>
+    <main class="content">
+      <div class="ph">
+        <div><h1>Lease Contracts</h1><p class="sub" id="countLine"></p></div>
+        <div class="actions">
+          <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" type="search" placeholder="Search contract, client or unit" aria-label="Search contract, client or unit"></label>
+          <button type="button" class="btn btn-s"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4"/></svg>Filter</button>
+          <button type="button" class="btn btn-s"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export</button>
+        </div>
+      </div>
+
+      <section class="card" aria-label="Lease contracts">
+        <div class="tabs" role="tablist" id="tabs"></div>
+        <div class="filters"><span class="lbl">Status</span><div class="seg" id="seg" role="group" aria-label="Filter by status"></div></div>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th scope="col">Contract</th><th scope="col">Application</th><th scope="col">Client</th><th scope="col">Type</th><th scope="col">Unit</th><th scope="col">Advance rental</th><th scope="col">Status</th><th scope="col">Billing</th><th scope="col" class="act">Action</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <div class="empty" id="empty" hidden>No contracts match your search.</div>
+        </div>
+        <div class="pager"><span id="total"></span></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle" aria-describedby="dSub">
+  <div class="dh">
+    <div class="dh-txt">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 id="dTitle"></h2><span id="dBadge" class="pill"></span></div>
+      <p id="dSub"></p>
+    </div>
+    <button type="button" class="x" id="close" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="db">
+    <div class="note" id="stateNote"></div>
+    <section aria-labelledby="hDetails">
+      <h3 class="sec-t" id="hDetails">Contract details</h3>
+      <dl class="summary">
+        <div><dt>Client</dt><dd id="sClient"></dd></div>
+        <div><dt>Type</dt><dd id="sType"></dd></div>
+        <div><dt>Unit</dt><dd id="sUnit"></dd></div>
+        <div><dt>Application</dt><dd id="sApp"></dd></div>
+        <div><dt>Advance rental</dt><dd id="sRent"></dd></div>
+        <div><dt>Billing</dt><dd>Generated in D365</dd></div>
+      </dl>
+    </section>
+    <section aria-labelledby="hDoc">
+      <h3 class="sec-t" id="hDoc">Contract document</h3>
+      <div class="file">
+        <span class="file-ic" aria-hidden="true">PDF</span>
+        <div class="file-txt"><strong id="fName"></strong><span id="fMeta"></span></div>
+        <button type="button" class="btn btn-s">View</button>
+      </div>
+    </section>
+    <section aria-labelledby="hStage">
+      <h3 class="sec-t" id="hStage">Contract stage</h3>
+      <ol class="vsteps" id="steps"></ol>
+    </section>
+    <section aria-labelledby="hSoa">
+      <h3 class="sec-t" id="hSoa">Statement of Account</h3>
+      <div class="soa-wrap">
+        <table class="soa"><thead><tr><th scope="col">Bill no.</th><th scope="col">Due date</th><th scope="col">Amount</th><th scope="col">Status</th></tr></thead><tbody id="soa"></tbody></table>
+      </div>
+    </section>
+  </div>
+  <div class="df">
+    <button type="button" class="btn btn-s" id="btnClose2">Close</button>
+    <button type="button" class="btn btn-p" id="btnRelease">Release contract</button>
+    <button type="button" class="btn btn-p" id="btnDocs">Open Docs-in</button>
+  </div>
+</aside>
+
+<dialog id="confirm" aria-labelledby="cfT">
+  <div class="cf">
+    <span class="cf-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span>
+    <h3 id="cfT">Release this contract?</h3>
+    <p id="cfP"></p>
+    <ul><li>The client sees the contract in their portal and can sign it.</li><li>The client gets an email and in-app notice.</li><li>You can't edit the draft after release.</li></ul>
+  </div>
+  <div class="cf-f"><button type="button" class="btn btn-s" id="cfNo">Cancel</button><button type="button" class="btn btn-p" id="cfYes">Release contract</button></div>
+</dialog>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+  const TYPES = { RTO: "p-brand", "DMCI owned": "p-indigo", "Non-DMCI": "p-gray" };
+  const TYPE_TAB = { RTO: "RTO", "DMCI owned": "Leasing: DMCI owned", "Non-DMCI": "Leasing: non-DMCI owned" };
+  const ST = [
+    { label: "Draft", pill: "p-gray", action: "Review",
+      note: ["n-info", "Ready for release", "Billing is generated and the client already sees the SOA. Check the draft, then release it so the client can sign."] },
+    { label: "Released", pill: "p-blue", action: "View",
+      note: ["n-warn", "Waiting for the client's signature", "The client has the contract in their portal. The status changes to Signed once they sign."] },
+    { label: "Signed", pill: "p-ok", action: "View",
+      note: ["n-ok", "Next: Docs-in", "The client signed the contract. Collect the original copies in Docs-in."] }
+  ];
+  const STEPS = [["Draft", "Created in D365 with billing"], ["Released", "Sent to the client portal"], ["Signed", "Signed by the client"], ["Docs-in", "Original copies collected"], ["Turnover", "Move-in date set by PCG"]];
+  const data = [
+    ["LC-0001","TIS-0007","Eva Lim","RTO","Unit 0612",25000,0,"Nov 1, 2026"],
+    ["LC-0002","TIS-0008","Gil Yap","DMCI owned","Unit 0901",28000,1,"Nov 3, 2026"],
+    ["LC-0003","TIS-0005","Ben Tan","Non-DMCI","Unit 1101",26000,2,"Nov 5, 2026"],
+    ["LC-0004","TIS-0011","Olivia Chen","RTO","Unit 0310",24000,0,"Nov 6, 2026"],
+    ["LC-0005","TIS-0012","Raj Patel","DMCI owned","Unit 1502",30000,1,"Nov 7, 2026"],
+    ["LC-0006","TIS-0015","Sophie Zhang","Non-DMCI","Unit 2107",27000,2,"Nov 8, 2026"],
+    ["LC-0007","TIS-0016","Mohammed Khan","Non-DMCI","Unit 0756",22000,0,"Nov 9, 2026"],
+    ["LC-0008","TIS-0019","Lucas White","Non-DMCI","Unit 0853",29000,1,"Nov 10, 2026"]
+  ].map(([lc, app, client, type, unit, rent, status, date]) => ({ lc, app, client, type, unit, rent, status, date }));
+  const peso = n => "PHP " + n.toLocaleString("en-US");
+  const $ = id => document.getElementById(id);
+  let tab = "All", statusF = "All", query = "", openIdx = -1, lastFocus = null;
+
+  function inTab(d) { return tab === "All" || TYPE_TAB[d.type] === tab; }
+  function renderTabs() {
+    const tabs = ["All", "RTO", "Leasing: DMCI owned", "Leasing: non-DMCI owned"];
+    $("tabs").innerHTML = tabs.map(t => `<button type="button" role="tab" class="tab" aria-selected="${t === tab}" data-tab="${t}">${t}<span class="count">${t === "All" ? data.length : data.filter(d => TYPE_TAB[d.type] === t).length}</span></button>`).join("");
+    const segs = ["All", "Draft", "Released", "Signed"];
+    $("seg").innerHTML = segs.map(s => { const n = data.filter(d => inTab(d) && (s === "All" || ST[d.status].label === s)).length; return `<button type="button" aria-pressed="${s === statusF}" data-seg="${s}">${s}<span>${n}</span></button>`; }).join("");
+  }
+  function visible() {
+    const q = query.toLowerCase();
+    return data.map((d, i) => ({ d, i })).filter(({ d }) => inTab(d) && (statusF === "All" || ST[d.status].label === statusF) && (!q || [d.lc, d.app, d.client, d.unit].some(v => v.toLowerCase().includes(q))));
+  }
+  function renderRows() {
+    const list = visible();
+    $("rows").innerHTML = list.map(({ d, i }) => { const s = ST[d.status]; return `<tr class="${i === openIdx ? "sel" : ""}"><td class="lead">${d.lc}</td><td>${d.app}</td><td>${d.client}</td><td><span class="pill ${TYPES[d.type]}">${d.type}</span></td><td>${d.unit}</td><td class="num">${peso(d.rent)}</td><td><span class="pill ${s.pill}"><span class="d"></span>${s.label}</span></td><td><span class="pill p-ok">Generated</span></td><td class="act"><button type="button" class="link" data-open="${i}" aria-label="${s.action} ${d.lc}">${s.action}</button></td></tr>`; }).join("");
+    $("empty").hidden = list.length > 0;
+    $("countLine").textContent = `${data.length} items are available`;
+    $("total").textContent = `Showing ${list.length} of ${data.length}`;
+  }
+  function fillDrawer() {
+    const d = data[openIdx], s = ST[d.status];
+    $("dTitle").textContent = d.lc;
+    $("dBadge").innerHTML = `<span class="d"></span>${s.label}`; $("dBadge").className = "pill " + s.pill;
+    $("dSub").textContent = `Lease contract · ${d.client} · ${d.unit}`;
+    const [nc, nt, nb] = s.note;
+    const ic = { "n-info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>', "n-warn": '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', "n-ok": '<circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/>' }[nc];
+    $("stateNote").className = "note " + nc;
+    $("stateNote").innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">${ic}</svg><div><b>${nt}</b>${nb}</div>`;
+    $("sClient").textContent = d.client; $("sType").innerHTML = `<span class="pill ${TYPES[d.type]}">${d.type}</span>`;
+    $("sUnit").textContent = d.unit; $("sApp").textContent = d.app; $("sRent").textContent = peso(d.rent) + " (reservation paid)";
+    $("fName").textContent = `${d.lc}-${s.label.toLowerCase()}.pdf`;
+    $("fMeta").textContent = d.status === 2 ? `Signed by ${d.client}` : d.status === 1 ? `Released on ${d.date}` : `Draft from D365 · ${d.date}`;
+    $("steps").innerHTML = STEPS.map(([t, sub], i) => {
+      const cls = i < d.status ? "done" : i === d.status ? "now" : "todo";
+      const check = i < d.status ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>' : "";
+      return `<li class="vs ${cls}" ${i === d.status ? 'aria-current="step"' : ""}><div class="rail"><span class="dot">${check}</span>${i < STEPS.length - 1 ? '<span class="line"></span>' : ""}</div><div class="vs-txt"><b>${t}</b><span>${sub}</span></div></li>`;
+    }).join("");
+    const months = ["Dec 1, 2026", "Jan 1, 2027", "Feb 1, 2027"];
+    $("soa").innerHTML = months.map((m, i) => `<tr><td>BL-${String(openIdx * 3 + i + 1).padStart(4, "0")}</td><td>${m}</td><td class="num">${peso(d.rent)}</td><td><span class="pill p-blue">Upcoming</span></td></tr>`).join("");
+    $("btnRelease").hidden = d.status !== 0; $("btnDocs").hidden = d.status !== 2;
+  }
+  function openDrawer(i, trigger) { openIdx = i; lastFocus = trigger; fillDrawer(); renderRows(); $("overlay").classList.add("open"); $("drawer").classList.add("open"); setTimeout(() => $("close").focus(), 50); }
+  function closeDrawer() { $("overlay").classList.remove("open"); $("drawer").classList.remove("open"); openIdx = -1; renderRows(); if (lastFocus && document.body.contains(lastFocus)) lastFocus.focus(); }
+  function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => t.hidden = true, 2600); }
+
+  $("tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (!b) return; tab = b.dataset.tab; renderTabs(); renderRows(); });
+  $("seg").addEventListener("click", e => { const b = e.target.closest("[data-seg]"); if (!b) return; statusF = b.dataset.seg; renderTabs(); renderRows(); });
+  $("q").addEventListener("input", e => { query = e.target.value; renderRows(); });
+  $("rows").addEventListener("click", e => { const b = e.target.closest("[data-open]"); if (b) openDrawer(+b.dataset.open, b); });
+  $("overlay").addEventListener("click", closeDrawer);
+  $("close").addEventListener("click", closeDrawer);
+  $("btnClose2").addEventListener("click", closeDrawer);
+  $("btnDocs").addEventListener("click", () => toast("Opening Docs-in for " + data[openIdx].app));
+  $("btnRelease").addEventListener("click", () => { const d = data[openIdx]; $("cfP").textContent = `${d.lc} for ${d.client}, ${d.unit}.`; $("confirm").showModal(); });
+  $("cfNo").addEventListener("click", () => $("confirm").close());
+  $("cfYes").addEventListener("click", () => { $("confirm").close(); const d = data[openIdx]; d.status = 1; d.date = "Nov 16, 2026"; fillDrawer(); renderTabs(); renderRows(); toast(`${d.lc} released to ${d.client}`); });
+  document.addEventListener("keydown", e => {
+    if (!$("drawer").classList.contains("open") || $("confirm").open) return;
+    if (e.key === "Escape") closeDrawer();
+    if (e.key === "Tab") { const f = [...$("drawer").querySelectorAll("button")].filter(el => el.offsetParent !== null); if (!f.length) return; if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); } }
+  });
+  renderTabs(); renderRows();
+</script>
+</body>
+</html>

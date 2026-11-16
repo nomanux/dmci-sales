@@ -560,17 +560,18 @@ export default function ProjectDetails() {
                 {buildings.length} {buildings.length === 1 ? "Building" : "Buildings"}
               </span>
             </div>
-            <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-3 p-0">
               {buildings.map((building, index) => (
                 <li
                   key={building.code}
-                  className="card flex flex-col gap-3 p-4"
+                  className="card flex flex-col gap-2.5 p-3"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
-                      <BuildingIcon className="h-5 w-5" />
+                  {/* Name and code on one line; the three figures share a row. */}
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-600">
+                      <BuildingIcon className="h-4 w-4" />
                     </span>
-                    <div className="flex min-w-0 flex-col">
+                    <div className="flex min-w-0 flex-1 flex-col">
                       <span className="text-xs font-semibold text-gray-900">
                         Building No {index + 1}
                       </span>
@@ -578,17 +579,23 @@ export default function ProjectDetails() {
                         {building.name}
                       </span>
                     </div>
+                    <span
+                      className="shrink-0 rounded-md bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700"
+                      title="Building Code"
+                    >
+                      <span className="sr-only">Building Code </span>
+                      {building.code}
+                    </span>
                   </div>
-                  <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 text-[13px]">
+                  <dl className="m-0 flex justify-between gap-3 rounded-lg bg-gray-50 px-2.5 py-1.5">
                     {[
                       ["RFO Date", building.rfoDate],
                       ["Total Floors", building.totalFloors],
                       ["No. Of Units", building.units],
-                      ["Building Code", building.code],
                     ].map(([label, value]) => (
-                      <div key={label} className="contents">
-                        <dt className="text-gray-500">{label}</dt>
-                        <dd className="m-0 truncate font-medium text-gray-900">
+                      <div key={label} className="flex flex-col whitespace-nowrap">
+                        <dt className="text-[11px] text-gray-500">{label}</dt>
+                        <dd className="m-0 text-[13px] font-medium text-gray-900">
                           {value}
                         </dd>
                       </div>

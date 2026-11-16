@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Credit Review: panel states</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#06318a; --brand-500:#07389d; --brand-25:#f0f5ff; --brand-50:#d4e1fc;
+    --t1:#111827; --t2:#374151; --t3:#4b5563; --t4:#6b7280;
+    --b1:#d1d5db; --b2:#e5e7eb; --bg:#f9fafb; --white:#fff;
+    --err:#d92d20; --err-bg:#fef3f2; --err-bd:#fecdca;
+    --ok:#067647; --ok-bg:#ecfdf3; --ok-bd:#abefc6;
+    --warn:#b54708; --warn-bg:#fffaeb; --warn-bd:#fedf89;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--t1)}
+  .page{max-width:1240px;margin:0 auto;padding:24px}
+  .review{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:20px;padding:12px 14px;background:#fff;border:1px dashed var(--b1);border-radius:10px;font-size:13px;color:var(--t3)}
+  .review b{color:var(--t1)}
+  .review button{font:500 13px Inter,sans-serif;padding:6px 12px;border-radius:999px;border:1px solid var(--b1);background:#fff;color:var(--t2);cursor:pointer;min-height:32px}
+  .review button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+  h1{margin:0;font-size:24px;line-height:32px;font-weight:600}
+  .sub{margin:2px 0 16px;font-size:14px;color:var(--t3)}
+  .card{background:#fff;border:1px solid var(--b2);border-radius:12px;box-shadow:0 1px 2px rgba(10,13,18,.05)}
+  .tabs{display:flex;gap:4px;padding:0 20px;border-bottom:1px solid var(--b2);overflow-x:auto}
+  .tab{padding:14px 12px;font-size:14px;font-weight:500;color:var(--t3);border-bottom:2px solid transparent;white-space:nowrap;display:flex;gap:6px;align-items:center}
+  .tab.on{color:var(--brand-500);font-weight:600;border-color:var(--brand-500)}
+  .count{font-size:12px;padding:0 7px;border-radius:999px;border:1px solid var(--b2);background:var(--bg);color:var(--t2)}
+  .tab.on .count{background:var(--brand-25);border-color:var(--brand-50);color:var(--brand-500)}
+  .layout{display:flex;flex-wrap:wrap;gap:16px;padding:16px}
+  .tablewrap{flex:999 1 520px;min-width:0;border:1px solid var(--b2);border-radius:10px;overflow:auto;align-self:flex-start}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+  th{text-align:left;font-size:12px;font-weight:500;color:var(--t3);background:var(--bg);padding:12px 16px;border-bottom:1px solid var(--b2)}
+  td{padding:14px 16px;border-bottom:1px solid var(--b2);color:var(--t3)}
+  tr:last-child td{border-bottom:0}
+  td:first-child{color:var(--t1);font-weight:500}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:var(--bg)}
+  tbody tr.sel{background:var(--brand-25)}
+  .pill{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:500;border:1px solid}
+  .p-brand{background:var(--brand-25);border-color:var(--brand-50);color:var(--brand-500)}
+  .p-ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+  .p-err{background:var(--err-bg);border-color:var(--err-bd);color:var(--err)}
+  .p-warn{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn)}
+  .p-gray{background:var(--bg);border-color:var(--b2);color:var(--t2)}
+  .link{background:none;border:0;padding:6px 0;font:600 14px Inter,sans-serif;color:var(--brand-500);cursor:pointer}
+
+  .panel{flex:1 1 360px;min-width:0;max-width:440px;border:1px solid var(--b2);border-radius:10px;display:flex;flex-direction:column}
+  .ph{padding:18px 20px;border-bottom:1px solid var(--b2);display:flex;flex-direction:column;gap:4px}
+  .ph-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .ph h2{margin:0;font-size:18px;font-weight:600}
+  .meta{font-size:13px;color:var(--t3)}
+  .activity{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t4);margin-top:4px}
+  .pb{padding:18px 20px;display:flex;flex-direction:column;gap:16px}
+  .lbl{font-size:14px;font-weight:500;color:var(--t2);margin:0 0 8px}
+  .radios{display:flex;gap:24px}
+  .radio{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--t2);cursor:pointer;min-height:32px}
+  .radio input{width:18px;height:18px;accent-color:var(--brand);margin:0}
+  textarea{width:100%;min-height:96px;border:1px solid var(--b1);border-radius:8px;padding:10px 12px;font:400 14px Inter,sans-serif;color:var(--t1);resize:vertical}
+  textarea:focus,.radio input:focus-visible,button:focus-visible{outline:3px solid rgba(7,56,157,.24);outline-offset:1px}
+  .note{display:flex;gap:10px;padding:12px 14px;border-radius:8px;font-size:13px;line-height:19px}
+  .note svg{flex:none;margin-top:1px}
+  .note b{display:block;font-size:14px;margin-bottom:2px}
+  .n-err{background:var(--err-bg);color:#b42318}
+  .n-ok{background:var(--ok-bg);color:var(--ok)}
+  .n-info{background:var(--brand-25);color:var(--brand)}
+  .pf{margin-top:auto;padding:14px 20px;border-top:1px solid var(--b2);background:var(--bg);display:flex;justify-content:flex-end;gap:10px;border-radius:0 0 10px 10px}
+  .btn{min-height:40px;padding:8px 16px;border-radius:8px;font:600 14px Inter,sans-serif;cursor:pointer;border:1px solid}
+  .btn-p{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn-p:disabled{background:#f3f4f6;border-color:var(--b2);color:var(--t4);cursor:not-allowed}
+  .btn-s{background:#fff;border-color:var(--b1);color:var(--t2)}
+  .ro{display:grid;grid-template-columns:110px 1fr;gap:10px 12px;font-size:14px;margin:0}
+  .ro dt{color:var(--t3)} .ro dd{margin:0;color:var(--t1);font-weight:500}
+  .empty{font-size:14px;color:var(--t4)}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="review" role="group" aria-label="Preview panel state">
+    <b>Preview state:</b>
+    <button type="button" data-preview="pending">1. Pending</button>
+    <button type="button" data-preview="failed">2. Failed selected</button>
+    <button type="button" data-preview="passed">3. Passed selected</button>
+    <button type="button" data-preview="saved">4. Saved (Failed)</button>
+    <span>Or click a table row.</span>
+  </div>
+
+  <h1>Credit Review</h1>
+  <p class="sub">18 items are available</p>
+
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <span class="tab on" role="tab" aria-selected="true">All <span class="count">18</span></span>
+      <span class="tab" role="tab">RTO <span class="count">6</span></span>
+      <span class="tab" role="tab">Leasing: DMCI owned <span class="count">7</span></span>
+      <span class="tab" role="tab">Leasing: non-DMCI owned <span class="count">5</span></span>
+    </div>
+
+    <div class="layout">
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th scope="col">Application</th><th scope="col">Client</th><th scope="col">Type</th><th scope="col">Requested</th><th scope="col">CI result</th><th scope="col">Action</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <aside class="panel" aria-labelledby="pTitle">
+        <div class="ph">
+          <div class="ph-top"><h2 id="pTitle">Record CI result</h2><span id="pBadge" class="pill"></span></div>
+          <span class="meta" id="pMeta"></span>
+          <span class="activity">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+            <span id="pActivity"></span>
+          </span>
+        </div>
+
+        <!-- Editable: states 1 to 3 -->
+        <div class="pb" id="editView">
+          <p class="meta" style="margin:0">The credit investigation happens outside myDMCIHomes. Record the result here.</p>
+          <fieldset style="border:0;padding:0;margin:0">
+            <legend class="lbl">CI result</legend>
+            <div class="radios">
+              <label class="radio"><input type="radio" name="ci" value="passed"> Passed</label>
+              <label class="radio"><input type="radio" name="ci" value="failed"> Failed</label>
+            </div>
+          </fieldset>
+          <div>
+            <label class="lbl" for="remarks" style="display:block">Remarks</label>
+            <textarea id="remarks" placeholder="Add remarks for Credit and the seller"></textarea>
+          </div>
+
+          <div class="note n-err" id="noteFailed" hidden>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <div><b>Saving Failed will:</b>Deactivate the application and send the unit to maintenance. You can then start the refund with an endorsement form.</div>
+          </div>
+          <div class="note n-ok" id="notePassed" hidden>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+            <div><b>Next after Passed:</b>The client pays the 2-month security deposit. After approval, F&amp;O creates the Draft Lease Contract.</div>
+          </div>
+        </div>
+
+        <!-- Read-only: state 4 -->
+        <div class="pb" id="savedView" hidden>
+          <dl class="ro">
+            <dt>Result</dt><dd id="sResult"></dd>
+            <dt>Remarks</dt><dd id="sRemarks"></dd>
+            <dt>Saved by</dt><dd>Olivia Rhye · <span id="sDate"></span></dd>
+          </dl>
+          <div class="note n-err" id="savedFailed">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <div><b>Application deactivated</b>The unit is back in maintenance. Refund: endorsement form, then Agent, then Finance.</div>
+          </div>
+          <div class="note n-ok" id="savedPassed">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+            <div><b>Waiting for security deposit</b>The client sees the deposit step in the portal.</div>
+          </div>
+        </div>
+
+        <div class="pf">
+          <button type="button" class="btn btn-s" id="btnCancel">Cancel</button>
+          <button type="button" class="btn btn-p" id="btnSave" disabled>Save result</button>
+          <button type="button" class="btn btn-s" id="btnEndorse" hidden>Send endorsement form</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<script>
+  const data = [
+    { id: "TIS-0003", client: "Peter Cruz", type: ["RTO", "p-brand"], req: "Oct 20, 2026", result: "pending" },
+    { id: "TIS-0006", client: "Dan Ong", type: ["DMCI owned", "p-brand"], req: "Oct 18, 2026", result: "failed", remarks: "[Remarks from Credit]", saved: "Oct 22, 2026" },
+    { id: "TIS-0007", client: "Eva Lim", type: ["non-DMCI", "p-brand"], req: "Oct 15, 2026", result: "passed", remarks: "No issues found.", saved: "Oct 19, 2026" },
+    { id: "TIS-0008", client: "Gil Yap", type: ["RTO", "p-brand"], req: "Oct 14, 2026", result: "passed", remarks: "No issues found.", saved: "Oct 17, 2026" }
+  ];
+  const badge = r => r === "failed" ? ["Failed", "p-err"] : r === "passed" ? ["Passed", "p-ok"] : ["Pending", "p-warn"];
+  const $ = id => document.getElementById(id);
+  let current = 1, choice = null;
+
+  function renderRows() {
+    $("rows").innerHTML = data.map((d, i) => {
+      const [bl, bc] = badge(d.result);
+      return `<tr class="${i === current ? "sel" : ""}" data-i="${i}"><td>${d.id}</td><td>${d.client}</td><td><span class="pill ${d.type[1]}">${d.type[0]}</span></td><td>${d.req}</td><td><span class="pill ${bc}">${bl}</span></td><td><button type="button" class="link" data-i="${i}">Open</button></td></tr>`;
+    }).join("");
+  }
+
+  function renderPanel() {
+    const d = data[current];
+    const saved = d.result !== "pending";
+    const [bl, bc] = badge(saved ? d.result : "pending");
+    $("pBadge").textContent = bl; $("pBadge").className = "pill " + bc;
+    $("pMeta").textContent = `${d.id} · ${d.client} · ${d.type[0]}`;
+    $("pActivity").textContent = `CI request sent to Credit · ${d.req}`;
+    $("editView").hidden = saved; $("savedView").hidden = !saved;
+    $("btnSave").hidden = saved; $("btnCancel").hidden = saved;
+    $("btnEndorse").hidden = !(saved && d.result === "failed");
+    if (saved) {
+      $("sResult").textContent = bl; $("sRemarks").textContent = d.remarks || "None";
+      $("sDate").textContent = d.saved;
+      $("savedFailed").hidden = d.result !== "failed"; $("savedPassed").hidden = d.result !== "passed";
+    } else {
+      document.querySelectorAll('input[name="ci"]').forEach(r => r.checked = r.value === choice);
+      $("noteFailed").hidden = choice !== "failed"; $("notePassed").hidden = choice !== "passed";
+      $("btnSave").disabled = !choice;
+    }
+    document.querySelectorAll("[data-preview]").forEach(b => b.setAttribute("aria-pressed", "false"));
+  }
+
+  function open(i) { current = i; choice = null; renderRows(); renderPanel(); }
+
+  $("rows").addEventListener("click", e => { const tr = e.target.closest("[data-i]"); if (tr) open(+tr.dataset.i); });
+  document.querySelectorAll('input[name="ci"]').forEach(r => r.addEventListener("change", () => { choice = r.value; renderPanel(); }));
+  $("btnCancel").addEventListener("click", () => { choice = null; $("remarks").value = ""; renderPanel(); });
+  $("btnSave").addEventListener("click", () => {
+    const d = data[current]; d.result = choice; d.remarks = $("remarks").value.trim() || "None"; d.saved = "Nov 16, 2026";
+    choice = null; renderRows(); renderPanel();
+  });
+
+  // Review switcher: TIS-0003 is the pending row used for states 1 to 3.
+  document.querySelectorAll("[data-preview]").forEach(b => b.addEventListener("click", () => {
+    const s = b.dataset.preview;
+    data[0].result = "pending";
+    if (s === "saved") { open(1); }
+    else { open(0); choice = s === "pending" ? null : s; renderPanel(); }
+    b.setAttribute("aria-pressed", "true");
+  }));
+
+  open(0);
+  document.querySelector('[data-preview="pending"]').setAttribute("aria-pressed", "true");
+</script>
+</body>
+</html>

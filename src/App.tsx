@@ -13,6 +13,7 @@ import ParkingSlotList from "./ParkingSlotList";
 import ServiceAreaList from "./ServiceAreaList";
 import UnitAvailabilityList from "./UnitAvailabilityList";
 import UnitAvailabilityDetails from "./UnitAvailabilityDetails";
+import UnitAvailabilityDetailsLegacy from "./UnitAvailabilityDetailsLegacy";
 import UnitHoldingList from "./UnitHoldingList";
 import UnitHoldingDetails from "./UnitHoldingDetails";
 import ClientsList from "./ClientsList";
@@ -30,6 +31,9 @@ import RAForm from "./RAForm";
 import CaptureSelfieTrack from "./CaptureSelfieTrack";
 import RAFormV2 from "./RAFormV2";
 import NoResults from "./NoResults";
+
+// Set to true to show the old Unit Availability details design.
+const USE_LEGACY_UNIT_DETAILS = false;
 
 function Screens() {
   const { route } = useNavigation();
@@ -62,7 +66,7 @@ function Screens() {
     case "unit-availability":
       return <UnitAvailabilityList />;
     case "unit-availability-details":
-      return <UnitAvailabilityDetails />;
+      return USE_LEGACY_UNIT_DETAILS ? <UnitAvailabilityDetailsLegacy /> : <UnitAvailabilityDetails />;
     case "unit-holding":
       return <UnitHoldingList />;
     case "unit-holding-details":
