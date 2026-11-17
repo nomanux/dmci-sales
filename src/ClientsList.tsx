@@ -203,7 +203,7 @@ export default function ClientsList() {
 
         <>
           <div
-            className={`fixed inset-0 z-40 bg-black/70 transition-opacity duration-300 ${
+            className={`fixed inset-0 z-40 bg-gray-900/60 backdrop-blur-[2px] transition-opacity duration-300 ${
               showFilters ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
             onClick={() => setShowFilters(false)}

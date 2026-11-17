@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 import Button from "./Button";
 import { CheckIcon, XIcon } from "./icons";
 
@@ -83,15 +84,22 @@ export default function EntitySelectionModal({
     e.preventDefault();
   }
 
+  // Backdrop fades; the panel rises and scales in, and leaves faster than it came.
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { duration: 0.2, ease: "easeOut" } }}
+      exit={{ opacity: 0, transition: { duration: 0.15, ease: "easeIn" } }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-[2px] sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="entity-title"
       onClick={onClose}
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 420, damping: 32, mass: 0.8 } }}
+        exit={{ opacity: 0, scale: 0.97, y: 8, transition: { duration: 0.14, ease: "easeIn" } }}
         className="flex max-h-[90vh] w-full max-w-[600px] flex-col overflow-hidden rounded-xl bg-white shadow-xl antialiased"
         onClick={(e) => e.stopPropagation()}
       >
@@ -208,7 +216,7 @@ export default function EntitySelectionModal({
             </Button>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

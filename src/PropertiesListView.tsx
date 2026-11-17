@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { MotionConfig, motion } from "motion/react";
 import Layout from "./Layout";
+import ViewToggle, { itemEnter, viewEnter } from "./ViewToggle";
 import NoPhotoFigure from "./NoPhotoFigure";
 import type { FilterField } from "./FilterBar";
 import Pagination from "./Pagination";
@@ -212,51 +214,6 @@ const FILTERS: FilterField[] = [
   { kind: "select", label: "Type", placeholder: "Select type" },
 ];
 
-function ViewToggle({
-  view,
-  onChange,
-}: {
-  view: "list" | "grid";
-  onChange: (view: "list" | "grid") => void;
-}) {
-  return (
-    <div className="flex items-center gap-1.5 shrink-0">
-      <button
-        type="button"
-        aria-label="Grid view"
-        aria-pressed={view === "grid"}
-        onClick={() => onChange("grid")}
-        className={`h-8 w-8 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
-          view === "grid" ? "bg-[#F0F5FF]" : "hover:bg-[#F9FAFB]"
-        }`}
-        title="Grid view"
-      >
-        <img
-          alt="Grid view"
-          className="w-[15px] h-[15px]"
-          src="data:image/svg+xml,%3csvg%20width='17'%20height='17'%20viewBox='0%200%2017%2017'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M5.33398%200.833496H2.16732C1.70061%200.833496%201.46725%200.833496%201.28899%200.924324C1.13219%201.00422%201.00471%201.1317%200.924812%201.2885C0.833984%201.46676%200.833984%201.70012%200.833984%202.16683V5.3335C0.833984%205.80021%200.833984%206.03356%200.924812%206.21182C1.00471%206.36862%201.13219%206.49611%201.28899%206.576C1.46725%206.66683%201.70061%206.66683%202.16732%206.66683H5.33398C5.80069%206.66683%206.03405%206.66683%206.21231%206.576C6.36911%206.49611%206.4966%206.36862%206.57649%206.21182C6.66732%206.03356%206.66732%205.80021%206.66732%205.3335V2.16683C6.66732%201.70012%206.66732%201.46676%206.57649%201.2885C6.4966%201.1317%206.36911%201.00422%206.21231%200.924324C6.03405%200.833496%205.80069%200.833496%205.33398%200.833496Z'%20stroke='%23052B78'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3cpath%20d='M14.5007%200.833496H11.334C10.8673%200.833496%2010.6339%200.833496%2010.4557%200.924324C10.2989%201.00422%2010.1714%201.1317%2010.0915%201.2885C10.0007%201.46676%2010.0007%201.70012%2010.0007%202.16683V5.3335C10.0007%205.80021%2010.0007%206.03356%2010.0915%206.21182C10.1714%206.36862%2010.2989%206.49611%2010.4557%206.576C10.6339%206.66683%2010.8673%206.66683%2011.334%206.66683H14.5007C14.9674%206.66683%2015.2007%206.66683%2015.379%206.576C15.5358%206.49611%2015.6633%206.36862%2015.7432%206.21182C15.834%206.03356%2015.834%205.80021%2015.834%205.3335V2.16683C15.834%201.70012%2015.834%201.46676%2015.7432%201.2885C15.6633%201.1317%2015.5358%201.00422%2015.379%200.924324C15.2007%200.833496%2014.9674%200.833496%2014.5007%200.833496Z'%20stroke='%23052B78'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3cpath%20d='M14.5007%2010.0002H11.334C10.8673%2010.0002%2010.6339%2010.0002%2010.4557%2010.091C10.2989%2010.1709%2010.1714%2010.2984%2010.0915%2010.4552C10.0007%2010.6334%2010.0007%2010.8668%2010.0007%2011.3335V14.5002C10.0007%2014.9669%2010.0007%2015.2002%2010.0915%2015.3785C10.1714%2015.5353%2010.2989%2015.6628%2010.4557%2015.7427C10.6339%2015.8335%2010.8673%2015.8335%2011.334%2015.8335H14.5007C14.9674%2015.8335%2015.2007%2015.8335%2015.379%2015.7427C15.5358%2015.6628%2015.6633%2015.5353%2015.7432%2015.3785C15.834%2015.2002%2015.834%2014.9669%2015.834%2014.5002V11.3335C15.834%2010.8668%2015.834%2010.6334%2015.7432%2010.4552C15.6633%2010.2984%2015.5358%2010.1709%2015.379%2010.091C15.2007%2010.0002%2014.9674%2010.0002%2014.5007%2010.0002Z'%20stroke='%23052B78'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3cpath%20d='M5.33398%2010.0002H2.16732C1.70061%2010.0002%201.46725%2010.0002%201.28899%2010.091C1.13219%2010.1709%201.00471%2010.2984%200.924812%2010.4552C0.833984%2010.6334%200.833984%2010.8668%200.833984%2011.3335V14.5002C0.833984%2014.9669%200.833984%2015.2002%200.924812%2015.3785C1.00471%2015.5353%201.13219%2015.6628%201.28899%2015.7427C1.46725%2015.8335%201.70061%2015.8335%202.16732%2015.8335H5.33398C5.80069%2015.8335%206.03405%2015.8335%206.21231%2015.7427C6.36911%2015.6628%206.4966%2015.5353%206.57649%2015.3785C6.66732%2015.2002%206.66732%2014.9669%206.66732%2014.5002V11.3335C6.66732%2010.8668%206.66732%2010.6334%206.57649%2010.4552C6.4966%2010.2984%206.36911%2010.1709%206.21231%2010.091C6.03405%2010.0002%205.80069%2010.0002%205.33398%2010.0002Z'%20stroke='%23052B78'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e"
-        />
-      </button>
-      <button
-        type="button"
-        aria-label="List view"
-        aria-pressed={view === "list"}
-        onClick={() => onChange("list")}
-        className={`h-8 w-8 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
-          view === "list" ? "bg-[#F0F5FF]" : "hover:bg-[#F9FAFB]"
-        }`}
-        title="List view"
-      >
-        <img
-          alt="List view"
-          className="w-[15px] h-[15px]"
-          src="data:image/svg+xml,%3csvg%20width='17'%20height='14'%20viewBox='0%200%2017%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M15.834%206.66683L5.83398%206.66683M15.834%201.66683L5.83398%201.66683M15.834%2011.6668L5.83398%2011.6668M2.50065%206.66683C2.50065%207.12707%202.12755%207.50016%201.66732%207.50016C1.20708%207.50016%200.833984%207.12707%200.833984%206.66683C0.833984%206.20659%201.20708%205.8335%201.66732%205.8335C2.12755%205.8335%202.50065%206.20659%202.50065%206.66683ZM2.50065%201.66683C2.50065%202.12707%202.12755%202.50016%201.66732%202.50016C1.20708%202.50016%200.833984%202.12707%200.833984%201.66683C0.833984%201.20659%201.20708%200.833496%201.66732%200.833496C2.12755%200.833496%202.50065%201.20659%202.50065%201.66683ZM2.50065%2011.6668C2.50065%2012.1271%202.12755%2012.5002%201.66732%2012.5002C1.20708%2012.5002%200.833984%2012.1271%200.833984%2011.6668C0.833984%2011.2066%201.20708%2010.8335%201.66732%2010.8335C2.12755%2010.8335%202.50065%2011.2066%202.50065%2011.6668Z'%20stroke='%2306318A'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e"
-        />
-      </button>
-    </div>
-  );
-}
-
 function TableView({
   view,
   onViewChange,
@@ -315,11 +272,16 @@ function TableView({
         rightSlot={
           <>
             <DownloadPdfButton />
-            <ViewToggle view={view} onChange={onViewChange} />
+            <ViewToggle id="projects" view={view} onChange={onViewChange} />
           </>
         }
       />
-      <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]">
+      <motion.div
+        variants={viewEnter}
+        initial="hidden"
+        animate="show"
+        className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]"
+      >
         <table className="w-full min-w-[960px] border-collapse text-[13px]">
           <thead className="table-head">
             <tr className="shadow-[inset_0_-1px_0_0_#e5e7eb] bg-gray-50 text-left text-gray-500">
@@ -336,9 +298,11 @@ function TableView({
             </tr>
           </thead>
           <tbody>
-            {filteredProjects.map((row) => (
-              <tr
+            {filteredProjects.map((row, index) => (
+              <motion.tr
                 key={row.code}
+                variants={itemEnter}
+                custom={index}
                 className="border-b border-gray-100 text-gray-600 hover:bg-gray-50"
               >
                 <td className="px-4 py-2">
@@ -388,11 +352,11 @@ function TableView({
                     })}
                   </div>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </motion.div>
       <Pagination total={89} />
     </div>
   );
@@ -444,12 +408,19 @@ function GridView({
             />
           </div>
         }
-        rightSlot={<ViewToggle view={view} onChange={onViewChange} />}
+        rightSlot={<ViewToggle id="projects" view={view} onChange={onViewChange} />}
       />
-      <div className="grid flex-1 min-h-0 auto-rows-min grid-cols-[repeat(auto-fill,minmax(256px,1fr))] items-start gap-5 overflow-auto p-6 [scrollbar-gutter:stable]">
+      <motion.div
+        variants={viewEnter}
+        initial="hidden"
+        animate="show"
+        className="grid flex-1 min-h-0 auto-rows-min grid-cols-[repeat(auto-fill,minmax(256px,1fr))] items-start gap-5 overflow-auto p-6 [scrollbar-gutter:stable]"
+      >
         {filteredCards.map((card, index) => (
-          <div
+          <motion.div
             key={card.name + index}
+            variants={itemEnter}
+            custom={index}
             role="button"
             tabIndex={0}
             onClick={() =>
@@ -515,9 +486,9 @@ function GridView({
               </div>
             </div>
             </div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
       <Pagination total={89} />
     </div>
   );
@@ -559,6 +530,7 @@ export default function PropertiesListView() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col px-5 pb-3 pt-0">
+          <MotionConfig reducedMotion="user">
           {view === "list" ? (
             <TableView
               view={view}
@@ -578,6 +550,7 @@ export default function PropertiesListView() {
               filters={filters}
             />
           )}
+          </MotionConfig>
         </div>
       </div>
 

@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Computation Sheet Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b25:#f0f5ff;--b50:#e3ebfd;--b100:#d9e6ff;--b200:#b3ccff;--b400:#0a4de0;--b500:#07389d;--b600:#06318a;--b700:#052b78;--b800:#011e7e;
+  --g25:#fcfcfd;--g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;--g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g900:#111827;
+  --ok:#059669;--ok50:#ecfdf5;--ok200:#a7f3d0;--warn:#b45309;--warn50:#fffbeb;--err:#e52222;
+  --bg:#f5f7fb;--line:#e4e8f0;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--g900);font-size:14px;line-height:20px;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+
+/* top bar */
+.top{height:60px;background:#fff;border-bottom:1px solid var(--g200);position:sticky;top:0;z-index:30}
+.top-in{max-width:1320px;margin:0 auto;height:100%;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.crumb{display:flex;align-items:center;gap:8px;color:var(--g500);font-size:14px}
+.crumb b{color:var(--b600);font-weight:600}
+.save{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--g500)}
+.save i{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+
+/* page */
+.page{max-width:1320px;margin:0 auto;padding:20px 24px 110px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.head h1{margin:0;font-size:22px;line-height:30px;color:var(--b800)}
+.head p{margin:2px 0 0;color:var(--g500);font-size:13px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:2px 10px;border-radius:99px;background:var(--g100);color:var(--g600);vertical-align:4px;margin-left:8px}
+.link{border:0;background:none;color:var(--b500);font-weight:600;padding:0;display:inline-flex;align-items:center;gap:6px}
+.link:hover{text-decoration:underline}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;align-items:start}
+
+/* cards */
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;margin-bottom:14px}
+.card-h{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--g100)}
+.num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;border:1.5px solid var(--b200);color:var(--b500);background:var(--b25);flex-shrink:0}
+.card.done .num{background:var(--ok);border-color:var(--ok);color:#fff}
+.card-h strong{display:block;font-size:16px;line-height:22px}
+.card-h small{display:block;color:var(--g500);font-size:13px}
+.card.done .card-h small{color:var(--ok)}
+.card-b{padding:18px 20px 20px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+
+/* fields */
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.lbl{font-size:14px;font-weight:500;color:var(--g700)}
+.lbl .req{color:var(--err);margin-left:2px}
+.lbl em{font-style:normal;color:var(--g400);font-weight:400}
+.in{height:40px;width:100%;border:1px solid var(--g300);border-radius:8px;padding:0 12px;font-size:15px;background:#fff;box-shadow:0 1px 2px rgba(10,13,18,.05)}
+.in:focus{outline:none;border-color:var(--b400);box-shadow:0 0 0 3px rgba(10,77,224,.12)}
+.in:disabled{background:var(--g50);color:var(--g400);cursor:not-allowed}
+.in::placeholder{color:var(--g400)}
+.help{font-size:12px;color:var(--g500);line-height:16px}
+.affix{position:relative}
+.affix .pre{position:absolute;left:12px;top:10px;color:var(--g500)}
+.affix .in{padding-left:28px}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:36px;padding:6px 14px;border:1px solid var(--g300);border-radius:99px;background:#fff;font-size:14px;font-weight:500;color:var(--g700);display:inline-flex;align-items:center;gap:6px}
+.chip:hover{border-color:var(--b200);background:var(--b25)}
+.chip[aria-pressed=true]{background:var(--b25);border-color:var(--b500);color:var(--b600)}
+.chip[aria-pressed=true]::before{content:"";width:8px;height:4px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg) translateY(-2px)}
+.chip small{font-weight:400;color:var(--g500);font-size:12px}
+
+/* plan cards */
+.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.plan{border:1px solid var(--g300);border-radius:12px;background:#fff;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px}
+.plan:hover{border-color:var(--b200);background:var(--b25)}
+.plan[aria-pressed=true]{border-color:var(--b500);background:var(--b25);box-shadow:0 0 0 1px var(--b500) inset}
+.plan b{font-size:14px;color:var(--g900)}
+.plan span{font-size:12px;color:var(--g600);line-height:16px}
+
+/* combobox */
+.combo{position:relative}
+.combo .in{padding-right:36px}
+.combo > svg{position:absolute;right:12px;top:12px;color:var(--g400);pointer-events:none}
+.combo ul{position:absolute;z-index:20;top:calc(100% + 4px);left:0;right:0;margin:0;padding:4px;list-style:none;background:#fff;border:1px solid var(--g200);border-radius:10px;box-shadow:0 10px 15px -3px rgba(10,13,18,.1);max-height:280px;overflow:auto}
+.combo li{padding:8px 10px;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.combo li .t{display:flex;flex-direction:column;min-width:0}
+.combo li small{font-size:12px;color:var(--g500)}
+.combo li.act,.combo li:hover{background:var(--b25)}
+.combo li.add{color:var(--b500);font-weight:600;border-top:1px solid var(--g100);margin-top:4px}
+.combo li.empty{color:var(--g500);cursor:default;background:none}
+.tag{font-size:11px;font-weight:600;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.tag.ok{background:var(--ok50);color:#047857}
+.tag.warn{background:var(--warn50);color:var(--warn)}
+.tag.info{background:var(--b50);color:var(--b600)}
+
+/* unit summary */
+.unit{border:1px solid var(--g200);border-radius:12px;background:var(--g25);padding:14px 16px}
+.unit-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.unit-top b{font-size:16px}
+.unit-top .price{font-size:18px;font-weight:700;color:var(--b600)}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px}
+.kv div span{display:block;font-size:12px;color:var(--g500)}
+.kv div b{font-weight:500;font-size:14px}
+.unit-empty{border:1px dashed var(--g300);border-radius:12px;padding:16px;color:var(--g500);text-align:center;font-size:13px}
+
+/* summary panel */
+.sum{position:sticky;top:80px}
+.sum .card-b{padding:16px 20px}
+.big{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 16px;border-radius:12px;background:var(--b600);color:#fff;margin-bottom:14px}
+.big span{font-size:13px;opacity:.85}
+.big b{font-size:22px;letter-spacing:-.2px}
+.rows{display:flex;flex-direction:column}
+.row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;font-size:14px}
+.row span{color:var(--g600)}
+.row b{font-weight:500;font-variant-numeric:tabular-nums;text-align:right}
+.row.minus b{color:var(--ok)}
+.row.total{border-top:1px solid var(--g200);margin-top:4px;padding-top:10px}
+.row.total span{color:var(--g900);font-weight:600}
+.row.total b{font-weight:700}
+.sec-t{margin:14px 0 4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--b500)}
+.sched{list-style:none;margin:6px 0 0;padding:0;position:relative}
+.sched li{position:relative;padding:0 0 12px 22px}
+.sched li::before{content:"";position:absolute;left:5px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--b400)}
+.sched li::after{content:"";position:absolute;left:8.5px;top:16px;bottom:0;width:1px;background:var(--b200)}
+.sched li:last-child::after{display:none}
+.sched b{display:block;font-weight:600;font-size:13px}
+.sched span{font-size:12px;color:var(--g500)}
+.sched .amt{float:right;font-weight:600;font-size:13px;font-variant-numeric:tabular-nums}
+.todo{background:var(--warn50);border:1px solid #fde68a;border-radius:10px;padding:10px 12px;font-size:13px;color:#92400e;margin-top:12px}
+.todo b{display:block;margin-bottom:2px}
+.ready{background:var(--ok50);border:1px solid var(--ok200);border-radius:10px;padding:10px 12px;font-size:13px;color:#065f46;margin-top:12px}
+.note{font-size:11px;color:var(--g400);margin-top:10px;line-height:15px}
+
+/* buttons */
+.btn{height:40px;padding:0 16px;border-radius:8px;font-weight:600;font-size:14px;border:1px solid transparent;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+.btn-p{background:var(--b600);color:#fff}
+.btn-p:hover{background:var(--b700)}
+.btn-p:disabled{background:var(--b200);cursor:not-allowed}
+.btn-s{background:#fff;border-color:var(--g300);color:var(--g700)}
+.btn-s:hover{background:var(--g50)}
+.btn-g{background:none;color:var(--g600)}
+.btn-g:hover{color:var(--g900);background:var(--g100)}
+.btn-sm{height:34px;padding:0 12px;font-size:13px}
+
+.foot{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--g200);box-shadow:0 -2px 8px rgba(10,13,18,.06);z-index:30}
+.foot-in{max-width:1320px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.foot-r{display:flex;gap:8px}
+.mob-total{display:none}
+
+.toast{position:fixed;left:50%;bottom:84px;transform:translate(-50%,20px);background:var(--g900);color:#fff;padding:10px 16px;border-radius:10px;font-size:13px;opacity:0;transition:all .25s;z-index:40;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1100px){.layout{grid-template-columns:minmax(0,1fr) 330px}.plans{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  .sum{position:static}
+  .g2,.g3,.kv{grid-template-columns:1fr 1fr}
+  .page{padding:16px 12px 120px}
+  .top-in{padding:0 12px}
+  .foot-in{padding:10px 12px}
+  .foot .hide-m{display:none}
+  .mob-total{display:flex;flex-direction:column;font-size:12px;color:var(--g500)}
+  .mob-total b{font-size:16px;color:var(--g900)}
+}
+@media (max-width:520px){.g2,.g3{grid-template-columns:1fr}.save{display:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="crumb">Dashboard <span>›</span> <b>Computation Sheet</b></div>
+    <div class="save"><i></i><span id="saved">Draft saved</span></div>
+  </div>
+</header>
+
+<div class="page">
+  <div class="head">
+    <div>
+      <h1>New computation sheet <span class="badge" id="status">Draft</span></h1>
+      <p>Generated <span id="genDate"></span> · Prices update as you fill the form.</p>
+    </div>
+    <button type="button" class="link" id="listBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      All computation sheets
+    </button>
+  </div>
+
+  <div class="layout">
+    <main>
+      <!-- 1 Client and reservation -->
+      <section class="card" id="c1">
+        <div class="card-h"><span class="num">1</span><div><strong>Client and reservation</strong><small></small></div></div>
+        <div class="card-b stack">
+          <div class="field">
+            <span class="lbl">Client<span class="req">*</span></span>
+            <div class="combo" data-list="clients"><input class="in" id="client" placeholder="Search by name, mobile or client ID" autocomplete="off"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><ul hidden></ul></div>
+            <span class="help">Pick an existing client to link the sheet, or create a new one.</span>
+          </div>
+          <div class="g2">
+            <div class="field">
+              <span class="lbl">Reservation date<span class="req">*</span></span>
+              <input class="in" type="date" id="resDate">
+              <span class="help">Defaults to today.</span>
+            </div>
+            <div class="field">
+              <span class="lbl">Reservation amount<span class="req">*</span></span>
+              <div class="chips" data-name="resAmt">
+                <button type="button" class="chip" data-v="20000">₱20,000</button>
+                <button type="button" class="chip" data-v="30000" aria-pressed="true">₱30,000</button>
+                <button type="button" class="chip" data-v="50000">₱50,000</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2 Unit -->
+      <section class="card" id="c2">
+        <div class="card-h"><span class="num">2</span><div><strong>Unit</strong><small></small></div></div>
+        <div class="card-b stack">
+          <div class="field">
+            <span class="lbl">Quick find <em>(optional)</em></span>
+            <div class="combo" data-list="units"><input class="in" id="unitFind" placeholder="Type a unit number, e.g. AGP-00A-C-28003" autocomplete="off"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><ul hidden></ul></div>
+            <span class="help">Know the unit number? Pick it here and we fill project and building.</span>
+          </div>
+          <div class="g3">
+            <div class="field"><span class="lbl">Project<span class="req">*</span></span><select class="in" id="project"><option value="">Select project</option></select></div>
+            <div class="field"><span class="lbl">Building<span class="req">*</span></span><select class="in" id="building" disabled><option value="">Choose a project first</option></select></div>
+            <div class="field"><span class="lbl">Unit no.<span class="req">*</span></span><select class="in" id="unit" disabled><option value="">Choose a building first</option></select></div>
+          </div>
+          <div id="unitBox"></div>
+        </div>
+      </section>
+
+      <!-- 3 Payment -->
+      <section class="card" id="c3">
+        <div class="card-h"><span class="num">3</span><div><strong>Payment terms</strong><small></small></div></div>
+        <div class="card-b stack">
+          <div class="field">
+            <span class="lbl">Payment plan<span class="req">*</span></span>
+            <div class="plans" data-name="plan">
+              <button type="button" class="plan" data-v="spot" aria-pressed="false"><b>Spot cash</b><span>Full price within 30 days. Highest discount.</span></button>
+              <button type="button" class="plan" data-v="spotdp" aria-pressed="false"><b>Spot downpayment</b><span>Downpayment within 30 days, balance by loan.</span></button>
+              <button type="button" class="plan" data-v="deferred" aria-pressed="true"><b>Deferred downpayment</b><span>Downpayment in monthly parts, balance by loan.</span></button>
+            </div>
+          </div>
+
+          <div class="g2" id="dpRow">
+            <div class="field">
+              <span class="lbl">Downpayment</span>
+              <div class="chips" data-name="dpPct">
+                <button type="button" class="chip" data-v="10">10%</button>
+                <button type="button" class="chip" data-v="15">15%</button>
+                <button type="button" class="chip" data-v="20" aria-pressed="true">20%</button>
+                <button type="button" class="chip" data-v="30">30%</button>
+              </div>
+            </div>
+            <div class="field" id="termField">
+              <span class="lbl">Pay downpayment over</span>
+              <div class="chips" data-name="term">
+                <button type="button" class="chip" data-v="12">12 mos</button>
+                <button type="button" class="chip" data-v="24">24 mos</button>
+                <button type="button" class="chip" data-v="36" aria-pressed="true">36 mos</button>
+                <button type="button" class="chip" data-v="48">48 mos</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="field" id="methodField">
+            <span class="lbl">Balance paid through</span>
+            <div class="chips" data-name="method">
+              <button type="button" class="chip" data-v="bank" aria-pressed="true">Bank loan</button>
+              <button type="button" class="chip" data-v="pagibig">Pag-IBIG</button>
+              <button type="button" class="chip" data-v="inhouse">In-house</button>
+            </div>
+          </div>
+
+          <div class="g2">
+            <div class="field">
+              <span class="lbl">Promo discount</span>
+              <select class="in" id="promo">
+                <option value="0">No promo</option>
+                <option value="3">Early bird · 3%</option>
+                <option value="5">Employee referral · 5%</option>
+                <option value="8" data-spot>Spot cash · 8% (spot cash only)</option>
+              </select>
+              <span class="help" id="promoHelp">Applied to the list price.</span>
+            </div>
+            <div class="field">
+              <span class="lbl">Closing fee</span>
+              <div class="chips" data-name="closing">
+                <button type="button" class="chip" data-v="separate" aria-pressed="true">Pay separately <small>5%</small></button>
+                <button type="button" class="chip" data-v="included">Add to price</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Live computation -->
+    <aside class="sum">
+      <section class="card">
+        <div class="card-h" style="border:0;padding-bottom:4px"><div><strong>Computation</strong><small id="sumUnit">No unit selected</small></div></div>
+        <div class="card-b">
+          <div class="big"><span>Total contract price</span><b id="tcp">₱0.00</b></div>
+          <div class="rows" id="rows"></div>
+          <p class="sec-t">Payment schedule</p>
+          <ul class="sched" id="sched"></ul>
+          <div id="state"></div>
+          <p class="note">Sample prices and terms for this mockup. Loan estimate uses 6.5% a year over 20 years. Actual figures come from the pricing engine.</p>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="foot-in">
+    <button type="button" class="btn btn-g" id="reset">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Reset
+    </button>
+    <div class="mob-total"><span>Total contract price</span><b id="tcpM">₱0.00</b></div>
+    <div class="foot-r">
+      <button type="button" class="btn btn-s hide-m" id="pdf">Export as PDF</button>
+      <button type="button" class="btn btn-s hide-m" id="preview">Preview</button>
+      <button type="button" class="btn btn-p" id="saveBtn" disabled>Save sheet</button>
+    </div>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+/* ---------- sample data (replace with API data) ---------- */
+const CLIENTS=[
+  {id:'CL-00231',name:'Maria Santos Dela Cruz',mobile:'0917 123 4567'},
+  {id:'CL-00244',name:'Juan Reyes',mobile:'0918 555 0192'},
+  {id:'CL-00251',name:'Ana Lim Tan',mobile:'0927 880 4410'},
+  {id:'CL-00260',name:'Jose Ramirez',mobile:'0939 210 7788'}
+];
+const PROJECTS={
+  'Allegra Garden Place':{type:'High Rise',city:'Pasig City',buildings:{
+    'Tower A':[
+      {no:'AGP-00A-C-28003',cat:'Condo Unit',size:'2BR · 54.5 sqm',loc:'Rear unit facing west',floor:28,rfo:'2024-07-31',price:6850000,status:'Available'},
+      {no:'AGP-00A-C-15010',cat:'Condo Unit',size:'1BR · 36.0 sqm',loc:'Front unit facing east',floor:15,rfo:'2024-07-31',price:4520000,status:'Available'},
+      {no:'AGP-00A-P-00112',cat:'Parking Slot',size:'12.5 sqm',loc:'Basement 1',floor:-1,rfo:'2024-07-31',price:950000,status:'Available'}],
+    'Tower B':[
+      {no:'AGP-00B-C-21007',cat:'Condo Unit',size:'2BR · 58.0 sqm',loc:'Corner unit facing north',floor:21,rfo:'2027-12-31',price:7240000,status:'Available'}]}},
+  'The Erin Heights':{type:'High Rise',city:'Quezon City',buildings:{
+    'Tower 1':[
+      {no:'TEH-T01-C-12008',cat:'Condo Unit',size:'2BR · 52.0 sqm',loc:'Mid unit facing south',floor:12,rfo:'2028-12-31',price:5980000,status:'Available'},
+      {no:'TEH-T01-C-09003',cat:'Condo Unit',size:'Studio · 24.5 sqm',loc:'End unit facing east',floor:9,rfo:'2028-12-31',price:3150000,status:'On hold'}]}}
+};
+const ALL_UNITS=[];
+for(const [p,pd] of Object.entries(PROJECTS))for(const [b,us] of Object.entries(pd.buildings))for(const u of us)ALL_UNITS.push({...u,project:p,building:b});
+
+/* ---------- state ---------- */
+const today=new Date();today.setHours(0,0,0,0);
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const day=v=>{const [y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d)};
+const S={client:null,resDate:iso(today),resAmt:30000,unit:null,plan:'deferred',dpPct:20,term:36,method:'bank',promo:0,closing:'separate'};
+const peso=n=>'₱'+n.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtDate=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const addMonths=(d,m)=>{const x=new Date(d);x.setMonth(x.getMonth()+m);return x};
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2200)}
+
+$('#genDate').textContent=fmtDate(today);
+$('#resDate').value=S.resDate;
+
+/* ---------- chips and plan cards ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.chip,.plan');if(!b)return;
+  const g=b.parentElement;if(!g.dataset.name)return;
+  $$('.chip,.plan',g).forEach(x=>x.setAttribute('aria-pressed',x===b));
+  const v=b.dataset.v;S[g.dataset.name]=isNaN(v)?v:+v;
+  if(g.dataset.name==='plan'&&v!=='spot'&&S.promo===8){S.promo=0;$('#promo').value='0'}
+  render();
+});
+
+/* ---------- comboboxes ---------- */
+function combo(wrap,source,onPick){
+  const inp=$('input',wrap),ul=$('ul',wrap);let items=[],idx=-1;
+  function draw(){
+    items=source(inp.value.trim().toLowerCase());
+    ul.innerHTML=items.length?items.map((it,i)=>`<li data-i="${i}" class="${it.add?'add':''} ${i===idx?'act':''}"><span class="t"><span>${esc(it.label)}</span>${it.sub?`<small>${esc(it.sub)}</small>`:''}</span>${it.tag||''}</li>`).join(''):'<li class="empty">No match</li>';
+    ul.hidden=false;
+  }
+  const pick=i=>{const it=items[i];if(!it)return;ul.hidden=true;idx=-1;onPick(it,inp)};
+  inp.addEventListener('focus',()=>{idx=-1;draw()});
+  inp.addEventListener('input',()=>{idx=-1;draw()});
+  inp.addEventListener('keydown',e=>{
+    if(ul.hidden)return;
+    if(e.key==='ArrowDown'){idx=Math.min(idx+1,items.length-1);draw();e.preventDefault()}
+    else if(e.key==='ArrowUp'){idx=Math.max(idx-1,0);draw();e.preventDefault()}
+    else if(e.key==='Enter'&&items.length){pick(Math.max(idx,0));e.preventDefault()}
+    else if(e.key==='Escape')ul.hidden=true;
+  });
+  ul.addEventListener('mousedown',e=>{const li=e.target.closest('li[data-i]');if(li){e.preventDefault();pick(+li.dataset.i)}});
+  inp.addEventListener('blur',()=>setTimeout(()=>ul.hidden=true,120));
+}
+combo($('[data-list=clients]'),q=>{
+  const list=CLIENTS.filter(c=>!q||(c.name+' '+c.mobile+' '+c.id).toLowerCase().includes(q)).map(c=>({label:c.name,sub:`${c.id} · ${c.mobile}`,c}));
+  return [...list,{label:'+ Create new client',add:true}];
+},(it,inp)=>{
+  if(it.add){inp.value='';toast('Opens the new client form');return}
+  S.client=it.c;inp.value=it.c.name;render();
+});
+$('#client').addEventListener('input',()=>{if(S.client&&$('#client').value!==S.client.name){S.client=null;render()}});
+
+combo($('[data-list=units]'),q=>ALL_UNITS.filter(u=>!q||(u.no+' '+u.project+' '+u.building).toLowerCase().includes(q)).slice(0,8)
+  .map(u=>({label:u.no,sub:`${u.project} · ${u.building} · ${u.size} · ${peso(u.price).replace('.00','')}`,tag:statusTag(u),u})),
+  (it,inp)=>{if(it.u.status!=='Available'){toast('This unit is on hold');return}selectUnit(it.u);inp.value='';});
+
+/* ---------- project > building > unit ---------- */
+const selP=$('#project'),selB=$('#building'),selU=$('#unit');
+selP.innerHTML+=Object.keys(PROJECTS).map(p=>`<option>${p}</option>`).join('');
+function fillBuildings(){
+  const p=PROJECTS[selP.value];
+  selB.disabled=!p;
+  selB.innerHTML=p?'<option value="">Select building</option>'+Object.keys(p.buildings).map(b=>`<option>${b}</option>`).join(''):'<option value="">Choose a project first</option>';
+}
+function fillUnits(){
+  const us=PROJECTS[selP.value]?.buildings[selB.value];
+  selU.disabled=!us;
+  selU.innerHTML=us?'<option value="">Select unit</option>'+us.map(u=>`<option value="${u.no}" ${u.status!=='Available'?'disabled':''}>${u.no} · ${u.size}${u.status!=='Available'?' · '+u.status:''}</option>`).join(''):'<option value="">Choose a building first</option>';
+}
+selP.addEventListener('change',()=>{fillBuildings();fillUnits();S.unit=null;render()});
+selB.addEventListener('change',()=>{fillUnits();S.unit=null;render()});
+selU.addEventListener('change',()=>{S.unit=ALL_UNITS.find(u=>u.no===selU.value)||null;render()});
+function selectUnit(u){
+  selP.value=u.project;fillBuildings();selB.value=u.building;fillUnits();selU.value=u.no;S.unit=u;render();
+  toast(`${u.no} selected`);
+}
+function statusTag(u){return u.status==='Available'?'<span class="tag ok">Available</span>':'<span class="tag warn">'+u.status+'</span>'}
+const isRFO=u=>day(u.rfo)<=today;
+
+/* ---------- other inputs ---------- */
+$('#resDate').addEventListener('change',e=>{S.resDate=e.target.value;render()});
+$('#promo').addEventListener('change',e=>{S.promo=+e.target.value;render()});
+
+/* ---------- compute ---------- */
+function compute(){
+  const u=S.unit;if(!u)return null;
+  const list=u.price, disc=list*S.promo/100, net=list-disc;
+  const closing=net*0.05;
+  const tcp=S.closing==='included'?net+closing:net;
+  const res=S.resAmt;
+  const start=S.resDate?day(S.resDate):today;
+  const out={list,disc,net,closing,tcp,res,lines:[],sched:[]};
+  out.sched.push({t:'Reservation fee',d:fmtDate(start),a:res});
+  if(S.plan==='spot'){
+    out.lines.push(['Balance due in 30 days',tcp-res]);
+    out.sched.push({t:'Full balance',d:'By '+fmtDate(addDays(start,30)),a:tcp-res});
+  }else{
+    const dp=tcp*S.dpPct/100, dpNet=dp-res, loan=tcp-dp;
+    out.lines.push([`Downpayment (${S.dpPct}%)`,dp],['Less reservation fee',-res],['Net downpayment',dpNet]);
+    if(S.plan==='spotdp'){
+      out.sched.push({t:'Net downpayment',d:'By '+fmtDate(addDays(start,30)),a:dpNet});
+    }else{
+      const m=dpNet/S.term;
+      out.lines.push([`Monthly downpayment × ${S.term}`,m]);
+      out.sched.push({t:`Monthly downpayment × ${S.term}`,d:`${fmtDate(addMonths(start,1))} to ${fmtDate(addMonths(start,S.term))}`,a:m,per:'/mo'});
+    }
+    const mName={bank:'Bank loan',pagibig:'Pag-IBIG loan',inhouse:'In-house financing'}[S.method];
+    out.lines.push([`Balance via ${mName.toLowerCase()} (${100-S.dpPct}%)`,loan]);
+    const r=0.065/12,n=240,amort=loan*r/(1-Math.pow(1+r,-n));
+    const due=isRFO(u)?(S.plan==='spotdp'?addDays(start,30):addMonths(start,S.term)):day(u.rfo);
+    out.sched.push({t:`${mName} release`,d:(isRFO(u)?'After downpayment, around ':'At turnover, ')+fmtDate(due),a:loan});
+    out.amort=amort;
+  }
+  if(S.closing==='separate')out.sched.push({t:'Closing fee (5%)',d:'Before turnover',a:closing});
+  return out;
+}
+
+/* ---------- render ---------- */
+function render(){
+  // section status
+  const s1=!!S.client&&!!S.resDate, s2=!!S.unit, s3=!!S.plan;
+  $('#c1').classList.toggle('done',s1);$('#c1 .card-h small').textContent=s1?`${S.client.name} · ${peso(S.resAmt).replace('.00','')} on ${fmtDate(day(S.resDate))}`:'Who is reserving, and when';
+  $('#c2').classList.toggle('done',s2);$('#c2 .card-h small').textContent=s2?`${S.unit.no} · ${S.unit.project}`:'Pick the project, building and unit';
+  $('#c3').classList.toggle('done',s2&&s3);$('#c3 .card-h small').textContent={spot:'Spot cash',spotdp:`Spot downpayment ${S.dpPct}%`,deferred:`${S.dpPct}% downpayment over ${S.term} months`}[S.plan];
+  $$('.num').forEach((n,i)=>n.textContent=$$('.card')[i].classList.contains('done')?'✓':i+1);
+
+  // plan dependent fields
+  $('#dpRow').hidden=S.plan==='spot';$('#methodField').hidden=S.plan==='spot';$('#termField').hidden=S.plan!=='deferred';
+  $('[data-spot]').disabled=S.plan!=='spot';
+  $('#promoHelp').textContent=S.unit&&S.promo?`Saves ${peso(S.unit.price*S.promo/100)} on the list price.`:'Applied to the list price.';
+
+  // unit box
+  const u=S.unit;
+  $('#unitBox').innerHTML=u?`<div class="unit">
+    <div class="unit-top"><div><b>${u.no}</b> ${statusTag(u)} <span class="tag ${isRFO(u)?'ok':'info'}">${isRFO(u)?'RFO':'Non-RFO'}</span><div class="help" style="margin-top:2px">${u.project} · ${u.building} · ${PROJECTS[u.project].city}</div></div><div style="text-align:right"><span class="help">List price</span><div class="price">${peso(u.price)}</div></div></div>
+    <div class="kv">
+      <div><span>Unit category</span><b>${u.cat}</b></div>
+      <div><span>Size</span><b>${u.size}</b></div>
+      <div><span>Unit location</span><b>${u.loc}</b></div>
+      <div><span>Project type</span><b>${PROJECTS[u.project].type}</b></div>
+      <div><span>${isRFO(u)?'RFO date':'Target turnover'}</span><b>${fmtDate(day(u.rfo))}</b></div>
+      <div><span>Floor</span><b>${u.floor<0?'Basement '+(-u.floor):u.floor}</b></div>
+    </div></div>`:'<div class="unit-empty">Unit details and list price show here once you pick a unit.</div>';
+
+  // summary
+  const c=compute();
+  $('#sumUnit').textContent=u?`${u.no} · ${u.size}`:'No unit selected';
+  $('#tcp').textContent=$('#tcpM').textContent=peso(c?c.tcp:0);
+  if(c){
+    const rows=[['List price',c.list]];
+    if(c.disc)rows.push([`Promo discount (${S.promo}%)`,-c.disc,'minus']);
+    if(S.closing==='included')rows.push(['Closing fee (5%)',c.closing]);
+    $('#rows').innerHTML=rows.map(([k,v,cls])=>`<div class="row ${cls||''}"><span>${k}</span><b>${v<0?'− ':''}${peso(Math.abs(v))}</b></div>`).join('')
+      +`<div class="row total"><span>Total contract price</span><b>${peso(c.tcp)}</b></div>`
+      +c.lines.map(([k,v])=>`<div class="row ${v<0?'minus':''}"><span>${k}</span><b>${v<0?'− ':''}${peso(Math.abs(v))}</b></div>`).join('')
+      +(c.amort?`<div class="row"><span>Est. monthly loan payment</span><b>${peso(c.amort)}</b></div>`:'');
+    $('#sched').innerHTML=c.sched.map(s=>`<li><span class="amt">${peso(s.a)}${s.per||''}</span><b>${s.t}</b><span>${s.d}</span></li>`).join('');
+  }else{
+    $('#rows').innerHTML='<div class="row"><span>List price</span><b>Pick a unit</b></div>';
+    $('#sched').innerHTML='<li><b>Reservation fee</b><span>Schedule shows once a unit is picked</span></li>';
+  }
+
+  // readiness
+  const missing=[];if(!S.client)missing.push('client');if(!S.resDate)missing.push('reservation date');if(!S.unit)missing.push('unit');
+  $('#state').innerHTML=missing.length?`<div class="todo"><b>To save this sheet, add:</b>${missing.join(', ')}</div>`:'<div class="ready">Ready to save. Review the schedule, then save or preview.</div>';
+  $('#saveBtn').disabled=!!missing.length;
+  $('#status').textContent=missing.length?'Draft':'Ready';
+  $('#saved').textContent='Draft saved just now';
+}
+
+/* ---------- footer ---------- */
+$('#reset').addEventListener('click',()=>location.reload());
+$('#pdf').addEventListener('click',()=>toast('Exports the sheet as PDF'));
+$('#preview').addEventListener('click',()=>toast('Opens the client-facing preview'));
+$('#listBtn').addEventListener('click',()=>toast('Opens the list of saved sheets'));
+$('#saveBtn').addEventListener('click',()=>{$('#status').textContent='Saved';toast('Computation sheet saved')});
+
+render();
+</script>
+</body>
+</html>

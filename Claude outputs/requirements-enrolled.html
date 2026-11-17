@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Requirements: enrolled account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#10398e; --brand-700:#0b2a6b; --brand-25:#eff4ff; --brand-50:#d1defc;
+    --t1:#181d27; --t2:#414651; --t3:#535862; --t4:#717680;
+    --b1:#d5d7da; --b2:#e9eaeb; --bg:#fafafa; --bg2:#f5f5f5;
+    --err:#d92d20; --err-700:#b42318; --err-bg:#fef3f2; --err-bd:#fecdca;
+    --ok:#067647; --ok-bg:#ecfdf3; --ok-bd:#abefc6; --ok-solid:#17b26a;
+    --blue:#175cd3; --blue-bg:#eff8ff; --blue-bd:#b2ddff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;font-family:Inter,system-ui,sans-serif;color:var(--t1)}
+  button{font-family:inherit}
+  button:focus-visible,a:focus-visible,label:focus-within{outline:3px solid rgba(16,57,142,.28);outline-offset:2px}
+
+  header{border-bottom:1px solid var(--b2)}
+  .hd{max-width:1200px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:8px;color:var(--brand);font-weight:800;font-size:20px;text-decoration:none}
+  .nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+  .nav a{padding:10px 12px;border-radius:6px;font-size:15px;font-weight:500;color:var(--t2);text-decoration:none}
+  .nav a[aria-current]{background:var(--bg);color:var(--brand);font-weight:600}
+  .user{display:flex;align-items:center;gap:10px;font-size:14px}
+  .av{width:40px;height:40px;border-radius:50%;background:var(--bg2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--brand)}
+
+  main{max-width:1200px;margin:0 auto;padding:32px 24px 64px;display:flex;flex-direction:column;gap:20px}
+  h1{margin:0;font-size:24px;line-height:32px}
+  .info{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border:1px solid var(--brand-50);background:var(--brand-25);border-radius:8px;color:var(--brand);font-size:14px;line-height:20px}
+  .card{border:1px solid var(--b2);border-radius:12px;overflow:hidden}
+  .ch{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;flex-wrap:wrap}
+  .ch h2{margin:0;font-size:18px} .ch p{margin:4px 0 0;font-size:14px;color:var(--t3)}
+  .tw{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
+  th{text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--t3);background:var(--bg);padding:12px 24px;border-top:1px solid var(--b2);border-bottom:1px solid var(--b2)}
+  td{padding:16px 24px;border-bottom:1px solid var(--b2);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  td.doc{font-weight:500;font-size:15px}
+  td.rem{color:var(--t3);max-width:320px;line-height:20px}
+  th.act,td.act{text-align:right}
+  .pill{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;font-size:13px;font-weight:500;border:1px solid;white-space:nowrap}
+  .p-sub{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+  .p-ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+  .p-new{background:var(--bg2);border-color:var(--b2);color:var(--t2)}
+  .p-err{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-700)}
+  .btn{min-height:40px;padding:8px 16px;border-radius:8px;font:600 14px Inter,sans-serif;cursor:pointer;border:1px solid;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 1px 2px rgba(10,13,18,.05)}
+  .btn-p{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn-p:hover{background:var(--brand-700)}
+  .btn-p:disabled{background:var(--bg2);border-color:var(--b2);color:var(--t4);cursor:not-allowed;box-shadow:none}
+  .btn-s{background:#fff;border-color:var(--b1);color:var(--t2)}
+  .btn-s:hover{background:var(--bg)}
+
+  /* Modal */
+  dialog{border:0;padding:0;border-radius:16px;width:min(560px,calc(100% - 32px));max-height:calc(100% - 48px);box-shadow:0 24px 48px -12px rgba(10,13,18,.25);display:none;flex-direction:column}
+  dialog[open]{display:flex}
+  dialog::backdrop{background:rgba(10,13,18,.55)}
+  .mh{display:flex;gap:16px;align-items:flex-start;padding:24px 24px 16px}
+  .mh-ic{flex:none;width:48px;height:48px;border-radius:10px;border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;color:var(--t2);box-shadow:0 1px 2px rgba(10,13,18,.05)}
+  .mh-t{flex:1;min-width:0}
+  .mh h2{margin:0;font-size:18px;line-height:28px}
+  .mh p{margin:2px 0 0;font-size:14px;color:var(--t3)}
+  .x{flex:none;width:40px;height:40px;border:0;background:none;border-radius:8px;color:var(--t4);cursor:pointer;display:flex;align-items:center;justify-content:center;margin:-6px -8px 0 0}
+  .x:hover{background:var(--bg)}
+  .mb{padding:0 24px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+  .remark{display:flex;gap:10px;padding:12px 14px;border-radius:10px;background:var(--err-bg);border:1px solid var(--err-bd);color:var(--err-700);font-size:14px;line-height:20px}
+  .remark svg{flex:none;margin-top:2px}
+  .remark b{display:block;margin-bottom:2px}
+  .drop{position:relative;border:1px dashed var(--b1);border-radius:12px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;background:#fff;transition:border-color .15s,background .15s}
+  .drop.over{border-color:var(--brand);background:var(--brand-25)}
+  .drop-ic{width:40px;height:40px;border-radius:8px;border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;color:var(--t3)}
+  .drop p{margin:0;font-size:14px;color:var(--t3)}
+  .drop .pick{color:var(--brand);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .drop small{font-size:12px;color:var(--t4)}
+  .drop input{position:absolute;width:1px;height:1px;opacity:0}
+  .err{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--err-700)}
+  .files{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .file{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--b2);border-radius:12px}
+  .file.done{border-color:var(--b2)}
+  .file.bad{border-color:var(--err-bd);background:var(--err-bg)}
+  .ftype{flex:none;width:36px;height:40px;border-radius:6px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;font-size:10px;font-weight:700;color:#fff}
+  .ft-pdf{background:#d92d20} .ft-img{background:#079455}
+  .fbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+  .fname{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fmeta{font-size:13px;color:var(--t3);display:flex;gap:8px;align-items:center}
+  .bar{display:flex;align-items:center;gap:10px}
+  .track{flex:1;height:8px;border-radius:999px;background:var(--b2);overflow:hidden}
+  .fill{height:100%;background:var(--brand);border-radius:999px;transition:width .2s}
+  .pct{font-size:13px;font-weight:500;color:var(--t2);min-width:34px;text-align:right}
+  .fx{flex:none;width:36px;height:36px;border:0;background:none;border-radius:8px;color:var(--t4);cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .fx:hover{background:var(--bg);color:var(--err)}
+  .check{flex:none;width:20px;height:20px;border-radius:50%;background:var(--ok-solid);display:flex;align-items:center;justify-content:center}
+  .tips{margin:0;padding:12px 14px 12px 32px;background:var(--bg);border-radius:10px;font-size:13px;line-height:20px;color:var(--t2)}
+  .tips-t{font-size:13px;font-weight:600;color:var(--t2);margin:0 0 -8px}
+  .step1{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--b2);border-radius:10px;font-size:13px;color:var(--t3);flex-wrap:wrap}
+  .step1 b{display:block;font-size:14px;color:var(--t1);margin-bottom:2px}
+  .num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--brand-25);color:var(--brand);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+  fieldset.q{border:0;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .q legend{font-size:14px;font-weight:500;color:var(--t2);margin-bottom:8px;padding:0}
+  .opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--b1);border-radius:8px;font-size:14px;cursor:pointer;min-height:44px}
+  .opt:has(input:checked){border-color:var(--brand);background:var(--brand-25)}
+  .opt input{width:18px;height:18px;margin:0;accent-color:var(--brand)}
+  .sv-ta{width:100%;min-height:88px;border:1px solid var(--b1);border-radius:8px;padding:10px 12px;font:400 14px/20px Inter,sans-serif;resize:vertical}
+  .sv-l{display:block;font-size:14px;font-weight:500;color:var(--t2);margin-bottom:6px}
+  .sv-progress{font-size:13px;color:var(--t3)}
+  .ver{font-size:13px;color:var(--t3);display:flex;gap:6px;align-items:center}
+  .mf{display:flex;gap:12px;padding:16px 24px 24px;border-top:1px solid var(--b2)}
+  .mf .btn{flex:1}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#181d27;color:#fff;padding:12px 16px;border-radius:10px;font-size:14px;display:flex;gap:8px;align-items:center;box-shadow:0 12px 24px rgba(0,0,0,.2)}
+  [hidden]{display:none!important}
+  @media (prefers-reduced-motion:reduce){.fill,.drop{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hd">
+    <a class="logo" href="#"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="6" fill="#10398e"/><path d="M8 21V10l6-4 6 4v11M12 21v-5h4v5" stroke="#fff" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>DMCI HOMES</a>
+    <nav class="nav" aria-label="Main"><a href="#">Dashboard</a><a href="#" aria-current="page">Applications</a><a href="#">Accounts</a><a href="#">Profile</a><a href="#">Official Receipts</a><a href="#">Bills</a></nav>
+    <div class="user"><span class="av" aria-hidden="true">JD</span><div><div style="font-weight:600">John Doe</div><div style="color:var(--t3)">john@example.com</div></div></div>
+  </div>
+</header>
+
+<main>
+  <h1>Requirements</h1>
+  <div class="info"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>You can submit in any order. Developer accounts submit in stages. Enrolled accounts submit everything together.</span></div>
+
+  <section class="card" aria-labelledby="acct">
+    <div class="ch"><div><h2 id="acct">Enrolled Account (non-DMCI owned)</h2><p>Regular Leasing · Submit everything together</p></div></div>
+    <div class="tw">
+      <table>
+        <thead><tr><th scope="col">Document</th><th scope="col">Status</th><th scope="col">Remarks</th><th scope="col" class="act">Action</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<dialog id="dlg" aria-labelledby="mTitle" aria-describedby="mSub">
+  <div class="mh">
+    <span class="mh-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3M12 3v12M7 8l5-5 5 5"/></svg></span>
+    <div class="mh-t"><h2 id="mTitle"></h2><p id="mSub"></p></div>
+    <button type="button" class="x" id="mClose" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+
+  <div class="mb">
+    <div class="remark" id="remark" hidden>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <div><b>What DICD asked you to fix</b><span id="remarkText"></span></div>
+    </div>
+
+    <div class="step1" id="dlStep" hidden>
+      <span class="num" aria-hidden="true">1</span>
+      <div style="flex:1;min-width:0"><b>Download your lease contract</b><span>Print it, sign it, then upload the signed copy below.</span></div>
+      <button type="button" class="btn btn-s" id="dlBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download</button>
+    </div>
+    <p class="tips-t" id="tipsT" hidden>Before you upload</p>
+    <ul class="tips" id="tips" hidden></ul>
+
+    <label class="drop" id="drop">
+      <span class="drop-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16l-4-4-4 4M12 12v9"/><path d="M20.4 18.4A5 5 0 0018 9h-1.3A8 8 0 103 16.3"/></svg></span>
+      <p><span class="pick">Click to upload</span> or drag and drop</p>
+      <small>PDF, JPG or PNG · [MAX FILE SIZE] per file · up to 4 files</small>
+      <input type="file" id="file" accept=".pdf,.jpg,.jpeg,.png" multiple>
+    </label>
+    <div class="err" id="err" role="alert" hidden></div>
+
+    <ul class="files" id="files" aria-label="Selected files"></ul>
+    <p class="ver" id="ver"></p>
+  </div>
+
+  <div class="mf">
+    <button type="button" class="btn btn-s" id="mCancel">Cancel</button>
+    <button type="button" class="btn btn-p" id="mSubmit" disabled>Submit for review</button>
+  </div>
+</dialog>
+
+<dialog id="sdlg" aria-labelledby="sTitle" aria-describedby="sSub">
+  <div class="mh">
+    <span class="mh-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 14l2 2 4-4"/></svg></span>
+    <div class="mh-t"><h2 id="sTitle">Survey</h2><p id="sSub">Answer a few questions to finish your requirements. It takes about [X] minutes.</p></div>
+    <button type="button" class="x" id="sClose" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+  <form class="mb" id="sForm" onsubmit="return false">
+    <span class="sv-progress" id="svProg">0 of 3 answered</span>
+    <fieldset class="q"><legend>[Question 1 from DMCI] *</legend>
+      <label class="opt"><input type="radio" name="q1" value="a"> [Option A]</label>
+      <label class="opt"><input type="radio" name="q1" value="b"> [Option B]</label>
+      <label class="opt"><input type="radio" name="q1" value="c"> [Option C]</label>
+    </fieldset>
+    <fieldset class="q"><legend>[Question 2 from DMCI] *</legend>
+      <label class="opt"><input type="radio" name="q2" value="yes"> Yes</label>
+      <label class="opt"><input type="radio" name="q2" value="no"> No</label>
+    </fieldset>
+    <div><label class="sv-l" for="q3">[Question 3 from DMCI] *</label><textarea class="sv-ta" id="q3" placeholder="Type your answer"></textarea></div>
+  </form>
+  <div class="mf">
+    <button type="button" class="btn btn-s" id="sCancel">Save and close</button>
+    <button type="button" class="btn btn-p" id="sSubmit" disabled>Submit survey</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+  const MAX = 10 * 1024 * 1024; // placeholder: replace with the real size limit
+  const docs = [
+    { name: "Reservation fee", kind: "file", status: "sub", remarks: "", version: 1,
+      tips: ["Upload the deposit slip, bank transfer receipt or online payment confirmation.", "The amount, date and reference number must be readable."] },
+    { name: "Reservation Agreement", kind: "file", status: "ok", remarks: "", version: 1, tips: [] },
+    { name: "Valid IDs", kind: "file", status: "err", remarks: "[DICD remarks appear here]", version: 1,
+      tips: ["Upload 2 valid government-issued IDs that are not expired.", "Take a clear photo or scan. All 4 corners of each ID must show."] },
+    { name: "Tenant Information Sheet", kind: "form", status: "ok", remarks: "", version: 1, tips: [] },
+    { name: "Signed contract", kind: "contract", status: "new", remarks: "", version: 0,
+      tips: ["Sign every page where your signature is needed.", "Scan or photograph all pages in order. One PDF is best."] },
+    { name: "PDCs", kind: "file", status: "new", remarks: "", version: 0,
+      tips: ["Upload a clear photo or scan of each post-dated cheque.", "Check the dates and amounts match your billing schedule."] },
+    { name: "Survey", kind: "survey", status: "new", remarks: "", version: 0, tips: [] }
+  ];
+  const STATUS = { sub: ["Submitted", "p-sub"], ok: ["Sufficient", "p-ok"], err: ["Deficient", "p-err"], new: ["Not submitted", "p-new"] };
+  const $ = id => document.getElementById(id);
+  let current = -1, files = [], lastTrigger = null;
+
+  function renderRows() {
+    $("rows").innerHTML = docs.map((d, i) => {
+      const [label, cls] = STATUS[d.status];
+      const rem = d.status === "err" ? `DICD: ${d.remarks}` : d.status === "sub" && d.version > 1 ? "Resubmitted. Waiting for DICD review." : "-";
+      let btn;
+      if (d.kind === "survey") btn = d.status === "new" ? `<button type="button" class="btn btn-p" data-survey="${i}">Open</button>` : `<button type="button" class="btn btn-s" data-view="${i}">View</button>`;
+      else if (d.status === "err" || d.status === "new") btn = `<button type="button" class="btn btn-p" data-up="${i}">Upload</button>`;
+      else if (d.status === "sub") btn = `<button type="button" class="btn btn-s" data-up="${i}">Replace</button>`;
+      else btn = `<button type="button" class="btn btn-s" data-view="${i}">View</button>`;
+      return `<tr><td class="doc">${d.name}</td><td><span class="pill ${cls}">${label}</span></td><td class="rem">${rem}</td><td class="act">${btn}</td></tr>`;
+    }).join("");
+  }
+
+  function openUpload(i, trigger) {
+    current = i; files = []; lastTrigger = trigger;
+    const d = docs[i];
+    const replace = d.status === "sub";
+    $("mTitle").textContent = replace ? "Replace document" : "Upload document";
+    $("dlStep").hidden = d.kind !== "contract";
+    $("tipsT").textContent = d.kind === "contract" ? "2. Before you upload" : "Before you upload";
+    $("mSub").textContent = d.name;
+    $("remark").hidden = d.status !== "err"; $("remarkText").textContent = d.remarks;
+    $("tips").innerHTML = d.tips.map(t => `<li>${t}</li>`).join(""); $("tips").hidden = $("tipsT").hidden = !d.tips.length;
+    $("ver").hidden = d.version === 0;
+    $("ver").innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>This becomes version ${d.version + 1}. Version ${d.version} stays in your history.`;
+    $("err").hidden = true; renderFiles(); $("dlg").showModal();
+  }
+  function closeUpload() { files.forEach(f => clearInterval(f.timer)); $("dlg").close(); if (lastTrigger) lastTrigger.focus(); }
+
+  function fmt(b) { return b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB"; }
+  function addFiles(list) {
+    const errs = [];
+    for (const f of list) {
+      if (files.length >= 4) { errs.push("You can upload up to 4 files."); break; }
+      const ok = /\.(pdf|jpe?g|png)$/i.test(f.name);
+      if (!ok) { errs.push(`${f.name} is not a PDF, JPG or PNG.`); continue; }
+      if (f.size > MAX) { errs.push(`${f.name} is larger than the size limit.`); continue; }
+      const item = { name: f.name, size: f.size, pdf: /\.pdf$/i.test(f.name), pct: 0, done: false };
+      files.push(item);
+      item.timer = setInterval(() => { item.pct = Math.min(100, item.pct + 12 + Math.random() * 18); if (item.pct >= 100) { item.done = true; clearInterval(item.timer); } renderFiles(); }, 220);
+    }
+    $("err").hidden = !errs.length;
+    $("err").innerHTML = errs.length ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span>${errs.join(" ")}</span>` : "";
+    renderFiles();
+  }
+  function renderFiles() {
+    $("files").innerHTML = files.map((f, i) => `
+      <li class="file ${f.done ? "done" : ""}">
+        <span class="ftype ${f.pdf ? "ft-pdf" : "ft-img"}" aria-hidden="true">${f.pdf ? "PDF" : "IMG"}</span>
+        <div class="fbody">
+          <span class="fname">${f.name}</span>
+          <span class="fmeta">${fmt(f.size)}${f.done ? ' · <span style="color:var(--ok);font-weight:500">Uploaded</span>' : " · Uploading"}</span>
+          <div class="bar"><div class="track" role="progressbar" aria-label="Upload progress for ${f.name}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(f.pct)}"><div class="fill" style="width:${f.pct}%"></div></div><span class="pct">${Math.round(f.pct)}%</span></div>
+        </div>
+        ${f.done ? '<span class="check" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 12l5 5L20 7"/></svg></span>' : ""}
+        <button type="button" class="fx" data-rm="${i}" aria-label="Remove ${f.name}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+      </li>`).join("");
+    const ready = files.length > 0 && files.every(f => f.done);
+    $("mSubmit").disabled = !ready;
+    $("mSubmit").textContent = files.length && !ready ? "Uploading…" : "Submit for review";
+  }
+  function toast(m) { const t = $("toast"); t.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#75e0a7" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>${m}`; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => t.hidden = true, 3000); }
+
+  $("rows").addEventListener("click", e => {
+    const sv = e.target.closest("[data-survey]"); if (sv) return openSurvey(+sv.dataset.survey, sv);
+    const up = e.target.closest("[data-up]"); if (up) return openUpload(+up.dataset.up, up);
+    const v = e.target.closest("[data-view]"); if (v) toast("Opening " + docs[+v.dataset.view].name);
+  });
+  $("file").addEventListener("change", e => { addFiles([...e.target.files]); e.target.value = ""; });
+  const drop = $("drop");
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => addFiles([...e.dataTransfer.files]));
+  $("files").addEventListener("click", e => { const b = e.target.closest("[data-rm]"); if (!b) return; const i = +b.dataset.rm; clearInterval(files[i].timer); files.splice(i, 1); renderFiles(); });
+  $("mClose").addEventListener("click", closeUpload);
+  $("mCancel").addEventListener("click", closeUpload);
+  $("dlg").addEventListener("cancel", e => { e.preventDefault(); closeUpload(); });
+  $("mSubmit").addEventListener("click", () => {
+    const d = docs[current]; d.version += 1; d.status = "sub"; d.remarks = "";
+    closeUpload(); renderRows(); toast(`${d.name} sent to DICD for review`);
+  });
+
+  let svIdx = -1, svTrigger = null;
+  function svCheck() {
+    const n = ["q1", "q2"].filter(q => document.querySelector(`input[name="${q}"]:checked`)).length + ($("q3").value.trim() ? 1 : 0);
+    $("svProg").textContent = `${n} of 3 answered`; $("sSubmit").disabled = n < 3;
+  }
+  function openSurvey(i, trigger) { svIdx = i; svTrigger = trigger; svCheck(); $("sdlg").showModal(); }
+  function closeSurvey(msg) { $("sdlg").close(); if (msg) toast(msg); if (svTrigger && document.body.contains(svTrigger)) svTrigger.focus(); }
+  $("sForm").addEventListener("input", svCheck);
+  $("sForm").addEventListener("change", svCheck);
+  $("sClose").addEventListener("click", () => closeSurvey());
+  $("sCancel").addEventListener("click", () => closeSurvey("Your answers are saved. You can finish later."));
+  $("sSubmit").addEventListener("click", () => { docs[svIdx].status = "sub"; closeSurvey("Survey submitted"); renderRows(); });
+  $("dlBtn").addEventListener("click", () => toast("Downloading your lease contract"));
+
+  renderRows();
+</script>
+</body>
+</html>

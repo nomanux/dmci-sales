@@ -106,7 +106,7 @@ import { CURRENT_USER, getInitials, useProfilePhoto } from "./currentUser";
 import EntitySelectionModal, {
   type SelectedEntity,
 } from "./EntitySelectionModal";
-import { LayoutGroup, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, LayoutGroup, MotionConfig, motion, useReducedMotion } from "motion/react";
 import {
   LayoutDashboardIcon,
   Building2Icon,
@@ -948,13 +948,20 @@ export default function Layout({
         </main>
       </div>
 
-      {entityModalOpen && (
-        <EntitySelectionModal
-          selected={selectedEntity}
-          onSelect={setSelectedEntity}
-          onClose={() => setEntityModalOpen(false)}
-        />
-      )}
+      {/* AnimatePresence keeps the modal mounted until its exit animation ends.
+          With reduced motion on, it only fades (no scale or rise). */}
+      <MotionConfig reducedMotion="user">
+        <AnimatePresence>
+          {entityModalOpen && (
+            <EntitySelectionModal
+              key="entity-modal"
+              selected={selectedEntity}
+              onSelect={setSelectedEntity}
+              onClose={() => setEntityModalOpen(false)}
+            />
+          )}
+        </AnimatePresence>
+      </MotionConfig>
     </div>
   );
 }

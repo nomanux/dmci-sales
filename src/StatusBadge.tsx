@@ -1,5 +1,9 @@
 import { LinkIcon, FileIcon } from "./icons";
 import Button from "./Button";
+import { useId } from "react";
+import { motion, useReducedMotion } from "motion/react";
+
+const RECORD_TABS_SPRING = { type: "spring", stiffness: 550, damping: 35, mass: 1 } as const;
 
 /**
  * Small shared pill/badge/card-header pieces reused across every property
@@ -167,6 +171,10 @@ export function RecordTabs({
   active: string;
   onChange: (tab: string) => void;
 }) {
+  // Unique per tab bar, so two RecordTabs on one screen never share an underline.
+  const underlineId = useId();
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="flex items-center gap-6 border-b border-gray-100 px-6">
       {tabs.map((tab) => (
@@ -175,13 +183,25 @@ export function RecordTabs({
           type="button"
           onClick={() => onChange(tab)}
           className={
-            "cursor-pointer border-b-2 py-3 text-sm font-semibold " +
+            // border-b-2 stays transparent to keep the original height; the
+            // blue underline is the animated span below.
+            "relative cursor-pointer border-b-2 border-transparent py-3 text-sm font-semibold transition-colors duration-200 " +
             (tab === active
-              ? "border-primary-500 text-primary-500"
-              : "border-transparent text-gray-500 hover:text-gray-700")
+              ? "text-primary-500"
+              : "text-gray-500 hover:text-gray-700")
           }
         >
           {tab}
+          {tab === active && (
+            // Shared-layout underline (same technique as the Motion Brew
+            // Preview/Source toggle): layoutId moves it between tabs and
+            // the spring gives ~190ms to peak, ~3% overshoot, settled ~380ms.
+            <motion.span
+              layoutId={`record-tabs-underline-${underlineId}`}
+              transition={reduceMotion ? { duration: 0 } : RECORD_TABS_SPRING}
+              className="absolute inset-x-0 -bottom-[2px] h-[2px] bg-primary-500"
+            />
+          )}
         </button>
       ))}
     </div>

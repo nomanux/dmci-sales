@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upload PDCs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#10398e; --brand-700:#0b2a6b; --brand-25:#eff4ff; --brand-50:#d1defc;
+    --t1:#181d27; --t2:#414651; --t3:#535862; --t4:#717680;
+    --b1:#d5d7da; --b2:#e9eaeb; --bg:#fafafa; --bg2:#f5f5f5;
+    --err-700:#b42318; --err-bg:#fef3f2; --err-bd:#fecdca;
+    --ok:#067647; --ok-bg:#ecfdf3; --ok-bd:#abefc6; --ok-solid:#17b26a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:rgba(10,13,18,.55);font-family:Inter,system-ui,sans-serif;color:var(--t1);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px}
+  button,input,select{font-family:inherit}
+  button:focus-visible,input:focus-visible,select:focus-visible,label:focus-within{outline:3px solid rgba(16,57,142,.28);outline-offset:1px}
+  .modal{background:#fff;border-radius:16px;width:min(760px,100%);box-shadow:0 24px 48px -12px rgba(10,13,18,.3);display:flex;flex-direction:column;max-height:calc(100vh - 64px)}
+  .mh{display:flex;gap:16px;align-items:flex-start;padding:24px 24px 16px}
+  .mh-ic{flex:none;width:48px;height:48px;border-radius:10px;border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;color:var(--t2)}
+  .mh h1{margin:0;font-size:18px;line-height:28px}
+  .mh p{margin:2px 0 0;font-size:14px;color:var(--t3)}
+  .x{margin-left:auto;flex:none;width:40px;height:40px;border:0;background:none;border-radius:8px;color:var(--t4);cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .x:hover{background:var(--bg)}
+  .mb{padding:0 24px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+
+  .method{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:0;padding:0;margin:0}
+  .method legend{font-size:14px;font-weight:600;margin-bottom:8px;padding:0}
+  .mopt{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--b1);border-radius:10px;cursor:pointer}
+  .mopt input{margin:2px 0 0;width:18px;height:18px;accent-color:var(--brand)}
+  .mopt b{display:block;font-size:14px;margin-bottom:2px}
+  .mopt span{font-size:13px;color:var(--t3);line-height:18px}
+  .mopt:has(input:checked){border-color:var(--brand);background:var(--brand-25);box-shadow:0 0 0 1px var(--brand)}
+  @media (max-width:560px){.method{grid-template-columns:1fr}}
+
+  .sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
+  .sum div{background:var(--bg);border:1px solid var(--b2);border-radius:10px;padding:10px 12px}
+  .sum dt{font-size:12px;color:var(--t4)} .sum dd{margin:2px 0 0;font-size:15px;font-weight:600}
+  .prog{display:flex;align-items:center;gap:12px;font-size:14px;font-weight:500;color:var(--t2)}
+  .track{flex:1;height:8px;border-radius:999px;background:var(--b2);overflow:hidden}
+  .fill{height:100%;background:var(--ok-solid);border-radius:999px;transition:width .2s}
+
+  .bulk{display:flex;gap:10px;align-items:center;padding:12px 14px;border:1px dashed var(--b1);border-radius:10px;font-size:13px;color:var(--t3);flex-wrap:wrap}
+  .bulk b{color:var(--t1);font-size:14px;display:block}
+  .bulk .grow{flex:1;min-width:220px}
+
+  .tw{border:1px solid var(--b2);border-radius:10px;overflow:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+  th{text-align:left;font-size:12px;font-weight:600;color:var(--t3);background:var(--bg);padding:10px 12px;border-bottom:1px solid var(--b2);white-space:nowrap}
+  td{padding:10px 12px;border-bottom:1px solid var(--b2);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .in{width:100%;min-width:110px;height:40px;border:1px solid var(--b1);border-radius:8px;padding:0 10px;font-size:14px;color:var(--t1);background:#fff}
+  .in::placeholder{color:var(--t4)}
+  .ph{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 12px;border:1px solid var(--b1);border-radius:8px;font-size:13px;font-weight:600;color:var(--t2);background:#fff;cursor:pointer;white-space:nowrap;position:relative}
+  .ph input{position:absolute;width:1px;height:1px;opacity:0}
+  .ph.done{border-color:var(--ok-bd);background:var(--ok-bg);color:var(--ok)}
+  .st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px;border:1px solid;white-space:nowrap}
+  .st-ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+  .st-no{background:var(--bg2);border-color:var(--b2);color:var(--t2)}
+
+  .ada{display:flex;flex-direction:column;gap:14px}
+  .note{display:flex;gap:10px;padding:12px 14px;border-radius:10px;background:var(--brand-25);border:1px solid var(--brand-50);color:var(--brand);font-size:13px;line-height:19px}
+  .drop{border:1px dashed var(--b1);border-radius:12px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;font-size:14px;color:var(--t3);cursor:pointer;position:relative}
+  .drop input{position:absolute;width:1px;height:1px;opacity:0}
+  .drop .pick{color:var(--brand);font-weight:600;text-decoration:underline}
+  .drop small{font-size:12px;color:var(--t4)}
+  .lbl{display:block;font-size:14px;font-weight:500;color:var(--t2);margin-bottom:6px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  .mf{display:flex;gap:12px;align-items:center;padding:16px 24px 24px;border-top:1px solid var(--b2);flex-wrap:wrap}
+  .mf .hint{flex:1;min-width:200px;font-size:13px;color:var(--t3)}
+  .btn{min-height:40px;padding:8px 16px;border-radius:8px;font:600 14px Inter,sans-serif;cursor:pointer;border:1px solid;display:inline-flex;align-items:center;gap:8px}
+  .btn-p{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn-p:disabled{background:var(--bg2);border-color:var(--b2);color:var(--t4);cursor:not-allowed}
+  .btn-s{background:#fff;border-color:var(--b1);color:var(--t2)}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#181d27;color:#fff;padding:12px 16px;border-radius:10px;font-size:14px}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="modal" role="dialog" aria-modal="true" aria-labelledby="t">
+  <div class="mh">
+    <span class="mh-ic" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 14h6M15 10h3"/></svg></span>
+    <div><h1 id="t">Upload PDCs</h1><p>Post-dated cheques for your monthly rent · Unit 1204</p></div>
+    <button type="button" class="x" aria-label="Close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+
+  <div class="mb">
+    <fieldset class="method">
+      <legend>How will you pay your monthly rent?</legend>
+      <label class="mopt"><input type="radio" name="m" value="pdc" checked><div><b>Post-dated cheques</b><span>One cheque for each month in your billing schedule.</span></div></label>
+      <label class="mopt"><input type="radio" name="m" value="ada"><div><b>Auto debit (ADA)</b><span>Upload your bank-approved auto debit form instead.</span></div></label>
+    </fieldset>
+
+    <!-- PDC -->
+    <div id="pdcView" style="display:flex;flex-direction:column;gap:16px">
+      <dl class="sum">
+        <div><dt>Monthly rent</dt><dd>PHP 25,000</dd></div>
+        <div><dt>Cheques needed</dt><dd id="need">12</dd></div>
+        <div><dt>Pay to the order of</dt><dd>[PAYEE NAME]</dd></div>
+      </dl>
+      <div class="prog"><span id="progTxt"></span><div class="track"><div class="fill" id="fill"></div></div></div>
+
+      <div class="bulk">
+        <div class="grow"><b>Same bank for all cheques?</b>Fill in the bank once and we copy it to every row.</div>
+        <select class="in" id="bankAll" style="width:200px" aria-label="Bank for all cheques"><option value="">Choose bank</option><option>BDO</option><option>BPI</option><option>Metrobank</option><option>UnionBank</option><option>Other</option></select>
+      </div>
+
+      <div class="tw">
+        <table>
+          <thead><tr><th scope="col">#</th><th scope="col">Cheque date</th><th scope="col">Amount</th><th scope="col">Cheque no.</th><th scope="col">Bank</th><th scope="col">Photo</th><th scope="col">Status</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADA -->
+    <div class="ada" id="adaView" hidden>
+      <div class="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Get the auto debit form approved by your bank first. Your rent of PHP 25,000 is then debited every month on the due date.</span></div>
+      <div class="grid2">
+        <div><label class="lbl" for="adaBank">Bank</label><select class="in" id="adaBank"><option value="">Choose bank</option><option>BDO</option><option>BPI</option><option>Metrobank</option><option>UnionBank</option><option>Other</option></select></div>
+        <div><label class="lbl" for="adaAcct">Account number (last 4 digits)</label><input class="in" id="adaAcct" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+      </div>
+      <label class="drop" id="adaDrop"><span aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16l-4-4-4 4M12 12v9"/><path d="M20.4 18.4A5 5 0 0018 9h-1.3A8 8 0 103 16.3"/></svg></span><span><span class="pick">Upload the approved ADA form</span> or drag and drop</span><small>PDF, JPG or PNG · [MAX FILE SIZE]</small><input type="file" id="adaFile" accept=".pdf,.jpg,.jpeg,.png"></label>
+      <p id="adaName" style="margin:0;font-size:14px;color:var(--ok);font-weight:500" hidden></p>
+    </div>
+  </div>
+
+  <div class="mf">
+    <span class="hint" id="hint"></span>
+    <button type="button" class="btn btn-s" id="save">Save and finish later</button>
+    <button type="button" class="btn btn-p" id="submit" disabled>Submit for review</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+  const months = ["Dec 1, 2026","Jan 1, 2027","Feb 1, 2027","Mar 1, 2027","Apr 1, 2027","May 1, 2027","Jun 1, 2027","Jul 1, 2027","Aug 1, 2027","Sep 1, 2027","Oct 1, 2027","Nov 1, 2027"];
+  const rows = months.map(d => ({ date: d, no: "", bank: "", photo: "" }));
+  const $ = id => document.getElementById(id);
+  const complete = r => r.no.trim() && r.bank && r.photo;
+
+  function render() {
+    $("rows").innerHTML = rows.map((r, i) => `<tr>
+      <td>${i + 1}</td><td class="num">${r.date}</td><td class="num">PHP 25,000</td>
+      <td><input class="in" data-i="${i}" data-f="no" value="${r.no}" inputmode="numeric" placeholder="0000123" aria-label="Cheque number for ${r.date}"></td>
+      <td><select class="in" data-i="${i}" data-f="bank" aria-label="Bank for ${r.date}"><option value="">Choose</option>${["BDO","BPI","Metrobank","UnionBank","Other"].map(b => `<option ${r.bank === b ? "selected" : ""}>${b}</option>`).join("")}</select></td>
+      <td><label class="ph ${r.photo ? "done" : ""}">${r.photo ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg>Added' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add photo'}<input type="file" accept=".jpg,.jpeg,.png,.pdf" data-i="${i}" data-f="photo" aria-label="Photo of cheque for ${r.date}"></label></td>
+      <td>${complete(r) ? '<span class="st st-ok">Ready</span>' : '<span class="st st-no">Missing</span>'}</td></tr>`).join("");
+    sync();
+  }
+  function sync() {
+    const ada = document.querySelector('input[name="m"]:checked').value === "ada";
+    $("pdcView").style.display = ada ? "none" : "flex"; $("adaView").hidden = !ada;
+    if (ada) {
+      const ok = $("adaBank").value && $("adaAcct").value.length === 4 && !$("adaName").hidden;
+      $("submit").disabled = !ok; $("hint").textContent = ok ? "Ready to submit." : "Add the bank, account digits and the approved form.";
+    } else {
+      const n = rows.filter(complete).length;
+      $("progTxt").textContent = `${n} of ${rows.length} cheques ready`;
+      $("fill").style.width = (n / rows.length * 100) + "%";
+      $("submit").disabled = n < rows.length;
+      $("hint").textContent = n < rows.length ? `Add ${rows.length - n} more cheque${rows.length - n > 1 ? "s" : ""} to submit.` : "All cheques ready.";
+    }
+  }
+  function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(t._h); t._h = setTimeout(() => t.hidden = true, 2600); }
+
+  $("rows").addEventListener("input", e => { const el = e.target; if (!el.dataset.f || el.type === "file") return; rows[+el.dataset.i][el.dataset.f] = el.value; sync(); const tr = el.closest("tr"); tr.lastElementChild.innerHTML = complete(rows[+el.dataset.i]) ? '<span class="st st-ok">Ready</span>' : '<span class="st st-no">Missing</span>'; });
+  $("rows").addEventListener("change", e => { const el = e.target; if (el.type === "file" && el.files[0]) { rows[+el.dataset.i].photo = el.files[0].name; render(); } else if (el.tagName === "SELECT") { rows[+el.dataset.i].bank = el.value; render(); } });
+  $("bankAll").addEventListener("change", e => { if (!e.target.value) return; rows.forEach(r => r.bank = e.target.value); render(); toast(`${e.target.value} added to all ${rows.length} cheques`); });
+  document.querySelectorAll('input[name="m"]').forEach(r => r.addEventListener("change", sync));
+  $("adaBank").addEventListener("change", sync); $("adaAcct").addEventListener("input", sync);
+  $("adaFile").addEventListener("change", e => { if (e.target.files[0]) { $("adaName").textContent = "Added: " + e.target.files[0].name; $("adaName").hidden = false; } sync(); });
+  $("save").addEventListener("click", () => toast("Saved. You can finish later."));
+  $("submit").addEventListener("click", () => toast("Sent to DICD for review"));
+  render();
+</script>
+</body>
+</html>

@@ -1,11 +1,13 @@
 ﻿import { useState } from "react";
+import { AnimatePresence, MotionConfig, motion, type Variants } from "motion/react";
 import Layout from "./Layout";
+import ViewToggle from "./ViewToggle";
 import Pagination from "./Pagination";
 import Checkbox from "./Checkbox";
 import ImagePreviewModal from "./ImagePreviewModal";
 import RightDrawer from "./RightDrawer";
 import FilterTrigger from "./FilterTrigger";
-import RowActionButton from "./RowActionButton";
+import RowActionButton, { RowActionGroup } from "./RowActionButton";
 import Select from "./Select";
 import { DownloadPdfButton, StatusPill, TableCardHeader } from "./StatusBadge";
 import { BuildingIcon, EyeIcon, ImageIcon, PauseCircleIcon } from "./icons";
@@ -154,6 +156,57 @@ const STATUS_OPTIONS = [
   { value: "On Hold", label: "On-Hold" },
 ];
 
+/* ---- Motion for the grid/list toggle ----
+ * The outgoing view fades and lifts away, then the incoming one fades in while
+ * its rows / unit cards ripple in one after another. Kept short so switching
+ * views never feels like waiting. */
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+
+const viewVariants: Variants = {
+  hidden: { opacity: 0, y: 10, filter: "blur(4px)" },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { duration: 0.28, ease: EASE_OUT, when: "beforeChildren" },
+  },
+  exit: {
+    opacity: 0,
+    y: -8,
+    filter: "blur(4px)",
+    transition: { duration: 0.16, ease: "easeIn" },
+  },
+};
+
+const rowListVariants: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.018 } },
+};
+
+const rowVariants: Variants = {
+  hidden: { opacity: 0, y: 6 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.24, ease: EASE_OUT } },
+};
+
+const propertyListVariants: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07 } },
+};
+
+const propertyVariants: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.3, ease: EASE_OUT, staggerChildren: 0.022, delayChildren: 0.06 },
+  },
+};
+
+const unitCardVariants: Variants = {
+  hidden: { opacity: 0, y: 8, scale: 0.96 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.26, ease: EASE_OUT } },
+};
+
 function floorLabel(floorNum: number): string {
   const mod100 = floorNum % 100;
   if (mod100 >= 11 && mod100 <= 13) return `${floorNum}th`;
@@ -270,41 +323,21 @@ export default function UnitAvailabilityList() {
               rightSlot={
                 <div className="flex items-center gap-3">
                   <DownloadPdfButton />
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setView("grid")}
-                      className={`h-8 w-8 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
-                        view === "grid" ? "bg-[#F0F5FF]" : "hover:bg-[#F9FAFB]"
-                      }`}
-                      title="Grid view"
-                    >
-                      <img
-                        alt="Grid view"
-                        className="w-[15px] h-[15px]"
-                        src="data:image/svg+xml,%3csvg%20width='17'%20height='17'%20viewBox='0%200%2017%2017'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M5.33398%200.833496H2.16732C1.70061%200.833496%201.46725%200.833496%201.28899%200.924324C1.13219%201.00422%201.00471%201.1317%200.924812%201.2885C0.833984%201.46676%200.833984%201.70012%200.833984%202.16683V5.3335C0.833984%205.80021%200.833984%206.03356%200.924812%206.21182C1.00471%206.36862%201.13219%206.49611%201.28899%206.576C1.46725%206.66683%201.70061%206.66683%202.16732%206.66683H5.33398C5.80069%206.66683%206.03405%206.66683%206.21231%206.576C6.36911%206.49611%206.4966%206.36862%206.57649%206.21182C6.66732%206.03356%206.66732%205.80021%206.66732%205.3335V2.16683C6.66732%201.70012%206.66732%201.46676%206.57649%201.2885C6.4966%201.1317%206.36911%201.00422%206.21231%200.924324C6.03405%200.833496%205.80069%200.833496%205.33398%200.833496Z'%20stroke='%23052B78'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3cpath%20d='M14.5007%200.833496H11.334C10.8673%200.833496%2010.6339%200.833496%2010.4557%200.924324C10.2989%201.00422%2010.1714%201.1317%2010.0915%201.2885C10.0007%201.46676%2010.0007%201.70012%2010.0007%202.16683V5.3335C10.0007%205.80021%2010.0007%206.03356%2010.0915%206.21182C10.1714%206.36862%2010.2989%206.49611%2010.4557%206.576C10.6339%206.66683%2010.8673%206.66683%2011.334%206.66683H14.5007C14.9674%206.66683%2015.2007%206.66683%2015.379%206.576C15.5358%206.49611%2015.6633%206.36862%2015.7432%206.21182C15.834%206.03356%2015.834%205.80021%2015.834%205.3335V2.16683C15.834%201.70012%2015.834%201.46676%2015.7432%201.2885C15.6633%201.1317%2015.5358%201.00422%2015.379%200.924324C15.2007%200.833496%2014.9674%200.833496%2014.5007%200.833496Z'%20stroke='%23052B78'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3cpath%20d='M14.5007%2010.0002H11.334C10.8673%2010.0002%2010.6339%2010.0002%2010.4557%2010.091C10.2989%2010.1709%2010.1714%2010.2984%2010.0915%2010.4552C10.0007%2010.6334%2010.0007%2010.8668%2010.0007%2011.3335V14.5002C10.0007%2014.9669%2010.0007%2015.2002%2010.0915%2015.3785C10.1714%2015.5353%2010.2989%2015.6628%2010.4557%2015.7427C10.6339%2015.8335%2010.8673%2015.8335%2011.334%2015.8335H14.5007C14.9674%2015.8335%2015.2007%2015.8335%2015.379%2015.7427C15.5358%2015.6628%2015.6633%2015.5353%2015.7432%2015.3785C15.834%2015.2002%2015.834%2014.9669%2015.834%2014.5002V11.3335C15.834%2010.8668%2015.834%2010.6334%2015.7432%2010.4552C15.6633%2010.2984%2015.5358%2010.1709%2015.379%2010.091C15.2007%2010.0002%2014.9674%2010.0002%2014.5007%2010.0002Z'%20stroke='%23052B78'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3cpath%20d='M5.33398%2010.0002H2.16732C1.70061%2010.0002%201.46725%2010.0002%201.28899%2010.091C1.13219%2010.1709%201.00471%2010.2984%200.924812%2010.4552C0.833984%2010.6334%200.833984%2010.8668%200.833984%2011.3335V14.5002C0.833984%2014.9669%200.833984%2015.2002%200.924812%2015.3785C1.00471%2015.5353%201.13219%2015.6628%201.28899%2015.7427C1.46725%2015.8335%201.70061%2015.8335%202.16732%2015.8335H5.33398C5.80069%2015.8335%206.03405%2015.8335%206.21231%2015.7427C6.36911%2015.6628%206.4966%2015.5353%206.57649%2015.3785C6.66732%2015.2002%206.66732%2014.9669%206.66732%2014.5002V11.3335C6.66732%2010.8668%206.66732%2010.6334%206.57649%2010.4552C6.4966%2010.2984%206.36911%2010.1709%206.21231%2010.091C6.03405%2010.0002%205.80069%2010.0002%205.33398%2010.0002Z'%20stroke='%23052B78'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e"
-                      />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setView("list")}
-                      className={`h-8 w-8 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
-                        view === "list" ? "bg-[#F0F5FF]" : "hover:bg-[#F9FAFB]"
-                      }`}
-                      title="List view"
-                    >
-                      <img
-                        alt="List view"
-                        className="w-[15px] h-[15px]"
-                        src="data:image/svg+xml,%3csvg%20width='17'%20height='14'%20viewBox='0%200%2017%2014'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M15.834%206.66683L5.83398%206.66683M15.834%201.66683L5.83398%201.66683M15.834%2011.6668L5.83398%2011.6668M2.50065%206.66683C2.50065%207.12707%202.12755%207.50016%201.66732%207.50016C1.20708%207.50016%200.833984%207.12707%200.833984%206.66683C0.833984%206.20659%201.20708%205.8335%201.66732%205.8335C2.12755%205.8335%202.50065%206.20659%202.50065%206.66683ZM2.50065%201.66683C2.50065%202.12707%202.12755%202.50016%201.66732%202.50016C1.20708%202.50016%200.833984%202.12707%200.833984%201.66683C0.833984%201.20659%201.20708%200.833496%201.66732%200.833496C2.12755%200.833496%202.50065%201.20659%202.50065%201.66683ZM2.50065%2011.6668C2.50065%2012.1271%202.12755%2012.5002%201.66732%2012.5002C1.20708%2012.5002%200.833984%2012.1271%200.833984%2011.6668C0.833984%2011.2066%201.20708%2010.8335%201.66732%2010.8335C2.12755%2010.8335%202.50065%2011.2066%202.50065%2011.6668Z'%20stroke='%2306318A'%20stroke-width='1.66667'%20stroke-linecap='round'%20stroke-linejoin='round'/%3e%3c/svg%3e"
-                      />
-                    </button>
-                  </div>
+                  <ViewToggle id="unit-availability" view={view} onChange={setView} />
                 </div>
               }
             />
+            <MotionConfig reducedMotion="user">
+            <AnimatePresence mode="wait" initial={false}>
             {view === "list" ? (
-              <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]">
+              <motion.div
+                key="list"
+                variants={viewVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+                className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]"
+              >
                 <table className="w-full min-w-[1040px] border-collapse text-[13px]">
                   <thead className="table-head">
                     <tr className="text-left">
@@ -324,10 +357,11 @@ export default function UnitAvailabilityList() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <motion.tbody variants={rowListVariants}>
                     {filteredRows.map((row, index) => (
-                      <tr
+                      <motion.tr
                         key={index}
+                        variants={rowVariants}
                         className="border-b border-gray-100 text-gray-600 transition-colors hover:bg-primary-25/50"
                       >
                         <td className="px-4 py-1">
@@ -346,7 +380,8 @@ export default function UnitAvailabilityList() {
                         <td className="px-2 py-1 text-right tabular-nums">{formatPrice(row.price)}</td>
                         <td className="px-2 py-1">{row.propertyUnit}</td>
                         <td className="px-2 py-1 col-actions">
-                          <div className="flex items-center justify-center gap-1.5">
+                          <div className="flex items-center justify-center">
+                            <RowActionGroup>
                             <RowActionButton
                               aria-label={`View ${row.buildingUnit} details`}
                               onClick={() =>
@@ -355,33 +390,42 @@ export default function UnitAvailabilityList() {
                                   itemId: row.propertyUnit,
                                 })
                               }
-                              size="sm"
+                              size="segment"
                             icon={<EyeIcon className="h-[22px] w-[22px]" />}
                               label="View"
                             />
                             <RowActionButton
                               aria-label={`View ${row.buildingUnit} image`}
                               onClick={() => setPreviewRow(row)}
-                              size="sm"
+                              size="segment"
                             icon={<ImageIcon className="h-[22px] w-[22px]" />}
                               label="Image"
                             />
                             <RowActionButton
                               aria-label={`Put ${row.buildingUnit} on hold`}
-                              size="sm"
+                              size="segment"
+                              disabled={row.status !== "Available"}
                             icon={<PauseCircleIcon className="h-[22px] w-[22px]" />}
                               label="Hold"
                             />
+                            </RowActionGroup>
                           </div>
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))}
-                  </tbody>
+                  </motion.tbody>
                 </table>
-              </div>
+              </motion.div>
             ) : (
-              <div className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]">
-                <div className="flex flex-col gap-8 p-6">
+              <motion.div
+                key="grid"
+                variants={viewVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+                className="flex-1 min-h-0 overflow-auto [scrollbar-gutter:stable]"
+              >
+                <motion.div variants={propertyListVariants} className="flex flex-col gap-8 p-6">
                   {[
                     { code: "AGP", name: "C- Amina", status: "Available" },
                     { code: "TWP", name: "C- Bella", status: "Available" },
@@ -389,7 +433,7 @@ export default function UnitAvailabilityList() {
                     { code: "STP", name: "C- Diana", status: "Available" },
                     { code: "MCP", name: "C- Emma", status: "Available" },
                   ].map((property) => (
-                    <div key={property.code} className="flex flex-col gap-4">
+                    <motion.div key={property.code} variants={propertyVariants} className="flex flex-col gap-4">
                       {/* Header */}
                       <div className="flex items-center gap-3 rounded-lg border border-gray-100 bg-gray-50 px-4 py-2">
                         <div className="flex shrink-0 items-center justify-center rounded-lg bg-white p-2">
@@ -453,9 +497,12 @@ export default function UnitAvailabilityList() {
                         {/* Units Grid */}
                         <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                           {floorGroup.units.map((row, idx) => (
-                            <button
+                            <motion.button
                               key={idx}
                               type="button"
+                              variants={unitCardVariants}
+                              whileHover={{ y: -2 }}
+                              whileTap={{ scale: 0.97 }}
                               onClick={() =>
                                 navigate({
                                   screen: "unit-availability-details",
@@ -473,17 +520,19 @@ export default function UnitAvailabilityList() {
                               >
                                 {row.description}
                               </span>
-                            </button>
+                            </motion.button>
                           ))}
                         </div>
                       </div>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             )}
+            </AnimatePresence>
+            </MotionConfig>
             <Pagination total={85} />
           </div>
         </div>

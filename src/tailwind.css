@@ -219,6 +219,33 @@
     background-color: theme("colors.gray.50");
   }
 
+  /*
+   * Row hover motion for every list table whose rows already have a
+   * hover:bg-* tint: the tint fades in and a 3px navy bar slides in on the
+   * row's left edge (the same mark as the sidebar's active row). Matching
+   * on the class keeps header rows and static tables out of it.
+   */
+  tbody > tr[class*="hover:bg-"],
+  tbody > tr > td.col-actions {
+    transition: background-color 180ms ease-out;
+  }
+
+  tbody > tr[class*="hover:bg-"] > td:first-child {
+    transition: box-shadow 180ms ease-out;
+  }
+
+  tbody > tr[class*="hover:bg-"]:hover > td:first-child {
+    box-shadow: inset 3px 0 0 theme("colors.primary.500");
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    tbody > tr[class*="hover:bg-"],
+    tbody > tr > td.col-actions,
+    tbody > tr[class*="hover:bg-"] > td:first-child {
+      transition: none;
+    }
+  }
+
   /* Compact (24px) — table pagination's page-size picker. */
   .select-xs {
     @apply h-6 px-2 text-xs;

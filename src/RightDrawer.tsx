@@ -20,7 +20,7 @@ export default function RightDrawer({
       >
         {/* Backdrop */}
         <div
-          className="absolute inset-0 bg-black/70"
+          className="absolute inset-0 bg-gray-900/60 backdrop-blur-[2px]"
           onClick={onClose}
           aria-hidden="true"
         />
