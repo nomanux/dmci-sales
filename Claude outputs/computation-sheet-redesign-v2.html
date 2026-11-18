@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Computation Sheet Calm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --b25:#f5f8ff;--b50:#e8eefc;--b200:#b3ccff;--b400:#0a4de0;--b500:#07389d;--b600:#06318a;--b700:#052b78;
+  --g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;--g300:#d1d5db;--g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;--g700:#374151;--g900:#111827;
+  --ok:#047857;--err:#e52222;--bg:#f6f7f9;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--g900);font-size:14px;line-height:20px;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit;color:inherit}
+[hidden]{display:none!important}
+
+.top{height:56px;background:#fff;border-bottom:1px solid var(--g200);position:sticky;top:0;z-index:30}
+.top-in{max-width:1320px;margin:0 auto;height:100%;padding:0 24px;display:flex;align-items:center;gap:8px;color:var(--g500)}
+.top-in b{color:var(--b600);font-weight:600}
+
+.page{max-width:1320px;margin:0 auto;padding:20px 24px 100px}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.head h1{margin:0;font-size:18px;line-height:28px;font-weight:600}
+.head span{font-size:13px;color:var(--g500)}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+.card{background:#fff;border:1px solid var(--g200);border-radius:12px}
+
+/* form */
+.form{padding:4px 24px}
+.sec{padding:18px 0 20px;border-bottom:1px solid var(--g100)}
+.sec:last-child{border-bottom:0}
+.sec h2{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--g900)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 20px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 20px}
+.full{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.lbl{font-size:13px;font-weight:500;color:var(--g700)}
+.lbl .req{color:var(--err);margin-left:2px}
+.in{height:36px;width:100%;border:1px solid var(--g300);border-radius:8px;padding:0 12px;font-size:14px;background:#fff}
+.in:focus{outline:none;border-color:var(--b400);box-shadow:0 0 0 3px rgba(10,77,224,.1)}
+.in:disabled{background:var(--g50);color:var(--g400);cursor:not-allowed}
+.in::placeholder{color:var(--g400)}
+
+/* segmented control */
+.seg{display:flex;background:var(--g100);border-radius:8px;padding:3px;gap:2px}
+.seg button{flex:1;height:30px;border:0;border-radius:6px;background:none;color:var(--g600);font-size:13px;font-weight:500;white-space:nowrap;padding:0 8px}
+.seg button:hover{color:var(--g900)}
+.seg button[aria-pressed=true]{background:#fff;color:var(--b600);font-weight:600;box-shadow:0 1px 2px rgba(16,24,40,.08)}
+
+/* combobox */
+.combo{position:relative}
+.combo .in{padding-right:34px}
+.combo > svg{position:absolute;right:11px;top:10px;color:var(--g400);pointer-events:none}
+.combo ul{position:absolute;z-index:20;top:calc(100% + 4px);left:0;right:0;margin:0;padding:4px;list-style:none;background:#fff;border:1px solid var(--g200);border-radius:8px;box-shadow:0 8px 16px -4px rgba(16,24,40,.12);max-height:260px;overflow:auto}
+.combo li{padding:7px 10px;border-radius:6px;cursor:pointer;display:flex;flex-direction:column}
+.combo li small{font-size:12px;color:var(--g500)}
+.combo li.act,.combo li:hover{background:var(--b25)}
+.combo li.add{color:var(--b500);font-weight:600}
+
+/* unit line */
+.unitline{margin-top:12px;padding:10px 12px;background:var(--g50);border-radius:8px;font-size:13px;color:var(--g600);display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}
+.unitline b{color:var(--g900);font-weight:600}
+.pill{font-size:11px;font-weight:600;padding:1px 8px;border-radius:99px;background:#ecfdf5;color:var(--ok)}
+.pill.np{background:var(--b50);color:var(--b600)}
+
+/* summary */
+.sum{position:sticky;top:76px;padding:20px}
+.sum .k{font-size:13px;color:var(--g500)}
+.sum .tcp{font-size:26px;line-height:34px;font-weight:700;color:var(--b600);margin:2px 0 2px;font-variant-numeric:tabular-nums}
+.sum .unit{font-size:12px;color:var(--g500)}
+.empty{margin-top:14px;font-size:13px;color:var(--g500)}
+.keys{margin-top:16px;border-top:1px solid var(--g100);padding-top:6px}
+.row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:14px}
+.row span{color:var(--g600)}
+.row span small{display:block;font-size:12px;color:var(--g400)}
+.row b{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.row.sub{padding:5px 0;font-size:13px}
+.row.sub b{font-weight:500}
+.more{border:0;background:none;padding:8px 0 0;color:var(--b500);font-weight:600;font-size:13px;display:flex;align-items:center;gap:4px}
+.more svg{transition:transform .15s}
+.more[aria-expanded=true] svg{transform:rotate(180deg)}
+.detail{border-top:1px dashed var(--g200);margin-top:8px;padding-top:4px}
+.note{margin:10px 0 0;font-size:11px;color:var(--g400);line-height:15px}
+
+/* footer */
+.foot{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--g200);z-index:30}
+.foot-in{max-width:1320px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.foot-r{display:flex;align-items:center;gap:8px}
+.hint{font-size:12px;color:var(--g500);margin-right:4px}
+.btn{height:36px;padding:0 14px;border-radius:8px;font-weight:600;font-size:13px;border:1px solid transparent;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-p{background:var(--b600);color:#fff}
+.btn-p:hover{background:var(--b700)}
+.btn-p:disabled{background:var(--b200);cursor:not-allowed}
+.btn-s{background:#fff;border-color:var(--g300);color:var(--g700)}
+.btn-s:hover{background:var(--g50)}
+.btn-g{background:none;color:var(--g600)}
+.btn-g:hover{background:var(--g100)}
+.mob{display:none}
+
+.toast{position:fixed;left:50%;bottom:76px;transform:translate(-50%,16px);background:var(--g900);color:#fff;padding:9px 14px;border-radius:8px;font-size:13px;opacity:0;transition:all .2s;z-index:40;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1024px){.layout{grid-template-columns:minmax(0,1fr) 300px}.grid3{grid-template-columns:1fr 1fr}}
+@media (max-width:820px){
+  .layout{grid-template-columns:1fr}
+  .sum{position:static}
+  .page{padding:14px 12px 96px}
+  .form{padding:0 16px}
+  .top-in,.foot-in{padding-left:12px;padding-right:12px}
+  .foot .hide-m,.hint{display:none}
+  .mob{display:flex;flex-direction:column;font-size:11px;color:var(--g500)}
+  .mob b{font-size:15px;color:var(--g900)}
+}
+@media (max-width:560px){.grid,.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="top-in">Dashboard <span>›</span> <b>Computation Sheet</b></div></header>
+
+<div class="page">
+  <div class="head">
+    <h1>Computation Sheet</h1>
+    <span id="gen"></span>
+  </div>
+
+  <div class="layout">
+    <div class="card form">
+      <!-- Client -->
+      <section class="sec">
+        <h2>Client and reservation</h2>
+        <div class="grid">
+          <div class="field full">
+            <span class="lbl">Client<span class="req">*</span></span>
+            <div class="combo" data-list="clients"><input class="in" id="client" placeholder="Search client name or mobile" autocomplete="off"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><ul hidden></ul></div>
+          </div>
+          <div class="field">
+            <span class="lbl">Reservation date<span class="req">*</span></span>
+            <input class="in" type="date" id="resDate">
+          </div>
+          <div class="field">
+            <span class="lbl">Reservation amount<span class="req">*</span></span>
+            <select class="in" id="resAmt">
+              <option value="20000">₱20,000</option>
+              <option value="30000" selected>₱30,000</option>
+              <option value="50000">₱50,000</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Unit -->
+      <section class="sec">
+        <h2>Unit</h2>
+        <div class="grid3">
+          <div class="field"><span class="lbl">Project<span class="req">*</span></span><select class="in" id="project"><option value="">Select one</option></select></div>
+          <div class="field"><span class="lbl">Building<span class="req">*</span></span><select class="in" id="building" disabled><option value="">Select one</option></select></div>
+          <div class="field"><span class="lbl">Unit no.<span class="req">*</span></span><select class="in" id="unit" disabled><option value="">Select one</option></select></div>
+        </div>
+        <div id="unitLine"></div>
+      </section>
+
+      <!-- Payment -->
+      <section class="sec">
+        <h2>Payment terms</h2>
+        <div class="grid">
+          <div class="field full">
+            <span class="lbl">Payment plan<span class="req">*</span></span>
+            <div class="seg" data-name="plan">
+              <button type="button" data-v="spot" aria-pressed="false">Spot cash</button>
+              <button type="button" data-v="spotdp" aria-pressed="false">Spot downpayment</button>
+              <button type="button" data-v="deferred" aria-pressed="true">Deferred downpayment</button>
+            </div>
+          </div>
+          <div class="field" data-hide="spot">
+            <span class="lbl">Downpayment</span>
+            <div class="seg" data-name="dpPct">
+              <button type="button" data-v="10" aria-pressed="false">10%</button>
+              <button type="button" data-v="15" aria-pressed="false">15%</button>
+              <button type="button" data-v="20" aria-pressed="true">20%</button>
+              <button type="button" data-v="30" aria-pressed="false">30%</button>
+            </div>
+          </div>
+          <div class="field" data-only="deferred">
+            <span class="lbl">Payment term</span>
+            <select class="in" id="term">
+              <option value="12">12 months</option>
+              <option value="24">24 months</option>
+              <option value="36" selected>36 months</option>
+              <option value="48">48 months</option>
+            </select>
+          </div>
+          <div class="field" data-hide="spot">
+            <span class="lbl">Payment method</span>
+            <select class="in" id="method">
+              <option value="bank">Bank loan</option>
+              <option value="pagibig">Pag-IBIG</option>
+              <option value="inhouse">In-house financing</option>
+            </select>
+          </div>
+          <div class="field">
+            <span class="lbl">Promo discount</span>
+            <select class="in" id="promo">
+              <option value="0">No promo</option>
+              <option value="3">Early bird · 3%</option>
+              <option value="5">Employee referral · 5%</option>
+              <option value="8" data-spot>Spot cash · 8%</option>
+            </select>
+          </div>
+          <div class="field">
+            <span class="lbl">Closing fee</span>
+            <select class="in" id="closing">
+              <option value="separate">Pay separately (5%)</option>
+              <option value="included">Add to contract price (5%)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Summary -->
+    <aside class="card sum">
+      <div class="k">Total contract price</div>
+      <div class="tcp" id="tcp">₱0.00</div>
+      <div class="unit" id="sumUnit"></div>
+      <div id="sumBody"></div>
+    </aside>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="foot-in">
+    <button type="button" class="btn btn-g" id="reset">Reset</button>
+    <div class="mob"><span>Total contract price</span><b id="tcpM">₱0.00</b></div>
+    <div class="foot-r">
+      <span class="hint" id="hint"></span>
+      <button type="button" class="btn btn-s hide-m" id="list">List</button>
+      <button type="button" class="btn btn-s hide-m" id="pdf">Export as PDF</button>
+      <button type="button" class="btn btn-s hide-m" id="preview">Preview</button>
+      <button type="button" class="btn btn-p" id="saveBtn" disabled>Save</button>
+    </div>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+/* sample data: replace with API data */
+const CLIENTS=[
+  {id:'CL-00231',name:'Maria Santos Dela Cruz',mobile:'0917 123 4567'},
+  {id:'CL-00244',name:'Juan Reyes',mobile:'0918 555 0192'},
+  {id:'CL-00251',name:'Ana Lim Tan',mobile:'0927 880 4410'}
+];
+const PROJECTS={
+  'Allegra Garden Place':{type:'High Rise',buildings:{
+    'Tower A':[
+      {no:'AGP-00A-C-28003',cat:'Condo Unit',size:'2BR, 54.5 sqm',loc:'Rear unit facing west',rfo:'2024-07-31',price:6850000},
+      {no:'AGP-00A-C-15010',cat:'Condo Unit',size:'1BR, 36 sqm',loc:'Front unit facing east',rfo:'2024-07-31',price:4520000}],
+    'Tower B':[
+      {no:'AGP-00B-C-21007',cat:'Condo Unit',size:'2BR, 58 sqm',loc:'Corner unit facing north',rfo:'2027-12-31',price:7240000}]}},
+  'The Erin Heights':{type:'High Rise',buildings:{
+    'Tower 1':[
+      {no:'TEH-T01-C-12008',cat:'Condo Unit',size:'2BR, 52 sqm',loc:'Mid unit facing south',rfo:'2028-12-31',price:5980000}]}}
+};
+
+const today=new Date();today.setHours(0,0,0,0);
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const day=v=>{const [y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d)};
+const peso=n=>'₱'+n.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const addM=(d,m)=>{const x=new Date(d);x.setMonth(x.getMonth()+m);return x};
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2000)}
+
+const S={client:null,resDate:iso(today),resAmt:30000,unit:null,project:'',plan:'deferred',dpPct:20,term:36,method:'bank',promo:0,closing:'separate',open:false};
+$('#gen').textContent='Generated '+fmt(today);
+$('#resDate').value=S.resDate;
+
+/* segmented controls */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.seg button');if(!b)return;
+  const g=b.parentElement;$$('button',g).forEach(x=>x.setAttribute('aria-pressed',x===b));
+  const v=b.dataset.v;S[g.dataset.name]=isNaN(v)?v:+v;
+  if(g.dataset.name==='plan'&&v!=='spot'&&S.promo===8){S.promo=0;$('#promo').value='0'}
+  render();
+});
+
+/* client search */
+(function(){
+  const wrap=$('[data-list=clients]'),inp=$('input',wrap),ul=$('ul',wrap);let items=[],idx=-1;
+  const draw=()=>{const q=inp.value.trim().toLowerCase();
+    items=CLIENTS.filter(c=>!q||(c.name+' '+c.mobile+' '+c.id).toLowerCase().includes(q)).map(c=>({c}));items.push({add:true});
+    ul.innerHTML=items.map((it,i)=>it.add?`<li data-i="${i}" class="add ${i===idx?'act':''}">+ New client</li>`:`<li data-i="${i}" class="${i===idx?'act':''}"><span>${esc(it.c.name)}</span><small>${it.c.mobile} · ${it.c.id}</small></li>`).join('');ul.hidden=false};
+  const pick=i=>{const it=items[i];ul.hidden=true;idx=-1;if(it.add){inp.value='';toast('Opens the new client form');return}S.client=it.c;inp.value=it.c.name;render()};
+  inp.addEventListener('focus',draw);inp.addEventListener('input',()=>{idx=-1;if(S.client){S.client=null;render()}draw()});
+  inp.addEventListener('keydown',e=>{if(ul.hidden)return;
+    if(e.key==='ArrowDown'){idx=Math.min(idx+1,items.length-1);draw();e.preventDefault()}
+    else if(e.key==='ArrowUp'){idx=Math.max(idx-1,0);draw();e.preventDefault()}
+    else if(e.key==='Enter'){pick(Math.max(idx,0));e.preventDefault()}
+    else if(e.key==='Escape')ul.hidden=true});
+  ul.addEventListener('mousedown',e=>{const li=e.target.closest('li[data-i]');if(li){e.preventDefault();pick(+li.dataset.i)}});
+  inp.addEventListener('blur',()=>setTimeout(()=>ul.hidden=true,120));
+})();
+
+/* project > building > unit */
+const P=$('#project'),Bd=$('#building'),U=$('#unit');
+P.innerHTML+=Object.keys(PROJECTS).map(p=>`<option>${p}</option>`).join('');
+P.addEventListener('change',()=>{const p=PROJECTS[P.value];Bd.disabled=!p;Bd.innerHTML='<option value="">Select one</option>'+(p?Object.keys(p.buildings).map(b=>`<option>${b}</option>`).join(''):'');U.disabled=true;U.innerHTML='<option value="">Select one</option>';S.unit=null;render()});
+Bd.addEventListener('change',()=>{const us=PROJECTS[P.value]?.buildings[Bd.value];U.disabled=!us;U.innerHTML='<option value="">Select one</option>'+(us?us.map(u=>`<option value="${u.no}">${u.no}</option>`).join(''):'');S.unit=null;render()});
+U.addEventListener('change',()=>{S.unit=PROJECTS[P.value].buildings[Bd.value].find(u=>u.no===U.value)||null;S.project=P.value;render()});
+
+/* other inputs */
+$('#resDate').addEventListener('change',e=>{S.resDate=e.target.value;render()});
+$('#resAmt').addEventListener('change',e=>{S.resAmt=+e.target.value;render()});
+$('#term').addEventListener('change',e=>{S.term=+e.target.value;render()});
+$('#method').addEventListener('change',e=>{S.method=e.target.value;render()});
+$('#promo').addEventListener('change',e=>{S.promo=+e.target.value;render()});
+$('#closing').addEventListener('change',e=>{S.closing=e.target.value;render()});
+document.addEventListener('click',e=>{if(e.target.closest('#more')){S.open=!S.open;render()}});
+
+const isRFO=u=>day(u.rfo)<=today;
+
+function compute(){
+  const u=S.unit;if(!u)return null;
+  const start=S.resDate?day(S.resDate):today;
+  const list=u.price,disc=list*S.promo/100,net=list-disc,closing=net*0.05;
+  const tcp=S.closing==='included'?net+closing:net,res=S.resAmt;
+  const c={list,disc,closing,tcp,res,start,key:[],detail:[]};
+  c.key.push(['Reservation fee',fmt(start),peso(res)]);
+  c.detail.push(['List price',peso(list)]);
+  if(disc)c.detail.push([`Promo discount (${S.promo}%)`,'− '+peso(disc)]);
+  if(S.closing==='included')c.detail.push(['Closing fee (5%)',peso(closing)]);
+  if(S.plan==='spot'){
+    c.key.push(['Balance',`Due by ${fmt(addD(start,30))}`,peso(tcp-res)]);
+  }else{
+    const dp=tcp*S.dpPct/100,dpNet=dp-res,loan=tcp-dp;
+    c.detail.push([`Downpayment (${S.dpPct}%)`,peso(dp)],['Less reservation fee','− '+peso(res)],['Net downpayment',peso(dpNet)]);
+    if(S.plan==='spotdp')c.key.push(['Downpayment',`Due by ${fmt(addD(start,30))}`,peso(dpNet)]);
+    else c.key.push(['Monthly downpayment',`${S.term} months from ${fmt(addM(start,1))}`,peso(dpNet/S.term)]);
+    const m={bank:'Bank loan',pagibig:'Pag-IBIG loan',inhouse:'In-house financing'}[S.method];
+    c.key.push([`${m} balance`,isRFO(u)?'After downpayment':`At turnover, ${fmt(day(u.rfo))}`,peso(loan)]);
+    const r=0.065/12,n=240;c.detail.push(['Est. monthly loan payment',peso(loan*r/(1-Math.pow(1+r,-n)))]);
+  }
+  if(S.closing==='separate')c.detail.push(['Closing fee (5%), before turnover',peso(closing)]);
+  return c;
+}
+
+function render(){
+  $$('[data-hide=spot]').forEach(e=>e.hidden=S.plan==='spot');
+  $$('[data-only=deferred]').forEach(e=>e.hidden=S.plan!=='deferred');
+  $('[data-spot]').disabled=S.plan!=='spot';
+
+  const u=S.unit;
+  $('#unitLine').innerHTML=u?`<div class="unitline"><span class="pill ${isRFO(u)?'':'np'}">${isRFO(u)?'RFO':'Non-RFO'}</span><span>${u.cat}</span><span>${u.size}</span><span>${u.loc}</span><span>${isRFO(u)?'RFO':'Turnover'} ${fmt(day(u.rfo))}</span><span>List price <b>${peso(u.price)}</b></span></div>`:'';
+
+  const c=compute();
+  $('#tcp').textContent=$('#tcpM').textContent=peso(c?c.tcp:0);
+  $('#sumUnit').textContent=u?`${u.no} · ${u.size}`:'';
+  $('#sumBody').innerHTML=c?`
+    <div class="keys">${c.key.map(([k,s,v])=>`<div class="row"><span>${k}<small>${s}</small></span><b>${v}</b></div>`).join('')}</div>
+    <button type="button" class="more" id="more" aria-expanded="${S.open}">${S.open?'Hide':'Show'} full breakdown <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+    ${S.open?`<div class="detail">${c.detail.map(([k,v])=>`<div class="row sub"><span>${k}</span><b>${v}</b></div>`).join('')}<p class="note">Sample figures. Loan estimate at 6.5% for 20 years.</p></div>`:''}`
+    :'<p class="empty">Select a unit to see the price and payment schedule.</p>';
+
+  const miss=[];if(!S.client)miss.push('client');if(!S.unit)miss.push('unit');
+  $('#saveBtn').disabled=!!miss.length;
+  $('#hint').textContent=miss.length?'Add '+miss.join(' and ')+' to save':'';
+}
+
+$('#reset').addEventListener('click',()=>location.reload());
+$('#pdf').addEventListener('click',()=>toast('Exports the sheet as PDF'));
+$('#preview').addEventListener('click',()=>toast('Opens the preview'));
+$('#list').addEventListener('click',()=>toast('Opens saved sheets'));
+$('#saveBtn').addEventListener('click',()=>toast('Computation sheet saved'));
+render();
+</script>
+</body>
+</html>

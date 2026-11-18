@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DMCI Homes · Lessee application flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#10398e;--brand-700:#0b2a6b;--brand-25:#eff4ff;--brand-50:#d1defc;
+  --t1:#181d27;--t2:#414651;--t3:#535862;--t4:#717680;
+  --b1:#d5d7da;--b2:#e9eaeb;--bg:#fafafa;--bg2:#f5f5f5;
+  --err:#d92d20;--err-700:#b42318;--err-bg:#fef3f2;--err-bd:#fecdca;
+  --ok:#067647;--ok-bg:#ecfdf3;--ok-bd:#abefc6;--ok-solid:#17b26a;
+  --warn:#b54708;--warn-bg:#fffaeb;--warn-bd:#fedf89;
+  --blue:#175cd3;--blue-bg:#eff8ff;--blue-bd:#b2ddff;
+  --sh:0 1px 2px rgba(10,13,18,.05);
+}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;font-family:Inter,system-ui,sans-serif;color:var(--t1);font-size:14px;line-height:20px}
+button{font-family:inherit}
+:focus-visible{outline:3px solid rgba(16,57,142,.28);outline-offset:2px}
+svg{flex:none}
+
+/* Prototype bar */
+.proto{background:var(--t1);color:#fff;font-size:13px}
+.proto .in{max-width:1280px;margin:0 auto;padding:8px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.proto b{font-weight:600}
+.seg{display:inline-flex;border:1px solid #414651;border-radius:8px;overflow:hidden}
+.seg button{background:none;border:0;color:#d5d7da;padding:6px 12px;font-size:13px;cursor:pointer}
+.seg button[aria-pressed=true]{background:#fff;color:var(--t1);font-weight:600}
+
+/* Header */
+header{border-bottom:1px solid var(--b2)}
+.hd{max-width:1280px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:8px;color:var(--brand);font-weight:800;font-size:20px;text-decoration:none;letter-spacing:-.01em}
+.nav{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+.nav a{padding:10px 12px;border-radius:6px;font-size:15px;font-weight:500;color:var(--t2);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.nav a[aria-current]{background:var(--bg);color:var(--brand);font-weight:600}
+.user{display:flex;align-items:center;gap:10px}
+.av{width:40px;height:40px;border-radius:50%;background:var(--bg2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--brand)}
+.user small{display:block;color:var(--t3);font-size:14px}
+
+main{max-width:1280px;margin:0 auto;padding:32px 24px 72px}
+.screen[hidden]{display:none}
+
+/* Page heading */
+.ph{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.ph h1{margin:0;font-size:24px;line-height:32px;font-weight:600}
+.back{width:36px;height:36px;border-radius:8px;border:1px solid var(--b1);background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);box-shadow:var(--sh)}
+.crumb{font-size:14px;color:var(--t3);margin:0 0 12px;display:flex;gap:8px;align-items:center}
+.crumb a{color:var(--t3);text-decoration:none}
+.crumb a:hover{color:var(--brand)}
+.crumb span[aria-current]{color:var(--brand);font-weight:600}
+
+/* Card (one style for every card) */
+.card{background:#fff;border:1px solid var(--b2);border-radius:12px;box-shadow:var(--sh);overflow:hidden}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 24px;flex-wrap:wrap}
+.ch h2{margin:0;font-size:18px;line-height:28px;font-weight:600}
+.ch p{margin:2px 0 0;color:var(--t3)}
+.ch + .cb{padding-top:0}
+.ch.solid{background:var(--brand);padding:16px 24px;min-height:64px}
+.ch.solid h2{color:#fff}
+.ch.solid p{color:#d1defc}
+.ch.solid .btn-s{border-color:#fff}
+.ch.solid .pill{background:#fff}
+.ch.solid + .tw th{border-top:0}
+.ch.solid + .cb,.ch.solid + .steps{padding-top:20px}
+.cb{padding:20px 24px 24px}
+.cb.flush{padding:0}
+
+/* Table */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--t3);background:var(--bg);padding:12px 24px;border-top:1px solid var(--b2);border-bottom:1px solid var(--b2);white-space:nowrap}
+td{padding:14px 24px;border-bottom:1px solid var(--b2);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.strong{font-weight:500;color:var(--t1)}
+td.muted{color:var(--t3)}
+.r{text-align:right}
+.rem{color:var(--t3);max-width:300px}
+.rem b{color:var(--err-700);font-weight:500}
+
+/* Badge (one pill style) */
+.pill{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;font-size:12px;line-height:18px;font-weight:500;border:1px solid;white-space:nowrap}
+.pill.dot::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-gray{background:var(--bg);border-color:var(--b2);color:var(--t2)}
+.p-blue{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue)}
+.p-ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+.p-err{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-700)}
+.p-warn{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn)}
+.p-brand{background:var(--brand-25);border-color:var(--brand-50);color:var(--brand)}
+
+/* Button (sm 36px everywhere) */
+.btn{min-height:36px;padding:8px 14px;border-radius:8px;font:600 14px/20px Inter,sans-serif;cursor:pointer;border:1px solid;display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:var(--sh);white-space:nowrap;text-decoration:none}
+.btn-p{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn-p:hover{background:var(--brand-700)}
+.btn-p:disabled{background:var(--bg2);border-color:var(--b2);color:var(--t4);cursor:not-allowed;box-shadow:none}
+.btn-s{background:#fff;border-color:var(--b1);color:var(--t2)}
+.btn-s:hover{background:var(--bg)}
+.btn-l{background:none;border-color:transparent;box-shadow:none;color:var(--brand);padding:8px 4px}
+.btn-l:hover{text-decoration:underline}
+.btns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+
+/* Alert (one style, 4 tones) */
+.alert{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border:1px solid;border-radius:8px}
+.alert p{margin:0}.alert strong{display:block;font-weight:600}
+.a-info{background:var(--brand-25);border-color:var(--brand-50);color:var(--brand)}
+.a-ok{background:var(--ok-bg);border-color:var(--ok-bd);color:var(--ok)}
+.a-warn{background:var(--warn-bg);border-color:var(--warn-bd);color:var(--warn)}
+.a-err{background:var(--err-bg);border-color:var(--err-bd);color:var(--err-700)}
+
+/* Search */
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--b1);border-radius:8px;padding:8px 12px;min-width:240px;box-shadow:var(--sh);color:var(--t4)}
+.search input{border:0;outline:0;font:inherit;color:var(--t1);width:100%}
+
+/* Layout */
+.detail{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+@media (max-width:1040px){.detail{grid-template-columns:1fr}}
+.stack{display:flex;flex-direction:column;gap:20px}
+.cols{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.cols{grid-template-columns:1fr}}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--b2);padding:0 24px;overflow-x:auto}
+.tab{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:16px 8px 14px;margin-right:16px;font-size:15px;font-weight:600;color:var(--t4);cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.tab[aria-selected=true]{color:var(--brand);border-color:var(--brand)}
+.tab .n{min-width:20px;height:20px;border-radius:999px;background:var(--err-bg);color:var(--err-700);border:1px solid var(--err-bd);font-size:12px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+.panel{padding:24px}
+.panel[hidden]{display:none}
+
+/* Key values */
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:16px 24px;padding:16px;border:1px solid var(--b2);border-radius:10px;background:var(--bg)}
+.kv dt{color:var(--t3);font-size:13px}
+.kv dd{margin:2px 0 0;font-weight:500;color:var(--t1)}
+.kv .full{grid-column:1/-1}
+
+/* Rows inside cards */
+.list{display:flex;flex-direction:column}
+.li{display:flex;align-items:center;gap:12px;padding:14px 0;border-top:1px solid var(--b2)}
+.li:first-child{border-top:0;padding-top:0}
+.li .grow{flex:1;min-width:0}
+.li .t{font-weight:500;color:var(--t1)}
+.li .s{color:var(--t3)}
+.ic{width:40px;height:40px;border-radius:8px;border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;color:var(--t2);background:#fff;box-shadow:var(--sh)}
+.money{font-weight:600;color:var(--t1);white-space:nowrap}
+
+/* Locked state */
+.locked{display:flex;flex-direction:column;align-items:center;text-align:center;padding:48px 24px;gap:12px}
+.locked .ic{width:48px;height:48px;border-radius:10px}
+.locked h3{margin:4px 0 0;font-size:16px;font-weight:600}
+.locked p{margin:0;color:var(--t3);max-width:440px}
+.next{margin-top:12px;text-align:left;border:1px solid var(--b2);border-radius:10px;padding:16px 20px;min-width:min(420px,100%)}
+.next h4{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--t2)}
+.next ol{margin:0;padding-left:18px;color:var(--t3)}
+.next li{padding:3px 0}
+
+/* Progress */
+.steps{list-style:none;margin:0;padding:4px 24px 24px}
+.step{display:grid;grid-template-columns:28px 1fr;gap:12px;position:relative;padding-bottom:20px}
+.step:last-child{padding-bottom:0}
+.step::before{content:"";position:absolute;left:13px;top:30px;bottom:2px;width:2px;background:var(--b2)}
+.step:last-child::before{display:none}
+.step.done::before{background:var(--brand)}
+.mk{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--b2);background:#fff}
+.done .mk{background:var(--brand);border-color:var(--brand);color:#fff}
+.cur .mk{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-25)}
+.cur .mk::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.todo .mk::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--b1)}
+.step .t{font-weight:600;color:var(--t2)}
+.step .s{color:var(--t3)}
+.cur .t{color:var(--brand)}
+.step .pill{margin-top:6px}
+
+/* Ring */
+.ringrow{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg);border:1px solid var(--b2);border-radius:10px;margin-bottom:16px}
+.ring{width:36px;height:36px;border-radius:50%;background:conic-gradient(var(--brand) var(--p),var(--b2) 0);display:flex;align-items:center;justify-content:center}
+.ring::after{content:"";width:26px;height:26px;border-radius:50%;background:var(--bg)}
+
+/* Pagination */
+.pg{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 24px;border-top:1px solid var(--b2);color:var(--t3);flex-wrap:wrap}
+
+/* Modal */
+dialog{border:0;padding:0;border-radius:16px;width:min(560px,calc(100vw - 32px));box-shadow:0 24px 48px -12px rgba(10,13,18,.18)}
+dialog::backdrop{background:rgba(10,13,18,.55)}
+.mh{display:flex;gap:16px;align-items:flex-start;padding:24px 24px 16px}
+.mh h3{margin:0;font-size:18px;line-height:28px;font-weight:600}
+.mh p{margin:0;color:var(--t3)}
+.x{margin-left:auto;background:none;border:0;cursor:pointer;color:var(--t4);padding:6px;border-radius:8px}
+.x:hover{background:var(--bg)}
+.mb{padding:0 24px 20px;display:flex;flex-direction:column;gap:16px}
+.mf{display:flex;gap:12px;padding:16px 24px 24px;border-top:1px solid var(--b2)}
+.mf .btn{flex:1}
+.drop{border:1px dashed var(--b1);border-radius:10px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;cursor:pointer}
+.drop:hover{background:var(--bg)}
+.drop b{color:var(--brand);font-weight:600}
+.drop small{color:var(--t4);font-size:12px}
+.file{display:flex;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--b2);border-radius:12px}
+.file .grow{flex:1}
+.tips{background:var(--bg);border-radius:10px;padding:12px 16px;color:var(--t2)}
+.tips ul{margin:6px 0 0;padding-left:18px}
+.check{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.check input{width:16px;height:16px;margin-top:2px;accent-color:var(--brand)}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--t1);color:#fff;padding:12px 16px;border-radius:10px;font-weight:500;transition:.2s;pointer-events:none;display:flex;gap:8px;align-items:center}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <a class="logo" href="#" onclick="go('list');return false">
+      <svg width="26" height="32" viewBox="0 0 26 32" aria-hidden="true"><rect width="26" height="32" rx="3" fill="#10398e"/><path d="M13 4c-3 6-3 18 0 24 3-6 3-18 0-24Z" fill="#fff"/></svg>
+      DMCI HOMES
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#">Dashboard</a>
+      <a href="#" aria-current="page" onclick="go('list');return false">Applications
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></a>
+      <a href="#">Accounts</a><a href="#">Profile</a><a href="#">Official Receipts</a><a href="#">Bills</a>
+    </nav>
+    <div class="user"><div class="av">JD</div><div><b>John Doe</b><small>john@example.com</small></div></div>
+  </div>
+</header>
+
+<main>
+  <!-- LIST -->
+  <section class="screen" id="s-list">
+    <div class="ph"><h1>Applications</h1></div>
+    <div class="card">
+      <div class="ch">
+        <div><h2>Your applications</h2><p>Open an application to see what to do next.</p></div>
+        <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input placeholder="Search" aria-label="Search applications"></label>
+      </div>
+      <div class="tw">
+        <table>
+          <thead><tr><th>Application</th><th>Type</th><th>Property</th><th>Submitted</th><th>Stage</th><th>Next step</th><th class="r">Action</th></tr></thead>
+          <tbody id="listBody"></tbody>
+        </table>
+      </div>
+      <div class="pg"><span>Showing 3 of 3 applications</span></div>
+    </div>
+  </section>
+
+  <!-- DETAIL -->
+  <section class="screen" id="s-detail" hidden>
+    <p class="crumb"><a href="#" onclick="go('list');return false">Applications</a><span aria-hidden="true">/</span><span aria-current="page" id="dCrumb">TIS-0003</span></p>
+    <div class="ph">
+      <button class="back" aria-label="Back to applications" onclick="go('list')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+      <h1 id="dTitle">TIS-0003 · Andea, Unit 0815</h1>
+      <span class="pill p-gray" id="dType">RTO</span>
+      <span class="pill p-brand" id="dAcct">Developer account (DMCI owned)</span>
+    </div>
+
+    <div class="detail">
+      <div class="card">
+        <div class="tabs" role="tablist" id="tabs"></div>
+        <div class="panel" role="tabpanel" id="p-req"></div>
+        <div class="panel" role="tabpanel" id="p-lease" hidden></div>
+        <div class="panel" role="tabpanel" id="p-orig" hidden></div>
+      </div>
+
+      <aside class="card" aria-label="Progress">
+        <div class="ch solid"><div><h2>Progress</h2><p id="progSub"></p></div></div>
+        <ol class="steps" id="steps"></ol>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<!-- Upload / replace modal -->
+<dialog id="mUpload" aria-labelledby="muT">
+  <div class="mh">
+    <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></div>
+    <div><h3 id="muT">Upload document</h3><p id="muS"></p></div>
+    <button class="x" aria-label="Close" onclick="mUpload.close()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="mb" id="muBody"></div>
+  <div class="mf"><button class="btn btn-s" onclick="mUpload.close()">Cancel</button><button class="btn btn-p" id="muGo" disabled>Submit for review</button></div>
+</dialog>
+
+<!-- Sign modal -->
+<dialog id="mSign" aria-labelledby="msT">
+  <div class="mh">
+    <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 17l2-2 2 2 4-4"/></svg></div>
+    <div><h3 id="msT">Sign lease contract</h3><p id="signSub">LC-0003 · Andea, Unit 0815</p></div>
+    <button class="x" aria-label="Close" onclick="mSign.close()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="mb">
+    <div class="kv">
+      <div><dt>Lease term</dt><dd>12 months</dd></div><div><dt>Start date</dt><dd>Dec 1, 2026</dd></div>
+      <div><dt>Monthly rent</dt><dd>PHP 25,000</dd></div><div><dt>Security deposit</dt><dd>PHP 50,000</dd></div>
+    </div>
+    <label class="check"><input type="checkbox" id="agree"><span>I read the lease contract and agree to its terms.</span></label>
+    <div class="alert a-info"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><p>After you sign, bring the printed original with your other original copies.</p></div>
+  </div>
+  <div class="mf"><button class="btn btn-s" onclick="mSign.close()">Cancel</button><button class="btn btn-p" id="signGo" disabled>Sign contract</button></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const I = {
+  check:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>',
+  info:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+  alert:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
+  ok:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>',
+  lock:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  lockS:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  file:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg>',
+  pin:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  card:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+  up:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4m0 0-4 4m4-4 4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>',
+  trash:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
+  team:t=>`<span class="ic" style="font-size:12px;font-weight:700;color:var(--brand);background:var(--brand-25);border-color:var(--brand-50)">${t}</span>`
+};
+const pill = (txt, tone, dot) => `<span class="pill p-${tone}${dot?' dot':''}">${txt}</span>`;
+const alertBox = (tone, icon, body) => `<div class="alert a-${tone}">${I[icon]}<p>${body}</p></div>`;
+
+let stage = 'A';
+let validIdsFixed = false;
+let signed = false;
+
+/* ---------- Data per stage ---------- */
+const STEPS = [
+  ['Application submitted','Tenant Information Sheet received'],
+  ['Reservation Agreement signed','RA synced to your account'],
+  ['Reservation paid','Payment cleared'],
+  ['Documents review','Reviewed by DICD'],
+  ['Credit review','Reviewed by Credit and Collection'],
+  ['Contract and deposits','Sign your contract and pay 2 deposits'],
+  ['Original copies','Hand in your original documents'],
+  ['Turnover date set','Property care or Leasing sets the date']
+];
+const APPS = {
+  'TIS-0003':{unit:'Andea, Unit 0815',type:'RTO',acct:'Developer account (DMCI owned)',cur:4,deficient:true},
+  'TIS-0007':{unit:'Almond, Unit 1803',type:'Leasing: non-DMCI owned',acct:'Enrolled account (non-DMCI owned)',cur:4,deficient:false},
+  'TIS-0001':{unit:'Almond, Unit 1204',type:'Leasing: DMCI owned',acct:'Developer account (DMCI owned)',cur:8,deficient:false}
+};
+let appId = 'TIS-0003';
+const APP = () => APPS[appId];
+function openApp(id){
+  appId = id; signed = APP().cur>=8;
+  dCrumb.textContent = id; dTitle.textContent = id+' · '+APP().unit; dType.textContent = APP().type; dAcct.textContent = APP().acct;
+  signSub.textContent = 'LC-'+id.slice(4)+' · '+APP().unit;
+  tab='req'; renderAll(); go('detail');
+}
+
+function reqRows(){
+  const done = !APP().deficient;
+  const vid = done ? ['Sufficient','ok','-','View']
+    : validIdsFixed ? ['Submitted','blue','-','Replace']
+    : ['Deficient','err','<b>DICD:</b> Second id is expired. Please upload a valid one','Upload'];
+  return [
+    ['Reservation fee (proof of payment)', done?'Sufficient':'Submitted', done?'ok':'blue', '-', done?'View':'Replace'],
+    ['Reservation Agreement','Sufficient','ok','-','View'],
+    ['Valid IDs with 3 specimen signatures', vid[0], vid[1], vid[2], vid[3]],
+    ['Tenant Information Sheet','Sufficient','ok','-','View']
+  ];
+}
+const actionNeeded = () => APP().deficient && !validIdsFixed ? 1 : 0;
+
+/* ---------- List ---------- */
+function renderList(){
+  const s = {
+    A: validIdsFixed ? ['Documents review','blue','No action needed', false] : ['Documents review','blue','Upload Valid IDs', true],
+    B: signed ? ['Contract and deposits','blue','Pay 2 deposits', true] : ['Contract and deposits','blue','Sign your contract', true],
+    C: ['Original copies','blue','Hand in 6 original copies', true]
+  }[stage];
+  const rows = [
+    ['TIS-0003','RTO','Andea · Unit 0815','Jan 5, 2025', s[0], s[1], s[2], s[3]],
+    ['TIS-0007','Leasing: non-DMCI owned','Almond · Unit 1803','Jan 7, 2025','Credit review','blue','No action needed', false],
+    ['TIS-0001','Leasing: DMCI owned','Almond · Unit 1204','Jan 3, 2025','Moved in','ok','None', false]
+  ];
+  listBody.innerHTML = rows.map(r=>`<tr>
+    <td class="strong">${r[0]}</td><td>${pill(r[1],'gray')}</td><td class="muted">${r[2]}</td><td class="muted">${r[3]}</td>
+    <td>${pill(r[4],r[5],true)}</td>
+    <td>${r[7]?`<span style="color:var(--warn);font-weight:500">${r[6]}</span>`:`<span class="muted">${r[6]}</span>`}</td>
+    <td class="r"><button class="btn ${r[7]?'btn-p':'btn-s'}" onclick="openApp('${r[0]}')">${r[7]?'Continue':'View'}</button></td></tr>`).join('');
+}
+
+/* ---------- Tabs ---------- */
+const TABS = [['req','Requirements'],['lease','Lease contract'],['orig','Original copies']];
+let tab = 'req';
+function renderTabs(){
+  const locked = { req:false, lease:false, orig:false };
+  tabs.innerHTML = TABS.map(([k,l])=>`<button class="tab" role="tab" aria-selected="${tab===k}" aria-controls="p-${k}" data-k="${k}">
+    ${locked[k]?I.lockS:''}${l}${k==='req'&&actionNeeded()?'<span class="n" aria-label="1 needs action">1</span>':''}</button>`).join('');
+  tabs.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{tab=b.dataset.k;renderTabs();showPanel();});
+}
+function showPanel(){ for(const [k] of TABS) document.getElementById('p-'+k).hidden = tab!==k; }
+
+/* ---------- Requirements ---------- */
+function renderReq(){
+  const banner = APP().deficient
+    ? (validIdsFixed ? alertBox('info','info','DICD is reviewing your new Valid IDs. You get an email once they finish.')
+                     : alertBox('err','alert','<strong>1 document needs your action</strong>Upload a new Valid IDs file so DICD can finish the review.'))
+    : alertBox('ok','ok','<strong>All documents approved</strong>DICD approved every requirement. No action needed here.');
+  p_req().innerHTML = `<div class="stack">
+    ${banner}
+    <div class="card">
+      <div class="ch"><div><h2>Requirements</h2><p>${APP().acct.startsWith('Enrolled')?'Submit all documents together.':'You submit in stages. Upload each document when you have it.'}</p></div></div>
+      <div class="tw"><table>
+        <thead><tr><th>Document</th><th>Status</th><th>Remarks</th><th class="r">Action</th></tr></thead>
+        <tbody>${reqRows().map(r=>`<tr><td class="strong">${r[0]}</td><td>${pill(r[1],r[2])}</td><td class="rem">${r[3]}</td>
+          <td class="r"><button class="btn ${r[4]==='Upload'?'btn-p':'btn-s'}" data-act="${r[4]}" data-doc="${r[0]}">${r[4]}</button></td></tr>`).join('')}</tbody>
+      </table></div>
+    </div></div>`;
+  p_req().querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>{
+    const a=b.dataset.act; if(a==='View') return toast('Opens '+b.dataset.doc);
+    openUpload(a, b.dataset.doc);
+  });
+}
+const p_req=()=>document.getElementById('p-req'), p_lease=()=>document.getElementById('p-lease'), p_orig=()=>document.getElementById('p-orig');
+
+/* ---------- Lease contract ---------- */
+function lockedView(title, body, items){
+  return `<div class="card"><div class="locked"><div class="ic">${I.lock}</div><h3>${title}</h3><p>${body}</p>
+    <div class="next"><h4>What you will do here</h4><ol>${items.map(i=>`<li>${i}</li>`).join('')}</ol></div></div></div>`;
+}
+function renderLease(){
+  const isSigned = signed;
+  const paid = false;
+  p_lease().innerHTML = `<div class="stack">
+    ${isSigned ? (paid ? alertBox('ok','ok','<strong>Contract signed and deposits paid</strong>Next, hand in your original copies.')
+                       : alertBox('warn','alert','<strong>Pay your 2 deposits</strong>Pay both deposits to move to original copies.'))
+               : alertBox('info','info','<strong>Your contract is ready to sign</strong>Read the contract, then sign it. Your SOA is ready below.')}
+    <div class="cols">
+      <div class="card">
+        <div class="ch solid"><div><h2>Contract details</h2><p>LC-${appId.slice(4)}</p></div>${pill(isSigned?'Signed':'Released', isSigned?'ok':'blue')}</div>
+        <div class="cb stack">
+          <dl class="kv" style="margin:0">
+            <div><dt>Unit</dt><dd>${APP().unit}</dd></div>
+            <div><dt>Lease term</dt><dd>12 months</dd></div>
+            <div><dt>Start date</dt><dd>Dec 1, 2026</dd></div>
+            <div><dt>Monthly rent</dt><dd>PHP 25,000</dd></div>
+            <div class="full"><dt>Advance rental</dt><dd>PHP 25,000 (paid with your reservation)</dd></div>
+          </dl>
+          <div class="btns" style="justify-content:flex-start">
+            <button class="btn btn-s" onclick="toast('Opens LC-0003.pdf')">View contract</button>
+            ${isSigned?'<button class="btn btn-s" onclick="toast(\'Downloads signed copy\')">Download signed copy</button>':'<button class="btn btn-p" onclick="openSign()">Sign contract</button>'}
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch solid"><div><h2>Deposits</h2><p>Pay both before you hand in original copies</p></div></div>
+        <div class="cb"><div class="list">
+          ${[['Security deposit','2 months rent','PHP 50,000'],['Utility bill deposit','Water and electricity','PHP 5,000']].map(d=>`
+            <div class="li" style="flex-wrap:wrap"><div class="ic">${I.card}</div><div class="grow"><div class="t">${d[0]}</div><div class="s">${d[1]}</div></div>
+            <div class="money">${d[2]}</div>
+            <div class="btns" style="width:100%;padding-left:52px;justify-content:flex-start"><button class="btn btn-p" onclick="toast('Opens online payment')">Pay online</button><button class="btn btn-s" onclick="toast('Shows office payment steps')">Pay at office</button></div>
+            </div>`).join('')}
+        </div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch solid"><div><h2>Statement of account</h2><p>Monthly rent bills for your lease</p></div><button class="btn btn-s" onclick="toast('Downloads SOA')">Download SOA</button></div>
+      <div class="tw"><table>
+        <thead><tr><th>Bill no.</th><th>Due date</th><th>Status</th><th class="r">Amount</th></tr></thead>
+        <tbody>${[['BL-0001','Dec 1, 2026'],['BL-0002','Jan 1, 2027'],['BL-0003','Feb 1, 2027']].map(b=>`<tr><td class="strong">${b[0]}</td><td class="muted">${b[1]}</td><td>${pill('Not due','gray')}</td><td class="r money">PHP 25,000</td></tr>`).join('')}</tbody>
+      </table></div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Original copies ---------- */
+function renderOrig(){
+  const docs = [['Reservation Agreement','',1],['Valid IDs with 3 specimen signatures','',1],['Tenant Information Sheet','',1],
+    ['Signed lease contract','',0],['Proof of income','RTO',0],['Proof of billing','RTO',0],['Notice of acceptance (NOA)','RTO',0],['Computation sheet','',0],['PDCs or approved ADA','',0]];
+  const got = docs.filter(d=>d[2]).length;
+  p_orig().innerHTML = `<div class="stack">
+    ${alertBox('info','info','<strong>Bring the originals in person</strong>You uploaded copies earlier. DMCI now needs the paper originals. Staff mark each one as received.')}
+    <div class="cols">
+      <div class="card">
+        <div class="ch solid"><div><h2>Original copies to bring</h2><p>${got} of ${docs.length} received</p></div></div>
+        <div class="tw"><table>
+          <thead><tr><th>Document</th><th class="r">Status</th></tr></thead>
+          <tbody>${docs.map(d=>`<tr><td class="strong">${d[0]} ${d[1]?pill('RTO only','brand'):''}</td><td class="r">${d[2]?pill('Received','ok'):pill('Not received','gray')}</td></tr>`).join('')}</tbody>
+        </table></div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <div class="ch solid"><div><h2>Where to bring them</h2></div></div>
+          <div class="cb"><div class="list">
+            <div class="li"><div class="ic">${I.pin}</div><div class="grow"><div class="t">${APP().unit.split(',')[0]} property office</div><div class="s">[OFFICE ADDRESS]</div></div></div>
+            <div class="li"><div class="ic">${I.file}</div><div class="grow"><div class="t">Mon to Sat, 9 AM to 5 PM</div><div class="s">Bring 1 valid ID. Contact [PHONE] for questions.</div></div></div>
+          </div></div>
+        </div>
+        <div class="card">
+          <div class="ch solid"><div><h2>Move-in clearance</h2><p>DMCI teams finish these before turnover</p></div></div>
+          <div class="cb">
+            <div class="ringrow"><div class="ring" style="--p:33%"></div><div><div class="t" style="font-weight:600">1 of 3 done</div><div class="s" style="color:var(--t3)">1 needs your action</div></div></div>
+            <div class="list">
+              <div class="li">${I.team('PM')}<div class="grow"><div class="t">House rules</div><div class="s">Property management</div></div><button class="btn btn-p" onclick="toast('Opens house rules')">Review and accept</button></div>
+              <div class="li">${I.team('PC')}<div class="grow"><div class="t">Move-in inspection</div><div class="s">Property care</div></div>${pill('In progress','warn',true)}</div>
+              <div class="li">${I.team('LS')}<div class="grow"><div class="t">Contract copy</div><div class="s">Leasing</div></div>${pill('Done','ok',true)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Progress ---------- */
+function renderSteps(){
+  const cur = APP().cur;
+  const curNote = {
+    A: pill('In progress','blue',true),
+    B: signed ? pill('Pay 2 deposits','warn',true) : pill('Sign your contract','warn',true),
+    C: pill('6 originals to bring','warn',true)
+  }[stage];
+  progSub.textContent = cur>=STEPS.length ? 'All steps done' : `Step ${cur+1} of ${STEPS.length}`;
+  steps.innerHTML = STEPS.map((s,i)=>{
+    const st = i<cur?'done':i===cur?'cur':'todo';
+    let sub = s[1];
+    if(st==='todo' && i===cur+1){ sub = {4:'Starts after documents review',5:'Opens after credit approval',6:'Opens after contract and deposits',7:'Set after original copies'}[i]||sub; }
+    return `<li class="step ${st}"><div class="mk">${st==='done'?I.check:''}</div><div><div class="t">${s[0]}</div><div class="s">${sub}</div>${st==='cur'?curNote:''}</div></li>`;
+  }).join('');
+}
+
+/* ---------- Modals ---------- */
+let pending = null;
+function openUpload(kind, doc){
+  const replace = kind==='Replace';
+  muT.textContent = replace ? 'Replace document' : 'Upload document';
+  muS.textContent = doc;
+  muGo.textContent = replace ? 'Replace file' : 'Submit for review';
+  muGo.disabled = true;
+  const deficient = doc.startsWith('Valid IDs') && !validIdsFixed && !replace;
+  muBody.innerHTML = `
+    ${deficient ? alertBox('err','alert','<strong>What DICD asked you to fix</strong>Second id is expired. Please upload a valid one') : ''}
+    ${replace ? alertBox('warn','alert','<strong>The review starts again</strong>DICD has not reviewed this file yet. Your new file replaces the current one.') : ''}
+    <div class="tips"><b>Before you upload</b><ul><li>Take a clear photo or scan. All 4 corners must show.</li><li>PDF, JPG or PNG, up to [MAX FILE SIZE] per file.</li></ul></div>
+    <div class="drop" tabindex="0" role="button" id="drop"><span class="ic">${I.up}</span><span><b>Click to upload</b> or drag and drop</span><small>PDF, JPG or PNG</small></div>
+    <div id="files"></div>
+    <p style="margin:0;color:var(--t3)">This becomes version 2. Version 1 stays in your history.</p>`;
+  const add = () => {
+    files.innerHTML = `<div class="file"><span class="ic">${I.file}</span><div class="grow"><div style="font-weight:500">${doc.startsWith('Valid')?'valid-ids-v2.pdf':'receipt-v2.pdf'}</div><div style="color:var(--ok);font-weight:500">Uploaded · 1.2 MB</div></div><button class="x" aria-label="Remove file" onclick="files.innerHTML='';muGo.disabled=true">${I.trash}</button></div>`;
+    muGo.disabled = false;
+  };
+  drop.onclick = add; drop.onkeydown = e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();add();} };
+  pending = doc;
+  mUpload.showModal();
+}
+muGo.onclick = () => {
+  if(pending && pending.startsWith('Valid IDs')) validIdsFixed = true;
+  mUpload.close(); toast(muT.textContent==='Replace document'?'File replaced. Review starts again.':'Submitted for review'); renderAll();
+};
+function openSign(){ agree.checked=false; signGo.disabled=true; mSign.showModal(); }
+agree.onchange = () => signGo.disabled = !agree.checked;
+signGo.onclick = () => { signed = true; mSign.close(); toast('Contract signed'); renderAll(); };
+
+/* ---------- Shell ---------- */
+let tt;
+function toast(m){ toastEl.innerHTML = I.ok + m; toastEl.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>toastEl.classList.remove('on'),2200); }
+const toastEl = document.getElementById('toast');
+function go(s){ document.getElementById('s-list').hidden = s!=='list'; document.getElementById('s-detail').hidden = s!=='detail'; window.scrollTo(0,0); }
+function renderAll(){ renderList(); renderTabs(); renderReq(); renderLease(); renderOrig(); renderSteps(); showPanel(); }
+renderAll();
+</script>
+</body>
+</html>
