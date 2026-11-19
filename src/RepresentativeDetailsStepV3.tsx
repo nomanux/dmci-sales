@@ -305,7 +305,7 @@ function Field({
 
 function SubHead({ children }: { children: ReactNode }) {
   return (
-    <p className="m-0 mt-1 border-0 border-t border-solid border-gray-100 pt-3 text-[13px] font-semibold leading-5 text-gray-900">
+    <p className="m-0 mt-2 border-0 border-t border-solid border-gray-100 pt-4 text-[13px] font-semibold leading-5 text-gray-900">
       {children}
     </p>
   );
@@ -545,13 +545,39 @@ function ChipField({
       missing={optional ? undefined : !!error}
       className={className}
     >
-      <div role="group" className="flex flex-wrap gap-2">
-        {options.map((o) => (
-          <Chip key={o} on={selected.includes(o)} invalid={showAll && !!error} onClick={() => toggle(o)}>
-            {o}
-          </Chip>
-        ))}
-      </div>
+      {!multi && options.length <= 3 && options.every((o) => o.length <= 16) ? (
+        <div
+          role="group"
+          className={`grid h-8 w-full max-w-[320px] grid-flow-col auto-cols-fr gap-0.5 rounded-[7px] p-[3px] ${
+            showAll && error ? "bg-[#fef3f2] ring-1 ring-[#f5a3a3]" : "bg-gray-100"
+          }`}
+        >
+          {options.map((o) => {
+            const on = selected.includes(o);
+            return (
+              <button
+                key={o}
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggle(o)}
+                className={`cursor-pointer rounded-[5px] border-0 text-xs font-medium transition-colors ${
+                  on ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "bg-transparent text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {o}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <div role="group" className="flex flex-wrap gap-1.5">
+          {options.map((o) => (
+            <Chip key={o} on={selected.includes(o)} invalid={showAll && !!error} onClick={() => toggle(o)}>
+              {o}
+            </Chip>
+          ))}
+        </div>
+      )}
     </Field>
   );
 }
@@ -1853,7 +1879,6 @@ const SECTIONS: { id: SectionId; title: string; nav: string; optional?: boolean 
 
 function Section({
   id,
-  number,
   title,
   optional,
   open,
@@ -1863,7 +1888,6 @@ function Section({
   children,
 }: {
   id: SectionId;
-  number: number;
   title: string;
   optional?: boolean;
   open: boolean;
@@ -1876,44 +1900,42 @@ function Section({
   return (
     <section
       id={`rd-${id}`}
-      className={`mb-2 scroll-mt-4 border border-solid bg-white transition-[box-shadow,border-color] md:rounded-xl ${
-        open ? "border-gray-200 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_6px_16px_-8px_rgba(16,24,40,0.12)]" : "border-gray-200 hover:border-gray-300"
+      className={`mb-2.5 scroll-mt-4 bg-white transition-shadow md:rounded-xl ${
+        open
+          ? "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.06)]"
+          : "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:shadow-[0_1px_2px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.05)]"
       }`}
     >
       <button
         type="button"
         aria-expanded={open}
         onClick={onToggle}
-        className="flex w-full cursor-pointer items-center gap-2.5 rounded-xl border-0 bg-transparent px-4 py-2.5 text-left"
+        className="flex w-full cursor-pointer items-center gap-3 rounded-xl border-0 bg-transparent px-5 py-3.5 text-left"
       >
-        <span
-          className={`grid size-6 flex-shrink-0 place-items-center rounded-full border-[1.5px] text-[11px] font-semibold ${
-            done
-              ? "border-success-600 bg-success-600 text-white"
-              : open
-                ? "border-brand-400 bg-brand-25 text-brand-500"
-                : "border-gray-300 text-gray-500"
-          }`}
-        >
-          {done ? <CheckIcon className="size-3" /> : number}
-        </span>
         <span className="min-w-0 flex-1">
-          <strong className="block text-sm font-semibold leading-5 text-gray-900">
+          <strong className="block text-[15px] font-semibold leading-5 tracking-[-0.01em] text-gray-900">
             {title}
-            {optional && (
-              <span className="ml-1.5 rounded-full bg-gray-100 px-1.5 py-px align-[1px] text-[10px] font-semibold text-gray-500">
-                Optional
-              </span>
-            )}
+            {optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
           </strong>
-          <small className={`block truncate text-xs leading-4 ${done ? "text-success-600" : "text-gray-500"}`}>
-            {missing === undefined ? "" : done ? summary : `${missing} ${missing === 1 ? "answer" : "answers"} left`}
-          </small>
+          {done && summary && !open && (
+            <small className="mt-0.5 block truncate text-xs leading-4 text-gray-500">{summary}</small>
+          )}
         </span>
+        {missing !== undefined &&
+          (done ? (
+            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-[#ecfdf3] px-2 py-0.5 text-[11px] font-medium text-success-600">
+              <CheckIcon className="size-2.5" />
+              Done
+            </span>
+          ) : (
+            <span className="flex-shrink-0 rounded-full bg-brand-25 px-2 py-0.5 text-[11px] font-medium text-brand-500">
+              {missing} left
+            </span>
+          ))}
         <ChevronDownIcon className={`size-4 flex-shrink-0 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {/* Closed sections stay mounted (only hidden) so their answers are kept. */}
-      <div data-section-body={id} className={open ? "px-4 pb-4 pt-1 md:pl-[50px] md:pr-5" : "hidden"}>
+      <div data-section-body={id} className={open ? "px-5 pb-5 pt-0.5" : "hidden"}>
         <div className={STACK}>{children}</div>
       </div>
     </section>
@@ -1923,7 +1945,13 @@ function Section({
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 const countOf = (v: string) => v.split(";").filter(Boolean).length;
 
-export default function RepresentativeDetailsStepV3() {
+/** Section list the page's left stepper shows under this step (one progress system). */
+export type SectionNav = {
+  items: { id: string; label: string; done: boolean; active: boolean }[];
+  jump: (id: string) => void;
+};
+
+export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChange?: (nav: SectionNav) => void } = {}) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [clientType, setClientType] = useState("Private individual");
   const [openIds, setOpenIds] = useState<Set<SectionId>>(() => new Set(["personal"]));
@@ -2296,88 +2324,75 @@ export default function RepresentativeDetailsStepV3() {
   const doneCount = visible.filter((s) => missing[s.id] === 0).length;
   const pct = Math.round((doneCount / visible.length) * 100);
 
+  // Report the section list to the page stepper. Keyed on a string so a new
+  // array each render doesn't loop; jump goes through a ref for the same reason.
+  const openRef = useRef(openSection);
+  openRef.current = openSection;
+  const navKey = visible.map((s) => `${s.id}~${s.nav}~${missing[s.id] === 0 ? 1 : 0}~${activeId === s.id ? 1 : 0}`).join("|");
+  useEffect(() => {
+    onNavChange?.({
+      items: navKey.split("|").map((row) => {
+        const [id, label, done, active] = row.split("~");
+        return { id, label, done: done === "1", active: active === "1" };
+      }),
+      jump: (id) => openRef.current(id as SectionId),
+    });
+  }, [navKey, onNavChange]);
+
   return (
-    <div ref={rootRef} className="form-lg rd-v3 mx-auto w-full max-w-[880px]">
+    <div ref={rootRef} className="form-lg rd-v3 mx-auto w-full max-w-[760px] px-4 pt-6 md:px-0">
       <div className="min-w-0">
-        <div className="mb-2 border border-solid border-gray-200 bg-white p-4 md:rounded-xl md:px-5">
-          <h1 className="m-0 text-lg font-bold leading-6 tracking-[-0.01em] text-gray-900">Client / company representative</h1>
-          <p className="m-0 mt-0.5 text-xs leading-4 text-gray-500">Check your details and complete the rest.</p>
+        <p className="m-0 text-xs font-medium leading-4 text-gray-500">Representative details</p>
+        <h1 className="m-0 mt-0.5 text-xl font-bold leading-7 tracking-[-0.015em] text-gray-900">Tell us about the buyer</h1>
+        <p className="m-0 mt-1 text-[13px] leading-5 text-gray-600">Check your details and fill in the rest. About 4 minutes.</p>
 
-          <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
-            {[
-              ["Private individual", "I am a private individual or a representative of a private partnership."],
-              ["Company representative", "I represent a company or corporation."],
-            ].map(([value, hint]) => {
-              const on = clientType === value;
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => setClientType(value)}
-                  className={`flex cursor-pointer items-start gap-2 rounded-lg border border-solid px-2.5 py-2 text-left transition-colors ${
-                    on ? "border-brand-500 bg-brand-25 shadow-[0_0_0_3px_rgba(10,77,224,0.08)]" : "border-gray-200 bg-white hover:border-gray-300"
+        <div className="mb-4 mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
+          {[
+            ["Private individual", "Buying for yourself or a private partnership"],
+            ["Company representative", "Buying on behalf of a company or corporation"],
+          ].map(([value, hint]) => {
+            const on = clientType === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setClientType(value)}
+                className={`flex cursor-pointer items-start gap-2.5 rounded-xl border-[1.5px] border-solid bg-white px-3 py-2.5 text-left transition-[border-color,box-shadow] ${
+                  on ? "border-brand-500 shadow-[0_0_0_3px_rgba(7,56,157,0.14)]" : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <span
+                  className={`mt-0.5 size-3.5 flex-shrink-0 rounded-full border-solid bg-white ${
+                    on ? "border-[4.5px] border-brand-500" : "border-[1.5px] border-gray-300"
                   }`}
-                >
-                  <span
-                    className={`mt-0.5 grid size-4 flex-shrink-0 place-items-center rounded-full border-[1.5px] ${
-                      on ? "border-brand-600 bg-brand-600" : "border-gray-300 bg-white"
-                    }`}
-                  >
-                    {on && <span className="size-1.5 rounded-full bg-white" />}
-                  </span>
-                  <span className="min-w-0">
-                    <strong className="block text-[13px] font-semibold leading-[18px] text-gray-900">{value}</strong>
-                    <small className="block text-[11px] leading-4 text-gray-500">{hint}</small>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                />
+                <span className="min-w-0">
+                  <strong className="block text-[13px] font-semibold leading-[18px] text-gray-900">{value}</strong>
+                  <small className="block text-[11.5px] leading-4 text-gray-500">{hint}</small>
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
-          {/* One progress meter for this step, with jump-to pills for each section. */}
-          <div className="mt-3 border-0 border-t border-solid border-gray-100 pt-3">
-            <div className="flex items-center justify-between text-[11px] leading-4 text-gray-500">
-              <span className="font-medium text-gray-700">In this step</span>
-              <span>
-                {doneCount} of {visible.length} sections done
-              </span>
-            </div>
-            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-gray-100">
-              <div className="h-full rounded-full bg-brand-400 transition-[width] duration-300" style={{ width: `${pct}%` }} />
-            </div>
-            <nav aria-label="Sections" className="mt-2.5 flex flex-wrap gap-1.5">
-              {visible.map((s) => {
-                const done = missing[s.id] === 0;
-                const active = activeId === s.id;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    aria-current={active ? "step" : undefined}
-                    onClick={() => openSection(s.id)}
-                    className={`inline-flex h-6 cursor-pointer items-center gap-1 rounded-full border border-solid px-2 text-[11px] font-medium transition-colors ${
-                      active
-                        ? "border-brand-500 bg-brand-25 text-brand-600"
-                        : done
-                          ? "border-gray-200 bg-white text-gray-700 hover:border-gray-300"
-                          : "border-gray-200 bg-gray-50 text-gray-500 hover:text-gray-900"
-                    }`}
-                  >
-                    {done && <CheckIcon className="size-2.5 text-success-600" />}
-                    {s.nav}
-                  </button>
-                );
-              })}
-            </nav>
+        {/* The page stepper lists the sections on md+; on phones they show here. */}
+        <div className="mb-3 md:hidden">
+          <div className="flex justify-between text-[11px] text-gray-500">
+            <span>This step</span>
+            <span>
+              {doneCount} of {visible.length} done
+            </span>
+          </div>
+          <div className="mt-1.5 h-[3px] overflow-hidden rounded-full bg-gray-200">
+            <div className="h-full rounded-full bg-brand-500 transition-[width] duration-300" style={{ width: `${pct}%` }} />
           </div>
         </div>
 
-        {visible.map((s, i) => (
+        {visible.map((s) => (
           <Section
             key={s.id}
             id={s.id}
-            number={i + 1}
             title={s.title}
             optional={s.optional}
             open={openIds.has(s.id)}

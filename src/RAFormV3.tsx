@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Button from "./Button";
-import RepresentativeDetailsStepV3 from "./RepresentativeDetailsStepV3";
+import RepresentativeDetailsStepV3, { type SectionNav } from "./RepresentativeDetailsStepV3";
 import BuyerPropertyStep from "./BuyerPropertyStep";
 import IdentityVerificationStep from "./IdentityVerificationStep";
 import TermsStep from "./TermsStep";
@@ -298,6 +298,8 @@ function readStepFromUrl(): number {
 }
 
 export default function RAFormV3() {
+  // Step 2's sections, shown as sub-items under it in the stepper.
+  const [sectionNav, setSectionNav] = useState<SectionNav | null>(null);
   // Phones: the live camera only runs full screen in landscape (an upright
   // 16:9 frame is too small to fit face + ID), so they start on Upload.
   // Upright, or after closing the full-screen view, a rotate / open-camera
@@ -766,6 +768,28 @@ export default function RAFormV3() {
                       {step.name}
                     </p>
                   </button>
+                  {step.id === BUYER_DETAILS_STEP && currentStep === BUYER_DETAILS_STEP && sectionNav && (
+                    <ul className="m-0 ml-[11px] mt-1 flex list-none flex-col border-0 border-l-[1.5px] border-solid border-gray-200 py-0.5 pl-4">
+                      {sectionNav.items.map((it) => (
+                        <li key={it.id}>
+                          <button
+                            type="button"
+                            onClick={() => sectionNav.jump(it.id)}
+                            className={`flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent px-0 py-[3px] text-left text-xs leading-4 ${
+                              it.active ? "font-semibold text-brand-500" : it.done ? "text-gray-700 hover:text-gray-900" : "text-gray-500 hover:text-gray-900"
+                            }`}
+                          >
+                            {it.done ? (
+                              <span className="grid size-3 flex-shrink-0 place-items-center rounded-full bg-success-600"><CheckmarkIcon className="size-2" /></span>
+                            ) : (
+                              <span className={`mx-[3px] size-1.5 flex-shrink-0 rounded-full ${it.active ? "bg-brand-500" : "bg-gray-300"}`} />
+                            )}
+                            {it.label}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {index < steps.length - 1 && (
                     <div className="flex h-6 items-center px-0.5 py-0 w-full">
                       <div className="flex h-full items-center justify-center w-6">
@@ -797,7 +821,7 @@ export default function RAFormV3() {
           {currentStep === BUYER_PROPERTY_STEP ? (
             <BuyerPropertyStep />
           ) : currentStep === BUYER_DETAILS_STEP ? (
-            <RepresentativeDetailsStepV3 />
+            <RepresentativeDetailsStepV3 onNavChange={setSectionNav} />
           ) : currentStep === IDENTITY_STEP ? (
             <IdentityVerificationStep onReadyChange={setIdentityReady} />
           ) : currentStep === TERMS_STEP ? (
