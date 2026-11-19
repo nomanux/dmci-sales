@@ -1,5 +1,6 @@
 // RA form v3 copy of TermsStep.tsx: StepHeaderV3 banner, focused card and compact fields. The original stays as v1/v2 use it.
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { motion } from "motion/react";
 import Checkbox from "./Checkbox";
 import StepHeaderV3 from "./StepHeaderV3";
 import "./RepresentativeDetailsStepV3.css";
@@ -133,6 +134,12 @@ function RequirementRows({ rows }: { rows: Row[] }) {
   );
 }
 
+const TERMS_SECTIONS = [
+  { id: "fee", label: "Reservation fee" },
+  { id: "documents", label: "Required documents" },
+  { id: "terms", label: "Terms" },
+] as const;
+
 export default function TermsStepV3({
   onReadyChange,
 }: {
@@ -141,52 +148,147 @@ export default function TermsStepV3({
 }) {
   const [agreed, setAgreed] = useState(() => AGREEMENTS.map(() => false));
   const ready = agreed.every(Boolean);
+  const [progress, setProgress] = useState(0);
+  const [active, setActive] = useState<string>("fee");
+  const [reachedEnd, setReachedEnd] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const idp = useId().replace(/:/g, "");
 
   useEffect(() => {
     onReadyChange?.(ready);
   }, [ready, onReadyChange]);
 
-  // Fills the visible area so only the text panel scrolls (one scrollbar), not the page too.
+  // Reading progress, scroll spy, and unlocking the acknowledgements at the end.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const max = el.scrollHeight - el.clientHeight;
+      const pr = max > 0 ? Math.min(1, el.scrollTop / max) : 1;
+      setProgress(pr);
+      if (pr >= 0.98) setReachedEnd(true);
+      const top = el.getBoundingClientRect().top + 72;
+      let cur: string = TERMS_SECTIONS[0].id;
+      el.querySelectorAll<HTMLElement>("[data-policy-sec]").forEach((sec) => {
+        if (sec.getBoundingClientRect().top <= top) cur = sec.dataset.policySec ?? cur;
+      });
+      if (max > 0 && el.scrollTop >= max - 4) cur = TERMS_SECTIONS[TERMS_SECTIONS.length - 1].id;
+      setActive(cur);
+    };
+    onScroll();
+    el.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  const jump = (id: string) => {
+    const el = scrollRef.current;
+    const sec = el?.querySelector<HTMLElement>(`[data-policy-sec="${id}"]`);
+    if (el && sec) el.scrollTo({ top: sec.offsetTop - 12, behavior: "smooth" });
+  };
+  const pct = Math.round(progress * 100);
+
+  // Fills the visible area so only the text column scrolls (one scrollbar), not the page too.
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 bg-white rounded-none md:rounded-2xl flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_0_0_4px_rgba(10,77,224,0.10),0_12px_32px_-12px_rgba(16,24,40,0.18)]">
       <StepHeaderV3 step={5} title="Terms and Conditions" className="px-4 md:px-8 pt-4 pb-4 md:pt-5 md:pb-5">
         Please read the terms and conditions carefully before proceeding next step.
       </StepHeaderV3>
 
-      <div className="px-4 md:px-8 pb-4 md:pb-6 flex flex-1 min-h-0 flex-col gap-4 md:gap-6">
-        {/* Scrollable agreement text */}
-        <div
-          tabIndex={0}
-          role="region"
-          aria-label="Terms and conditions text"
-          className="max-h-[50vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50 px-3 py-3 md:px-6 md:py-6 text-[13px] leading-5 md:text-[15px] md:leading-6 text-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
-        >
-          <TermsAgreementText />
-        </div>
+      <div className="flex flex-1 min-h-0 flex-col md:grid md:grid-cols-[180px_minmax(0,1fr)] md:gap-8 px-4 md:px-8">
+        {/* Section list: a sticky rail on desktop, scrollable chips on phones. */}
+        <nav aria-label="Terms sections" className="hidden md:flex flex-col gap-0.5 self-start pt-1">
+          <p className="m-0 mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-400">On this page</p>
+          {TERMS_SECTIONS.map((sec) => {
+            const on = active === sec.id;
+            return (
+              <button
+                key={sec.id}
+                type="button"
+                onClick={() => jump(sec.id)}
+                aria-current={on ? "location" : undefined}
+                className="relative cursor-pointer rounded-md border-0 bg-transparent px-2 py-1.5 text-left text-[13px] leading-5 outline-none"
+              >
+                {on && (
+                  <motion.span
+                    layoutId={`${idp}-toc`}
+                    transition={{ type: "spring", stiffness: 520, damping: 34, mass: 0.7 }}
+                    className="absolute inset-0 rounded-md bg-[#EBF1FF]"
+                  />
+                )}
+                <span className={`relative transition-colors ${on ? "font-semibold text-brand-500" : "text-gray-500 hover:text-gray-900"}`}>
+                  {sec.label}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
 
-        {/* Acknowledgements */}
-        <div className="flex flex-col gap-3 md:gap-4">
-          {AGREEMENTS.map((text, i) => (
-            <label key={text} className="flex cursor-pointer items-start gap-2 text-sm font-medium leading-5 text-gray-700">
-              <span className="pt-0.5">
-                <Checkbox
-                  checked={agreed[i]}
-                  onChange={(e) => setAgreed((prev) => prev.map((v, j) => (j === i ? e.target.checked : v)))}
-                />
-              </span>
-              {text}
-            </label>
-          ))}
+        <div className="flex min-h-0 flex-col">
+          <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-2 md:hidden [scrollbar-width:none]">
+            {TERMS_SECTIONS.map((sec) => (
+              <button
+                key={sec.id}
+                type="button"
+                onClick={() => jump(sec.id)}
+                className={`h-7 flex-shrink-0 cursor-pointer whitespace-nowrap rounded-full border border-solid px-2.5 text-xs font-medium transition-colors ${
+                  active === sec.id ? "border-brand-400 bg-brand-25 text-brand-500" : "border-gray-200 bg-white text-gray-600"
+                }`}
+              >
+                {sec.label}
+              </button>
+            ))}
+          </div>
+          {/* Reading progress, pinned to the top of the text. */}
+          <div className="h-[3px] flex-shrink-0 overflow-hidden rounded-full bg-gray-100">
+            <div
+              className={`h-full rounded-full transition-[width] duration-150 ${reachedEnd ? "bg-success-600" : "bg-brand-400"}`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div
+            ref={scrollRef}
+            tabIndex={0}
+            role="region"
+            aria-label="Terms and conditions text"
+            className="relative max-h-[55vh] md:max-h-none md:flex-1 md:min-h-0 overflow-y-auto pb-6 pt-5 pr-1 text-[14px] leading-6 text-gray-700 focus:outline-none [scrollbar-width:thin] [scrollbar-color:#d0d5dd_transparent]"
+          >
+            <TermsAgreementText idp={idp} />
+          </div>
         </div>
+      </div>
+
+      {/* Acknowledgements: full width, lined up with the section list; unlocked at the end of the text. */}
+      <div className="flex flex-shrink-0 flex-col gap-1 border-0 border-t border-solid border-gray-100 px-4 py-3 md:px-8 md:py-4">
+        {AGREEMENTS.map((text, i) => (
+          <label
+            key={text}
+            title={reachedEnd ? undefined : "Scroll to the end of the terms to agree"}
+            className={`flex items-center gap-3 py-1 md:px-2 ${reachedEnd ? "cursor-pointer" : "cursor-not-allowed"}`}
+          >
+            <Checkbox
+              checked={agreed[i]}
+              disabled={!reachedEnd}
+              onChange={(e) => setAgreed((prev) => prev.map((v, j) => (j === i ? e.target.checked : v)))}
+            />
+            <span className={`text-sm font-medium leading-5 transition-colors ${reachedEnd ? "text-gray-900" : "text-gray-400"}`}>
+              {text}
+            </span>
+          </label>
+        ))}
       </div>
     </section>
   );
 }
 
 /** The agreement body — shared with the Review & Submit step so both show identical copy. */
-export function TermsAgreementText() {
+export function TermsAgreementText({ idp = "terms" }: { idp?: string }) {
   return (
-  <div className="flex flex-col gap-4">
+  <div className="flex flex-col gap-10">
+    <section id={`${idp}-fee`} data-policy-sec="fee" aria-label="Reservation fee" className="flex scroll-mt-16 flex-col gap-4 [&>p]:max-w-[68ch]">
     <p className="m-0">
       A reservation fee in the amount of PESOS
       <Blank width="w-[100px]" label="Amount in words" />
@@ -194,6 +296,8 @@ export function TermsAgreementText() {
       <Blank width="w-[100px]" label="Amount in pesos" />) was paid for above described purchased property on
       <Blank width="w-[124px]" label="Payment date" />.
     </p>
+    </section>
+    <section id={`${idp}-documents`} data-policy-sec="documents" aria-label="Required documents" className="flex scroll-mt-16 flex-col gap-4 [&>p]:max-w-[68ch]">
     <p className="m-0">
       This reservation will be automatically cancelled in the event that I/we fail to submit the following
       REQUIRED DOCUMENTS WITHIN THIRTY (30) DAYS FROM PAYMENT OF THE RESERVATION FEE and hence, the reservation
@@ -242,11 +346,14 @@ export function TermsAgreementText() {
       </table>
     </div>
   
+    </section>
+    <section id={`${idp}-terms`} data-policy-sec="terms" aria-label="Terms" className="flex scroll-mt-16 flex-col gap-4 [&>p]:max-w-[68ch]">
     {CLAUSES.map((clause) => (
       <p key={clause.slice(0, 40)} className="m-0">
         {clause}
       </p>
     ))}
+    </section>
   </div>
   );
 }
