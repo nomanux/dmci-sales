@@ -988,7 +988,7 @@ export default function RAFormV3() {
           ) : currentStep === REVIEW_STEP ? (
             <ReviewStepV3 onEdit={goToStep} onReadyChange={setReviewReady} />
           ) : (
-            <section className="rd-v3 w-full md:max-h-full bg-white rounded-none md:rounded-2xl overflow-hidden flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_0_0_4px_rgba(10,77,224,0.10),0_12px_32px_-12px_rgba(16,24,40,0.18)]">
+            <section className="rd-v3 w-full md:max-h-full bg-white rounded-none md:rounded-2xl overflow-hidden flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_1px_2px_rgba(16,24,40,0.05)]">
               <StepHeaderV3
                 step={4}
                 title="Capture Live Selfie with ID"

@@ -388,7 +388,7 @@ export default function ReviewStepV3({
   }, [confirmed, onReadyChange]);
 
   return (
-    <section className="antialiased w-full md:max-h-full rd-v3 bg-white rounded-none md:rounded-2xl flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_0_0_4px_rgba(10,77,224,0.10),0_12px_32px_-12px_rgba(16,24,40,0.18)]">
+    <section className="antialiased w-full md:max-h-full rd-v3 bg-white rounded-none md:rounded-2xl flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_1px_2px_rgba(16,24,40,0.05)]">
       <StepHeaderV3 step={8} title="Review & Submit" className="px-4 md:px-8 pt-4 pb-4 md:pt-5 md:pb-5">
         Review the details below to ensure they are correct and up to date before submission.
       </StepHeaderV3>

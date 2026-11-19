@@ -539,7 +539,7 @@ export default function IdentityVerificationStepV3({
   onReadyChange?: (ready: boolean) => void;
 }) {
   return (
-    <section className="form-lg w-full md:max-h-full rd-v3 bg-white rounded-none md:rounded-2xl flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_0_0_4px_rgba(10,77,224,0.10),0_12px_32px_-12px_rgba(16,24,40,0.18)]">
+    <section className="form-lg w-full md:max-h-full rd-v3 bg-white rounded-none md:rounded-2xl flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_1px_2px_rgba(16,24,40,0.05)]">
       <StepHeaderV3 step={3} title="Upload your government ID" className="px-4 md:px-6 pt-4 pb-5 md:pt-5">
         Upload the front of your ID. We read your details from the card and fill in the form for you.{" "}
         <a href="#" className="font-semibold text-brand-600 underline hover:text-brand-700">
