@@ -409,7 +409,170 @@ function TextField({
   );
 }
 
-// Same country-code picker as v1's PhoneField: a native <select> sits invisibly over the flag.
+/** Country names for the dial-code picker (PHONE_COUNTRIES carries code, flag and dial). */
+const COUNTRY_NAMES: Record<string, string> = {
+  PH: "Philippines",
+  US: "United States",
+  SG: "Singapore",
+  AE: "United Arab Emirates",
+  JP: "Japan",
+};
+
+/** Small drawn flags: Windows has no flag emoji, so these render the same on every OS. */
+function CountryFlag({ code }: { code: string }) {
+  const box = "block h-[14px] w-5 shrink-0 overflow-hidden rounded-[3px] ring-1 ring-black/10";
+  if (code === "PH") return <span className={box + " [&>svg]:h-full [&>svg]:w-full"}><PhilippinesFlag /></span>;
+  return (
+    <svg viewBox="0 0 20 14" className={box} aria-hidden="true">
+      {code === "US" && (
+        <>
+          <rect width="20" height="14" fill="#fff" />
+          {[0, 2, 4, 6, 8, 10, 12].map((y) => (
+            <rect key={y} y={y} width="20" height="1.08" fill="#B22234" />
+          ))}
+          <rect width="8.5" height="7.5" fill="#3C3B6E" />
+        </>
+      )}
+      {code === "SG" && (
+        <>
+          <rect width="20" height="7" fill="#EF3340" />
+          <rect y="7" width="20" height="7" fill="#fff" />
+          <circle cx="4.6" cy="3.5" r="2.2" fill="#fff" />
+          <circle cx="5.5" cy="3.5" r="2" fill="#EF3340" />
+        </>
+      )}
+      {code === "AE" && (
+        <>
+          <rect width="20" height="4.67" fill="#00732F" />
+          <rect y="4.67" width="20" height="4.67" fill="#fff" />
+          <rect y="9.33" width="20" height="4.67" fill="#000" />
+          <rect width="5" height="14" fill="#FF0000" />
+        </>
+      )}
+      {code === "JP" && (
+        <>
+          <rect width="20" height="14" fill="#fff" />
+          <circle cx="10" cy="7" r="4" fill="#BC002D" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+/**
+ * Dial-code picker: the same animated panel as the v3 dropdowns (spring open,
+ * gliding highlight, tick on the chosen country), with drawn flags.
+ */
+function DialCodePicker({ value, onChange }: { value: string; onChange: (code: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [hover, setHover] = useState(-1);
+  const ref = useRef<HTMLDivElement>(null);
+  const uid = useId();
+  const current = PHONE_COUNTRIES.find((c) => c.code === value) ?? PHONE_COUNTRIES[0];
+  const at = PHONE_COUNTRIES.findIndex((c) => c.code === value);
+
+  useEffect(() => {
+    if (!open) return;
+    setHover(at);
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+    // `at` only matters at the moment the panel opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const choose = (code: string) => {
+    onChange(code);
+    setOpen(false);
+  };
+
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        aria-label={`Country code: ${COUNTRY_NAMES[current.code] ?? current.code} ${current.dial}`}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        onKeyDown={(e) => {
+          if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+            e.preventDefault();
+            setOpen(true);
+            return;
+          }
+          if (!open) return;
+          if (e.key === "ArrowDown") (e.preventDefault(), setHover((h) => (h + 1) % PHONE_COUNTRIES.length));
+          if (e.key === "ArrowUp") (e.preventDefault(), setHover((h) => (h <= 0 ? PHONE_COUNTRIES.length - 1 : h - 1)));
+          if (e.key === "Enter" && hover >= 0) (e.preventDefault(), choose(PHONE_COUNTRIES[hover].code));
+        }}
+        className={"select-trigger select-sm !w-auto !justify-start gap-1.5 !px-2.5" + (open ? " select-trigger-open" : "")}
+      >
+        <CountryFlag code={current.code} />
+        <span className="text-[13px] font-medium tabular-nums text-gray-900">{current.dial}</span>
+        <motion.span className="flex text-gray-500" animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}>
+          <ChevronDownIcon className="h-3.5 w-3.5" />
+        </motion.span>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            role="listbox"
+            aria-label="Country code"
+            initial={{ opacity: 0, scale: 0.96, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: -4, transition: { duration: 0.14 } }}
+            transition={{ type: "spring", stiffness: 520, damping: 34, mass: 0.7 }}
+            style={{ transformOrigin: "top left" }}
+            onPointerLeave={() => setHover(-1)}
+            className="select-panel m-0 !w-[272px] list-none"
+          >
+            {PHONE_COUNTRIES.map((c, i) => {
+              const sel = c.code === current.code;
+              return (
+                <li key={c.code}>
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={sel}
+                    onPointerEnter={() => setHover(i)}
+                    onClick={() => choose(c.code)}
+                    className={"select-option isolate relative gap-2.5" + (sel ? " select-option-selected" : "")}
+                  >
+                    {hover === i && (
+                      <motion.span
+                        layoutId={`${uid}-hl`}
+                        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                        className="rd-hl absolute inset-0 -z-10 rounded-lg"
+                      />
+                    )}
+                    <CountryFlag code={c.code} />
+                    <span className="min-w-0 flex-1 truncate">{COUNTRY_NAMES[c.code] ?? c.code}</span>
+                    <span className={`tabular-nums ${sel ? "" : "text-gray-500"}`}>{c.dial}</span>
+                    <span className="flex w-3.5 justify-end">
+                      {sel && (
+                        <svg viewBox="0 0 16 16" fill="none" className="size-3.5" aria-hidden="true">
+                          <path d="M13 4.5 6.5 11 3 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function PhoneField(props: TextFieldProps) {
   const [countryCode, setCountryCode] = useState(PHONE_COUNTRIES[0].code);
   return (
@@ -417,28 +580,7 @@ function PhoneField(props: TextFieldProps) {
       type="tel"
       inputMode="numeric"
       {...props}
-      before={
-        <div className="select-trigger select-sm relative w-16 shrink-0 focus-within:border-brand-400">
-          {countryCode === "PH" ? (
-            <PhilippinesFlag />
-          ) : (
-            <span className="text-xs font-semibold text-gray-700">{countryCode}</span>
-          )}
-          <ChevronDownIcon className="pointer-events-none h-4 w-4 shrink-0 text-gray-500" />
-          <select
-            aria-label="Country code"
-            value={countryCode}
-            onChange={(e) => setCountryCode(e.target.value)}
-            className="absolute inset-0 h-full w-full cursor-pointer appearance-none opacity-0"
-          >
-            {PHONE_COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.flag} {c.code} {c.dial}
-              </option>
-            ))}
-          </select>
-        </div>
-      }
+      before={<DialCodePicker value={countryCode} onChange={setCountryCode} />}
     />
   );
 }
