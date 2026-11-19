@@ -14,10 +14,11 @@ import Button from "./Button";
 import Checkbox from "./Checkbox";
 import DatePicker from "./DatePicker";
 import Input from "./Input";
-import Select from "./Select";
+import Select from "./SelectV3";
 import { PHONE_COUNTRIES, PhilippinesFlag } from "./BuyerDetailsStep";
 import { CheckIcon, ChevronDownIcon, SearchIcon } from "./icons";
 import "./RepresentativeDetailsStepV3.css";
+import { AnimatePresence, motion } from "motion/react";
 
 /**
  * Step 2 of RA form v3 — "Client / company representative", compact redesign.
@@ -780,8 +781,18 @@ function ComboField({
         ) : (
           <ChevronDownIcon className="pointer-events-none absolute right-3 top-2 size-4 text-gray-500" />
         )}
+        <AnimatePresence>
         {open && (
-          <ul id={`${id}-list`} role="listbox" className="select-panel select-option-list m-0 list-none">
+          <motion.ul
+            id={`${id}-list`}
+            role="listbox"
+            className="select-panel select-option-list m-0 list-none"
+            initial={{ opacity: 0, scale: 0.96, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: -4, transition: { duration: 0.14 } }}
+            transition={{ type: "spring", stiffness: 520, damping: 34, mass: 0.7 }}
+            style={{ transformOrigin: "top center" }}
+          >
             {matches.length ? (
               matches.map((o, i) => (
                 <li
@@ -792,8 +803,16 @@ function ComboField({
                     e.preventDefault();
                     pick(i);
                   }}
-                  className={`select-option flex-col !items-start ${i === active ? "bg-gray-50" : ""}`}
+                  className={`select-option flex-col !items-start isolate relative`}
+                  onMouseEnter={() => setActive(i)}
                 >
+                  {i === active && (
+                    <motion.span
+                      layoutId={`${id}-hl`}
+                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                      className="rd-hl absolute inset-0 -z-10 rounded-lg"
+                    />
+                  )}
                   <span>{highlight(itemLabel(o), typed ? v.trim().toLowerCase().split(/[\s,.]+/)[0] : "")}</span>
                   {itemMeta(o) && <small className="text-xs text-gray-500">{itemMeta(o)}</small>}
                 </li>
@@ -801,8 +820,9 @@ function ComboField({
             ) : (
               <li className="px-4 py-2 text-sm text-gray-500">{emptyText}</li>
             )}
-          </ul>
+          </motion.ul>
         )}
+        </AnimatePresence>
       </div>
     </Field>
   );
@@ -1276,8 +1296,18 @@ function AddressFinder({
           }}
         />
         <SearchIcon className="pointer-events-none absolute right-3 top-2 size-4 text-brand-500" />
+        <AnimatePresence>
         {open && q.trim() && (
-          <ul id={`${id}-list`} role="listbox" className="select-panel select-option-list m-0 list-none">
+          <motion.ul
+            id={`${id}-list`}
+            role="listbox"
+            className="select-panel select-option-list m-0 list-none"
+            initial={{ opacity: 0, scale: 0.96, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.97, y: -4, transition: { duration: 0.14 } }}
+            transition={{ type: "spring", stiffness: 520, damping: 34, mass: 0.7 }}
+            style={{ transformOrigin: "top center" }}
+          >
             {hits.length ? (
               hits.map((h, i) => (
                 <li
@@ -1288,8 +1318,16 @@ function AddressFinder({
                     e.preventDefault();
                     pick(h);
                   }}
-                  className={`select-option !items-center gap-3 ${i === active ? "bg-gray-50" : ""}`}
+                  className={`select-option !items-center gap-3 isolate relative`}
+                  onMouseEnter={() => setActive(i)}
                 >
+                  {i === active && (
+                    <motion.span
+                      layoutId={`${id}-hl`}
+                      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                      className="rd-hl absolute inset-0 -z-10 rounded-lg"
+                    />
+                  )}
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate">{highlight(finderLabel(h), words[0] ?? "")}</span>
                     <small className="truncate text-xs text-gray-500">{finderMeta(h)}</small>
@@ -1304,8 +1342,9 @@ function AddressFinder({
                 {loading ?? "No match. Pick your province, city and barangay below."}
               </li>
             )}
-          </ul>
+          </motion.ul>
         )}
+        </AnimatePresence>
       </div>
     </Field>
     </div>

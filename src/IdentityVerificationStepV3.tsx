@@ -3,7 +3,7 @@ import { useId, useEffect, useRef, useState, type DragEvent, type ReactNode } fr
 import Checkbox from "./Checkbox";
 import DatePicker from "./DatePicker";
 import Input from "./Input";
-import Select from "./Select";
+import Select from "./SelectV3";
 import StepHeaderV3 from "./StepHeaderV3";
 import "./RepresentativeDetailsStepV3.css";
 import ExamplePhotoPreview, { type ExamplePhoto } from "./ExamplePhotoPreview";

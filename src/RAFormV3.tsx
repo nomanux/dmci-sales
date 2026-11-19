@@ -744,7 +744,7 @@ export default function RAFormV3() {
                       <motion.span
                         layoutId={`${scope}-section-hover`}
                         transition={{ duration: 0.25, ease: GLIDE }}
-                        className="absolute inset-0 rounded-md bg-gray-900/[0.05]"
+                        className="absolute inset-0 rounded-md bg-[#F2F6FF]"
                       />
                     )}
                     {it.done ? (
@@ -788,13 +788,13 @@ export default function RAFormV3() {
             className="relative flex w-full items-center gap-2.5 rounded-lg border-0 bg-transparent px-2 py-1.5 text-left outline-none enabled:cursor-pointer disabled:cursor-default"
           >
             {step.status === "current" && (
-              <motion.span layoutId={`${scope}-step-current`} transition={SPRING} className="absolute inset-0 rounded-lg bg-brand-25" />
+              <motion.span layoutId={`${scope}-step-current`} transition={SPRING} className="absolute inset-0 rounded-lg bg-[#EBF1FF] ring-1 ring-inset ring-[#D6E3FF]" />
             )}
             {hoverStep === `${scope}-${step.id}` && step.status !== "current" && (
               <motion.span
                 layoutId={`${scope}-step-hover`}
                 transition={{ duration: 0.25, ease: GLIDE }}
-                className="absolute inset-0 rounded-lg bg-gray-900/[0.05]"
+                className="absolute inset-0 rounded-lg bg-[#F7F9FF] ring-1 ring-inset ring-[#E5EDFF]"
               />
             )}
             {stepMarker(step.status, step.id)}
