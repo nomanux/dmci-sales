@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMCI Homes Sales · Representative details (focused view)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --text:#101828; --text-2:#475467; --text-3:#667085; --muted:#98A2B3;
+    --line:#EAECF0; --field:#D0D5DD;
+    --brand:#07389D; --brand-2:#0A4DE0; --brand-soft:#EEF4FF; --brand-tint:#F5F8FF;
+    --green:#039855; --green-soft:#ECFDF3;
+    --amber:#B54708; --amber-soft:#FFFAEB;
+    --violet:#6941C6; --violet-soft:#F4F3FF;
+    --rose:#C01048; --rose-soft:#FFF1F3;
+    --teal:#0E7090; --teal-soft:#F0F9FF;
+    --ring:rgba(10,77,224,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,system-ui,sans-serif;background:#fff;color:var(--text);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  button{font:inherit;cursor:pointer}
+
+  /* Header */
+  .top{height:56px;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 32px;justify-content:space-between;position:sticky;top:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);z-index:20}
+  .logo{font-weight:800;color:var(--brand);font-size:16px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+  .logo i{width:22px;height:22px;border-radius:6px;background:var(--brand);display:inline-block}
+  .logo small{font-weight:500;color:var(--text-3);font-size:12px;border-left:1px solid var(--line);padding-left:8px}
+  .saved{font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:6px}
+  .saved::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green)}
+
+  .wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr) 260px;gap:40px;padding:28px 32px 100px}
+
+  /* Main stepper */
+  .rail{position:sticky;top:84px;align-self:start}
+  .rail h6{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+  .st{display:flex;align-items:center;gap:10px;padding:6px 0;color:var(--text-3);font-size:13px}
+  .st .d{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--field);display:grid;place-items:center;font-size:10px;font-weight:700;flex:none;background:#fff}
+  .st.done{color:var(--text-2)} .st.done .d{background:var(--green);border-color:var(--green);color:#fff}
+  .st.cur{color:var(--brand);font-weight:600} .st.cur .d{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 0 0 4px var(--ring)}
+  .bar{width:1.5px;height:10px;background:var(--line);margin-left:8px}
+
+  /* Hero band */
+  .hero{background:linear-gradient(135deg,#EEF4FF 0%,#F5F3FF 55%,#FDF2FA 100%);border-radius:16px;padding:20px 22px;display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:22px}
+  .hero .ey{font-size:12px;color:var(--brand-2);font-weight:600}
+  .hero h1{font-size:22px;letter-spacing:-.02em;margin:2px 0 4px}
+  .hero p{color:var(--text-2)}
+  .ring{--p:22;width:64px;height:64px;border-radius:50%;flex:none;display:grid;place-items:center;
+        background:conic-gradient(var(--brand-2) calc(var(--p)*1%),#fff 0);transition:--p .4s}
+  .ring b{width:50px;height:50px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:13px;color:var(--brand)}
+
+  .type{display:inline-flex;background:#fff;border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px;margin-bottom:18px}
+  .type button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-weight:500;color:var(--text-2);font-size:12.5px}
+  .type button.on{background:var(--brand);color:#fff}
+
+  /* Section rows */
+  .row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;margin-bottom:6px;border:1px solid var(--line);background:#fff}
+  .ic{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex:none}
+  .ic svg{width:16px;height:16px}
+  .row .t{flex:1;min-width:0}
+  .row .t b{display:block;font-size:13.5px;font-weight:600}
+  .row .t span{display:block;color:var(--text-3);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row.done .t span{color:var(--text-2)}
+  .edit{border:0;background:transparent;color:var(--brand-2);font-weight:600;font-size:12px}
+  .tick{width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:10px;flex:none}
+  .row.next{opacity:.6;border-style:dashed}
+  .row.next:hover{opacity:1}
+
+  /* Active card */
+  .active{border:1.5px solid var(--brand-2);border-radius:16px;padding:18px 20px 20px;margin:4px 0 10px;box-shadow:0 0 0 4px var(--ring),0 12px 32px -12px rgba(16,24,40,.18);animation:in .25s ease}
+  @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .ah{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .ah .t b{font-size:16px;letter-spacing:-.01em;display:block}
+  .ah .t span{font-size:12px;color:var(--text-3)}
+  .ah .count{margin-left:auto;font-size:11px;font-weight:600;color:var(--amber);background:var(--amber-soft);padding:3px 8px;border-radius:99px}
+
+  .g{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .s2{grid-column:span 2}
+  .f label{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:4px}
+  .f label em{font-style:normal;color:var(--muted);font-weight:400}
+  .f input,.f select{width:100%;height:36px;border:1px solid var(--field);border-radius:8px;padding:0 11px;font:inherit;color:var(--text);background:#fff;appearance:none;transition:border-color .15s,box-shadow .15s}
+  .f select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23667085' stroke-width='1.8'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:30px}
+  .f select:invalid{color:var(--muted)}
+  .f input:focus,.f select:focus{outline:none;border-color:var(--brand-2);box-shadow:0 0 0 3px var(--ring)}
+  .f .h{font-size:11px;color:var(--text-3);margin-top:3px}
+  .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:#F2F4F7;border-radius:8px;padding:3px;height:36px}
+  .seg button{border:0;background:transparent;border-radius:6px;font-weight:500;color:var(--text-2);font-size:12.5px}
+  .seg button.on{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+  .sub{grid-column:1/-1;font-size:12px;font-weight:600;color:var(--text);padding-top:10px;margin-top:4px;border-top:1px solid var(--line)}
+  .more{grid-column:1/-1;border:0;background:transparent;color:var(--brand-2);font-weight:600;font-size:12px;text-align:left;padding:2px 0}
+  .hidden{display:none!important}
+  .same{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--brand-tint);border:1px solid #D1E0FF;border-radius:10px;padding:10px 12px}
+  .same b{font-weight:600}
+  .same span{color:var(--text-3);font-size:12px;display:block}
+
+  .act{display:flex;align-items:center;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+  .btn{height:36px;border-radius:8px;padding:0 16px;font-weight:600;font-size:13px;border:1px solid transparent}
+  .btn.p{background:var(--brand);color:#fff;margin-left:auto}
+  .btn.p:hover{background:#052b78}
+  .btn.g{background:#fff;border-color:var(--field);color:var(--text-2)}
+  .hint{font-size:12px;color:var(--text-3)}
+
+  /* Right summary */
+  .side{position:sticky;top:84px;align-self:start}
+  .card{border:1px solid var(--line);border-radius:14px;padding:16px}
+  .card h6{font-size:12px;font-weight:600;margin-bottom:10px}
+  .prop{display:flex;gap:10px;align-items:center;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+  .prop .img{width:52px;height:52px;border-radius:10px;background:linear-gradient(160deg,#c7d7fe,#e9d7fe)}
+  .prop b{display:block;font-size:13px}
+  .prop span{font-size:12px;color:var(--text-3)}
+  .kv{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;color:var(--text-3)}
+  .kv b{color:var(--text);font-weight:500}
+  .help{margin-top:12px;background:var(--green-soft);border-radius:12px;padding:12px 14px;font-size:12px;color:#05603A}
+  .help b{display:block;margin-bottom:2px}
+
+  .foot{position:fixed;left:0;right:0;bottom:0;border-top:1px solid var(--line);background:rgba(255,255,255,.94);backdrop-filter:blur(8px)}
+  .foot .in{max-width:1180px;margin:0 auto;padding:10px 32px;display:flex;gap:10px;align-items:center}
+  .foot .in .hint{margin-left:auto}
+
+  @media (max-width:1100px){.wrap{grid-template-columns:200px 1fr}.side{display:none}}
+  @media (max-width:760px){.wrap{grid-template-columns:1fr;padding:20px 16px 100px}.rail{display:none}.g,.g2{grid-template-columns:1fr}.s2{grid-column:auto}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="logo"><i></i>DMCI HOMES <small>Sales</small></div>
+  <div class="saved">Draft saved</div>
+</header>
+
+<div class="wrap">
+  <aside class="rail">
+    <h6>Reservation</h6>
+    <div class="st done"><span class="d">✓</span>Buyer &amp; property</div><div class="bar"></div>
+    <div class="st cur"><span class="d">2</span>Representative details</div><div class="bar"></div>
+    <div class="st"><span class="d">3</span>Identity verification</div><div class="bar"></div>
+    <div class="st"><span class="d">4</span>Live selfie</div><div class="bar"></div>
+    <div class="st"><span class="d">5</span>Terms &amp; conditions</div><div class="bar"></div>
+    <div class="st"><span class="d">6</span>Data privacy</div><div class="bar"></div>
+    <div class="st"><span class="d">7</span>Consent &amp; acceptance</div><div class="bar"></div>
+    <div class="st"><span class="d">8</span>Review &amp; submit</div>
+  </aside>
+
+  <main>
+    <div class="hero">
+      <div>
+        <div class="ey">Step 2 of 8 · Representative details</div>
+        <h1>Tell us about the buyer</h1>
+        <p id="eta">6 short sections. About 4 minutes left.</p>
+      </div>
+      <div class="ring" id="ring"><b id="ringTxt">0/6</b></div>
+    </div>
+
+    <div class="type">
+      <button class="on">Private individual</button>
+      <button>Company representative</button>
+    </div>
+
+    <div id="list"></div>
+  </main>
+
+  <aside class="side">
+    <div class="card">
+      <h6>Your reservation</h6>
+      <div class="prop"><div class="img"></div><div><b>The Valeron Tower</b><span>Unit 12F · 2 bedroom</span></div></div>
+      <div class="kv"><span>Total price</span><b>₱ 8,450,000</b></div>
+      <div class="kv"><span>Reservation fee</span><b>₱ 30,000</b></div>
+      <div class="kv"><span>Agent</span><b>J. Reyes</b></div>
+    </div>
+    <div class="help"><b>Your answers save as you go.</b>Leave any time and pick up from the same section.</div>
+  </aside>
+</div>
+
+<footer class="foot">
+  <div class="in">
+    <button class="btn g">Previous step</button>
+    <span class="hint" id="footHint">Finish all sections to continue</span>
+    <button class="btn p" id="nextStep" style="margin-left:10px;opacity:.5">Next step</button>
+  </div>
+</footer>
+
+<script>
+const icon = {
+  user:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="5.5" r="2.75"/><path d="M2.75 13.5c.8-2.3 2.8-3.5 5.25-3.5s4.45 1.2 5.25 3.5"/></svg>',
+  phone:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="1.75" width="8" height="12.5" rx="2"/><path d="M7 11.75h2"/></svg>',
+  home:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2.5 7 8 2.5 13.5 7v6.5h-11z"/><path d="M6.5 13.5V10h3v3.5"/></svg>',
+  work:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4.75" width="12" height="8.5" rx="1.5"/><path d="M5.75 4.75V3.5a1 1 0 0 1 1-1h2.5a1 1 0 0 1 1 1v1.25"/></svg>',
+  heart:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 13.5S2.5 10.4 2.5 6.4A2.9 2.9 0 0 1 8 5a2.9 2.9 0 0 1 5.5 1.4c0 4-5.5 7.1-5.5 7.1z"/></svg>',
+  shield:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.75 13 3.5v4.25c0 3-2.2 5.3-5 6.5-2.8-1.2-5-3.5-5-6.5V3.5z"/><path d="m5.75 8 1.5 1.5 3-3"/></svg>'
+};
+const opt = (arr, ph) => `<option value="" disabled selected>${ph}</option>` + arr.map(o=>`<option>${o}</option>`).join("");
+const seg = (arr, on=0) => `<div class="seg">${arr.map((o,i)=>`<button type="button" class="${i===on?'on':''}">${o}</button>`).join("")}</div>`;
+
+const sections = [
+  { id:"personal", title:"Personal details", ic:"user", c:["var(--brand-2)","var(--brand-soft)"], left:4,
+    summary:"Maria Santos Dela Cruz · 14 Mar 1988 · Filipino · Married",
+    body:`<div class="g">
+      <div class="f"><label>First name</label><input value="Maria"></div>
+      <div class="f"><label>Middle name</label><input value="Santos"></div>
+      <div class="f"><label>Last name</label><input value="Dela Cruz"></div>
+      <div class="f"><label>Title</label><select required>${opt(["Ms.","Mrs.","Dr.","Atty."],"Select")}</select></div>
+      <div class="f"><label>Date of birth</label><input type="date" value="1988-03-14"></div>
+      <div class="f"><label>Gender</label>${seg(["Female","Male"])}</div>
+      <div class="f"><label>Civil status</label><select required>${opt(["Single","Married","Widowed","Legally separated"],"Select")}</select></div>
+      <div class="f"><label>Citizenship</label><select><option>Filipino</option><option>Dual</option><option>Other</option></select></div>
+      <div class="f"><label>Place of birth</label><input placeholder="Search city, e.g. Cebu"></div>
+      <button type="button" class="more" data-more>+ Add suffix, nationality, religion</button>
+      <div class="f hidden"><label>Suffix <em>(optional)</em></label><select><option>None</option><option>Jr.</option><option>Sr.</option></select></div>
+      <div class="f hidden"><label>Nationality</label><select><option>Filipino</option><option>Other</option></select></div>
+      <div class="f hidden"><label>Religion <em>(optional)</em></label><select required>${opt(["Roman Catholic","Islam","Iglesia ni Cristo","Other"],"Select")}</select></div>
+    </div>`},
+  { id:"contact", title:"Contact details", ic:"phone", c:["var(--teal)","var(--teal-soft)"], left:2,
+    summary:"+63 917 123 4567 · maria.delacruz@gmail.com",
+    body:`<div class="g g2">
+      <div class="f"><label>Mobile number</label><input placeholder="+63 917 123 4567"></div>
+      <div class="f"><label>Email</label><input placeholder="name@gmail.com"></div>
+      <div class="f"><label>Landline <em>(optional)</em></label><input placeholder="(02) 8123 4567"></div>
+      <div class="f"><label>Preferred contact</label>${seg(["Mobile","Email","Viber"])}</div>
+    </div>`},
+  { id:"address", title:"Addresses", ic:"home", c:["var(--violet)","var(--violet-soft)"], left:3,
+    summary:"Brgy. Kapitolyo, Pasig City · Same as permanent and mailing",
+    body:`<div class="g">
+      <div class="f s2"><label>Current address</label><input placeholder="Search barangay, street or building"><div class="h">We fill city, province and ZIP for you.</div></div>
+      <div class="f"><label>Unit / house no.</label><input placeholder="e.g. 12F, Tower 2"></div>
+      <div class="f"><label>Years at this address</label><select required>${opt(["Under 1","1 to 3","3 to 5","Over 5"],"Select")}</select></div>
+      <div class="f"><label>Home ownership</label>${seg(["Owned","Rented","Family"])}</div>
+      <div class="same"><div><b>Permanent home is the same address</b><span>Turn off to add a provincial or overseas home</span></div>${seg(["Yes","No"])}</div>
+      <div class="same"><div><b>Send mail to this address</b><span>Statements and the contract go here</span></div>${seg(["Yes","No"])}</div>
+    </div>`},
+  { id:"work", title:"Work and income", ic:"work", c:["var(--amber)","var(--amber-soft)"], left:4,
+    summary:"Employed · Accenture Inc. · ₱100k to ₱250k",
+    body:`<div class="g">
+      <div class="f"><label>Occupation</label><select required>${opt(["Employed","Self-employed","Business owner","OFW","Retired"],"Select")}</select></div>
+      <div class="f"><label>Employer / business</label><input placeholder="Company name"></div>
+      <div class="f"><label>Position</label><input placeholder="e.g. Manager"></div>
+      <div class="f"><label>Monthly income</label><select required>${opt(["Below ₱50k","₱50k to ₱100k","₱100k to ₱250k","Above ₱250k"],"Select")}</select></div>
+      <div class="f"><label>TIN</label><input placeholder="000-000-000-000"></div>
+      <div class="f"><label>Industry</label><select required>${opt(["IT / BPO","Banking","Healthcare","Government","Other"],"Select")}</select></div>
+    </div>`},
+  { id:"purchase", title:"Why you are buying", ic:"heart", c:["var(--rose)","var(--rose-soft)"], left:2,
+    summary:"To live in · Found us on Facebook",
+    body:`<div class="g g2">
+      <div class="f"><label>Purpose</label>${seg(["To live in","Investment","Both"])}</div>
+      <div class="f"><label>How you found us</label><select required>${opt(["Facebook","Friend or family","Agent","Billboard","Website"],"Select")}</select></div>
+    </div>`},
+  { id:"pep", title:"Representative and PEP", ic:"shield", c:["var(--green)","var(--green-soft)"], left:1,
+    summary:"No representative · Not a PEP",
+    body:`<div class="g g2">
+      <div class="f"><label>Is someone signing for you?</label>${seg(["No","Yes"])}</div>
+      <div class="f"><label>Do you or a close relative hold a government post?</label>${seg(["No","Yes"])}<div class="h">Required by RA 9160. Most buyers answer No.</div></div>
+    </div>`}
+];
+
+let current = 0;
+const done = new Set();
+const list = document.getElementById("list");
+
+function render(){
+  list.innerHTML = sections.map((s,i)=>{
+    const ic = `<div class="ic" style="color:${s.c[0]};background:${s.c[1]}">${icon[s.ic]}</div>`;
+    if(i===current){
+      const last = i===sections.length-1;
+      return `<div class="active" id="sec-${s.id}">
+        <div class="ah">${ic}<div class="t"><b>${s.title}</b><span>Section ${i+1} of ${sections.length}</span></div><span class="count">${s.left} left</span></div>
+        ${s.body}
+        <div class="act">
+          ${i>0?'<button class="btn g" data-back>Back</button>':''}
+          <span class="hint">${last?'Last section':'Next: '+sections[i+1].title}</span>
+          <button class="btn p" data-next>${last?'Finish this step':'Save and continue'}</button>
+        </div></div>`;
+    }
+    if(done.has(i)){
+      return `<div class="row done">${ic}<div class="t"><b>${s.title}</b><span>${s.summary}</span></div><span class="tick">✓</span><button class="edit" data-go="${i}">Edit</button></div>`;
+    }
+    return `<div class="row next" data-go="${i}">${ic}<div class="t"><b>${s.title}</b><span>${s.left} questions</span></div></div>`;
+  }).join("");
+
+  const n = done.size, t = sections.length;
+  document.getElementById("ring").style.setProperty("--p", Math.round(n/t*100));
+  document.getElementById("ringTxt").textContent = `${n}/${t}`;
+  const mins = Math.max(0, Math.ceil((t-n)*0.7));
+  document.getElementById("eta").textContent = n===t ? "All sections done. Review and continue." : `${t-n} short sections. About ${mins} minute${mins===1?'':'s'} left.`;
+  const ns = document.getElementById("nextStep");
+  ns.style.opacity = n===t ? 1 : .5;
+  document.getElementById("footHint").textContent = n===t ? "Ready for identity verification" : "Finish all sections to continue";
+}
+
+list.addEventListener("click", e=>{
+  const go = e.target.closest("[data-go]");
+  if(e.target.closest("[data-next]")){
+    done.add(current);
+    current = sections.findIndex((_,i)=>!done.has(i));
+    render();
+    const el = document.querySelector(".active");
+    if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+    return;
+  }
+  if(e.target.closest("[data-back]")){ current = Math.max(0,current-1); render(); return; }
+  if(go){ current = +go.dataset.go; render(); return; }
+  if(e.target.matches("[data-more]")){
+    e.target.parentElement.querySelectorAll(".f.hidden").forEach(x=>x.classList.remove("hidden"));
+    e.target.remove(); return;
+  }
+  const b = e.target.closest(".seg button");
+  if(b){ b.parentElement.querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b)); }
+});
+document.querySelector(".type").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  document.querySelectorAll(".type button").forEach(x=>x.classList.toggle("on", x===b));
+});
+
+render();
+</script>
+</body>
+</html>
