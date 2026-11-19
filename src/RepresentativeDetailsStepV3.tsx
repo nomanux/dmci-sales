@@ -19,6 +19,19 @@ import { PHONE_COUNTRIES, PhilippinesFlag } from "./BuyerDetailsStep";
 import { CheckIcon, ChevronDownIcon, SearchIcon } from "./icons";
 import "./RepresentativeDetailsStepV3.css";
 import { AnimatePresence, motion } from "motion/react";
+import {
+  Briefcase01Icon,
+  Building03Icon,
+  FavouriteIcon,
+  Home01Icon,
+  Location01Icon,
+  Mail01Icon,
+  SecurityCheckIcon,
+  SmartPhone01Icon,
+  UserAdd01Icon,
+  UserGroupIcon,
+  UserIcon,
+} from "hugeicons-react";
 
 /**
  * Step 2 of RA form v3 — "Client / company representative", compact redesign.
@@ -1914,28 +1927,26 @@ const SECTIONS: { id: SectionId; title: string; nav: string; optional?: boolean 
   { id: "rep", title: "Representative information and PEP", nav: "Representative and PEP" },
 ];
 
-/** Icon and colour per section, so each one is easy to tell apart. */
-const SECTION_LOOK: Record<SectionId, { fg: string; bg: string; d: string }> = {
-  company: { fg: "#0A4DE0", bg: "#EEF4FF", d: "M2.5 13.5h11M4 13.5V3.5h5v10M9 6h3v7.5M6 5.5h1M6 8h1M6 10.5h1" },
-  personal: { fg: "#0A4DE0", bg: "#EEF4FF", d: "M8 8.25a2.75 2.75 0 1 0 0-5.5 2.75 2.75 0 0 0 0 5.5zM2.75 13.5c.8-2.3 2.8-3.5 5.25-3.5s4.45 1.2 5.25 3.5" },
-  contact: { fg: "#0E7090", bg: "#F0F9FF", d: "M6 1.75h4a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8.5a2 2 0 0 1 2-2zM7 11.75h2" },
-  present: { fg: "#6941C6", bg: "#F4F3FF", d: "M8 14s4.5-3.9 4.5-7.5a4.5 4.5 0 0 0-9 0C3.5 10.1 8 14 8 14zM8 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" },
-  home: { fg: "#6941C6", bg: "#F4F3FF", d: "M2.5 7 8 2.5 13.5 7v6.5h-11zM6.5 13.5V10h3v3.5" },
-  work: { fg: "#B54708", bg: "#FFFAEB", d: "M3.5 4.75h9a1.5 1.5 0 0 1 1.5 1.5v5.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.75v-5.5a1.5 1.5 0 0 1 1.5-1.5zM5.75 4.75V3.5a1 1 0 0 1 1-1h2.5a1 1 0 0 1 1 1v1.25" },
-  mailing: { fg: "#0E7090", bg: "#F0F9FF", d: "M3 3.75h10a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6.5a1 1 0 0 1 1-1zM2.25 4.5 8 8.75l5.75-4.25" },
-  purchase: { fg: "#C01048", bg: "#FFF1F3", d: "M8 13.5S2.5 10.4 2.5 6.4A2.9 2.9 0 0 1 8 5a2.9 2.9 0 0 1 5.5 1.4c0 4-5.5 7.1-5.5 7.1z" },
-  guardian: { fg: "#039855", bg: "#ECFDF3", d: "M5.5 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM11 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM1.75 13c.5-2 1.9-3 3.75-3s3.25 1 3.75 3M9.5 10.25c.5-.2 1-.25 1.5-.25 1.5 0 2.6.9 3 3" },
-  cob: { fg: "#6941C6", bg: "#F4F3FF", d: "M6 7.5a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5zM1.75 13.25c.6-2 2.2-3 4.25-3s3.65 1 4.25 3M12 5.5v4M10 7.5h4" },
-  rep: { fg: "#039855", bg: "#ECFDF3", d: "M8 1.75 13 3.5v4.25c0 3-2.2 5.3-5 6.5-2.8-1.2-5-3.5-5-6.5V3.5zM5.75 8l1.5 1.5 3-3" },
+/** One icon per section: Hugeicons, stroke 1.5, one brand colour. */
+const SECTION_ICON: Record<SectionId, typeof UserIcon> = {
+  company: Building03Icon,
+  personal: UserIcon,
+  contact: SmartPhone01Icon,
+  present: Location01Icon,
+  home: Home01Icon,
+  work: Briefcase01Icon,
+  mailing: Mail01Icon,
+  purchase: FavouriteIcon,
+  guardian: UserGroupIcon,
+  cob: UserAdd01Icon,
+  rep: SecurityCheckIcon,
 };
 
 function SectionIcon({ id }: { id: SectionId }) {
-  const look = SECTION_LOOK[id];
+  const Icon = SECTION_ICON[id];
   return (
-    <span className="grid size-8 flex-shrink-0 place-items-center rounded-[9px]" style={{ color: look.fg, background: look.bg }}>
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="size-4">
-        <path d={look.d} />
-      </svg>
+    <span className="grid size-8 flex-shrink-0 place-items-center rounded-[9px] bg-brand-25 text-brand-500">
+      <Icon size={16} strokeWidth={1.5} color="currentColor" aria-hidden="true" />
     </span>
   );
 }
