@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Button from "./Button";
 import RepresentativeDetailsStepV3, { type SectionNav } from "./RepresentativeDetailsStepV3";
-import BuyerPropertyStep from "./BuyerPropertyStep";
-import IdentityVerificationStep from "./IdentityVerificationStep";
-import TermsStep from "./TermsStep";
-import DataPrivacyStep from "./DataPrivacyStep";
-import ConsentStep from "./ConsentStep";
-import ReviewStep from "./ReviewStep";
-import StepHeader from "./StepHeader";
+import BuyerPropertyStepV3 from "./BuyerPropertyStepV3";
+import IdentityVerificationStepV3 from "./IdentityVerificationStepV3";
+import TermsStepV3 from "./TermsStepV3";
+import DataPrivacyStepV3 from "./DataPrivacyStepV3";
+import ConsentStepV3 from "./ConsentStepV3";
+import ReviewStepV3 from "./ReviewStepV3";
+import StepHeaderV3 from "./StepHeaderV3";
 import ExamplePhotoPreview, { type ExamplePhoto } from "./ExamplePhotoPreview";
 import {
   COUNTDOWN_DELAY_MS,
@@ -674,7 +674,7 @@ export default function RAFormV3() {
 
   return (
     <div
-      className={`flex flex-col h-[100dvh] w-full font-sans overflow-hidden ${currentStep === BUYER_DETAILS_STEP ? "bg-white" : "bg-[#f5f7fb]"}`}
+      className={`flex flex-col h-[100dvh] w-full font-sans overflow-hidden bg-white`}
       style={{ "--footer-h": footerHeight + "px" } as CSSProperties}
     >
       <header className="bg-white border-b border-gray-200 flex justify-center">
@@ -819,28 +819,29 @@ export default function RAFormV3() {
               last fields slide under the fixed footer. */}
           <div className={`w-full flex flex-col ${currentStep === BUYER_DETAILS_STEP ? "" : "md:h-full"}`}>
           {currentStep === BUYER_PROPERTY_STEP ? (
-            <BuyerPropertyStep />
+            <BuyerPropertyStepV3 />
           ) : currentStep === BUYER_DETAILS_STEP ? (
             <RepresentativeDetailsStepV3 onNavChange={setSectionNav} />
           ) : currentStep === IDENTITY_STEP ? (
-            <IdentityVerificationStep onReadyChange={setIdentityReady} />
+            <IdentityVerificationStepV3 onReadyChange={setIdentityReady} />
           ) : currentStep === TERMS_STEP ? (
-            <TermsStep onReadyChange={setTermsReady} />
+            <TermsStepV3 onReadyChange={setTermsReady} />
           ) : currentStep === PRIVACY_STEP ? (
-            <DataPrivacyStep onReadyChange={setPrivacyReady} />
+            <DataPrivacyStepV3 onReadyChange={setPrivacyReady} />
           ) : currentStep === CONSENT_STEP ? (
-            <ConsentStep onReadyChange={setConsentReady} />
+            <ConsentStepV3 onReadyChange={setConsentReady} />
           ) : currentStep === REVIEW_STEP ? (
-            <ReviewStep onEdit={goToStep} onReadyChange={setReviewReady} />
+            <ReviewStepV3 onEdit={goToStep} onReadyChange={setReviewReady} />
           ) : (
-            <section className="w-full md:max-h-full bg-white rounded-none md:rounded-[16px] overflow-hidden flex flex-col border border-[#e4e8f0]">
-              <StepHeader
+            <section className="rd-v3 w-full md:max-h-full bg-white rounded-none md:rounded-2xl overflow-hidden flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_0_0_4px_rgba(10,77,224,0.10),0_12px_32px_-12px_rgba(16,24,40,0.18)]">
+              <StepHeaderV3
+                step={4}
                 title="Capture Live Selfie with ID"
-                className="px-4 md:px-8 pt-6 pb-6 flex-shrink-0"
+                className="px-4 md:px-6 pt-4 pb-5 md:pt-5 flex-shrink-0"
               >
                 Take a live selfie holding your ID. Make sure your face and ID
                 are clear.
-              </StepHeader>
+              </StepHeaderV3>
 
               {/* Only the card body scrolls; the title stays put. */}
               <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
