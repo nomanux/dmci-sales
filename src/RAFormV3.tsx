@@ -284,6 +284,22 @@ export default function RAFormV3() {
   const [mobileStepsOpen, setMobileStepsOpen] = useState(false);
   // Step 2: Next with unfinished sections opens a list of what is missing.
   const [guardOpen, setGuardOpen] = useState(false);
+  // TRIAL: new Live selfie design, switchable against the current one. Remove once decided.
+  const [selfieDesign, setSelfieDesign] = useState<"current" | "new">(() => {
+    try {
+      return localStorage.getItem("ra3-selfie-design") === "current" ? "current" : "new";
+    } catch {
+      return "new";
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem("ra3-selfie-design", selfieDesign);
+    } catch {
+      /* storage blocked: keep it for this visit only */
+    }
+  }, [selfieDesign]);
+  const ns = selfieDesign === "new";
   // Hover targets for the sliding highlight (same idea as Motion Brew's ActionMenu).
   const [hoverStep, setHoverStep] = useState<string | null>(null);
   const [hoverSection, setHoverSection] = useState<string | null>(null);
@@ -841,7 +857,7 @@ export default function RAFormV3() {
       style={{ "--footer-h": footerHeight + "px" } as CSSProperties}
     >
       <header className="bg-white border-b border-gray-200 flex justify-center">
-        <div className="w-full max-w-[1280px] h-[72px] px-4 md:px-0 flex items-center justify-between">
+        <div className="w-full max-w-[1152px] h-[72px] px-4 md:px-0 flex items-center justify-between">
           <div className="flex items-center">
             <img
               className="h-8 w-auto"
@@ -969,7 +985,7 @@ export default function RAFormV3() {
         {/* self-stretch (and flex-1 when stacked on mobile) pins main to the
             viewport height so long steps scroll inside it; under the row's
             items-start it would otherwise grow to its content and get clipped. */}
-        <main ref={mainRef} className="w-full md:w-[1024px] min-h-0 max-md:flex-1 self-stretch flex justify-center items-start overflow-y-auto pb-[var(--footer-h)] [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
+        <main ref={mainRef} className="w-full md:w-[56rem] min-h-0 max-md:flex-1 self-stretch flex justify-center items-start overflow-y-auto pb-[var(--footer-h)] [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
           {/* Fill-height steps scroll inside their card, so the wrapper is pinned
               to the viewport. Step 2 scrolls the page instead: its wrapper must
               grow with it, or main's footer padding lands mid-content and the
@@ -994,7 +1010,7 @@ export default function RAFormV3() {
               <StepHeaderV3
                 step={4}
                 title="Capture Live Selfie with ID"
-                className="px-4 md:px-6 pt-4 pb-5 md:pt-5 flex-shrink-0"
+                className="px-4 md:px-8 pt-4 pb-4 md:pt-5 md:pb-5 flex-shrink-0"
               >
                 Take a live selfie holding your ID. Make sure your face and ID
                 are clear.
@@ -1003,14 +1019,33 @@ export default function RAFormV3() {
               {/* Only the card body scrolls; the title stays put. */}
               <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
               <div className="px-4 md:px-8 pb-6 flex flex-col gap-2 min-h-0">
-                <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-6 md:gap-12 min-h-0">
+                {/* TRIAL switch: compare the current and new Live selfie design. */}
+                <div className="flex items-center justify-end gap-2 -mt-1 mb-1">
+                  <span className="rounded-full bg-[#FFFAEB] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#B54708]">Trial</span>
+                  <div role="group" aria-label="Live selfie design" className="grid h-7 grid-flow-col auto-cols-fr gap-0.5 rounded-[7px] bg-gray-100 p-[3px]">
+                    {(["current", "new"] as const).map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        aria-pressed={selfieDesign === d}
+                        onClick={() => setSelfieDesign(d)}
+                        className={`cursor-pointer rounded-[5px] border-0 px-2.5 text-[11px] font-semibold capitalize transition-colors ${
+                          selfieDesign === d ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)]" : "bg-transparent text-gray-500 hover:text-gray-900"
+                        }`}
+                      >
+                        {d === "current" ? "Current" : "New"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className={`grid grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] min-h-0 ${ns ? "gap-5 md:gap-8" : "gap-6 md:gap-12"}`}>
                   <div className="flex flex-col gap-4">
-                    <div className="md:flex gap-0 p-1 bg-gray-100 rounded-[12px] w-full md:w-fit hidden">
+                    <div className={`md:flex gap-0 p-1 bg-gray-100 w-full md:w-fit hidden ${ns ? "rounded-[10px] [&_button]:focus:outline-none [&_button]:focus-visible:ring-2 [&_button]:focus-visible:ring-brand-400" : "rounded-[12px]"}`}>
                       <button
                         type="button"
                         role="tab"
                         aria-selected={captureMode === "selfie"}
-                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-3.5 py-3 md:py-1.5 rounded-lg border-none ${captureMode === "selfie" ? "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]" : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-3.5 py-3 md:py-1.5 rounded-lg border-none ${captureMode === "selfie" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                         onClick={() => handleModeChange("selfie")}
                       >
                         <CameraIcon className="h-5 w-5 flex-shrink-0" />
@@ -1020,7 +1055,7 @@ export default function RAFormV3() {
                         type="button"
                         role="tab"
                         aria-selected={captureMode === "upload"}
-                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-3.5 py-3 md:py-1.5 rounded-lg border-none ${captureMode === "upload" ? "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]" : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-3.5 py-3 md:py-1.5 rounded-lg border-none ${captureMode === "upload" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                         onClick={() => handleModeChange("upload")}
                       >
                         <UploadIcon className="h-5 w-5 flex-shrink-0" />
@@ -1033,7 +1068,7 @@ export default function RAFormV3() {
                       <button
                         type="button"
                         onClick={() => handleModeChange("upload")}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-none ${captureMode === "upload" ? "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]" : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-none ${captureMode === "upload" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                       >
                         <UploadIcon className="h-5 w-5 flex-shrink-0" />
                         <span>Upload Photo</span>
@@ -1041,7 +1076,7 @@ export default function RAFormV3() {
                       <button
                         type="button"
                         onClick={() => handleModeChange("selfie")}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-none ${captureMode === "selfie" ? "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]" : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-none ${captureMode === "selfie" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                       >
                         <CameraIcon className="h-5 w-5 flex-shrink-0" />
                         <span>Take Selfie</span>
@@ -1057,20 +1092,29 @@ export default function RAFormV3() {
                     ) : (
                     <div
                       className={
-                        "relative rounded-xl w-full aspect-video md:aspect-video overflow-hidden transition-[border-color,outline-color,box-shadow] duration-500 " +
-                        (captureMode === "upload"
-                          ? "border-2 border-dashed border-primary-400"
-                          : "outline outline-2 outline-offset-4 " +
-                            (showLiveVideoCompact && faceDetected
-                              ? "outline-emerald-500"
-                              : "outline-primary-400"))
+                        ns
+                          ? "relative w-full aspect-video overflow-hidden rounded-2xl transition-[box-shadow] duration-500 " +
+                            (captureMode === "upload"
+                              ? "border-2 border-dashed border-gray-300"
+                              : showLiveVideoCompact && faceDetected && idHeld
+                                ? "shadow-[0_0_0_3px_rgba(16,185,129,0.9),0_12px_28px_-10px_rgba(16,185,129,0.45)]"
+                                : "shadow-[0_0_0_1px_rgba(16,24,40,0.08),0_12px_28px_-12px_rgba(16,24,40,0.3)]")
+                          : "relative rounded-xl w-full aspect-video md:aspect-video overflow-hidden transition-[border-color,outline-color,box-shadow] duration-500 " +
+                            (captureMode === "upload"
+                              ? "border-2 border-dashed border-primary-400"
+                              : "outline outline-2 outline-offset-4 " +
+                                (showLiveVideoCompact && faceDetected
+                                  ? "outline-emerald-500"
+                                  : "outline-primary-400"))
                       }
                       style={{
-                        boxShadow: showLiveVideoCompact
-                          ? faceDetected
-                            ? "0 8px 24px rgba(16, 185, 129, 0.25)"
-                            : "0 8px 24px rgba(10, 77, 224, 0.2)"
-                          : "none",
+                        boxShadow: ns
+                          ? undefined
+                          : showLiveVideoCompact
+                            ? faceDetected
+                              ? "0 8px 24px rgba(16, 185, 129, 0.25)"
+                              : "0 8px 24px rgba(10, 77, 224, 0.2)"
+                            : "none",
                         minHeight: "200px",
                       }}
                     >
@@ -1095,6 +1139,24 @@ export default function RAFormV3() {
                           />
                           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/55 to-transparent" />
                           <CaptureGuides faceFit={faceFit} idOk={idHeld} countdown={countdown} />
+                          {ns && countdown === null && (
+                            <div className="pointer-events-none absolute left-3 top-3 flex max-w-[60%]">
+                              <span
+                                key={faceFit + String(idHeld)}
+                                className={`rounded-full px-3 py-1 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.25)] backdrop-blur-md transition-colors ${
+                                  faceDetected && idHeld ? "bg-emerald-600/90" : "bg-black/55"
+                                }`}
+                              >
+                                {faceFit === "none"
+                                  ? "Place your face inside the oval"
+                                  : faceFit === "outside"
+                                    ? "Move so your whole face is inside the oval"
+                                    : !idHeld
+                                      ? "Hold your ID inside the card frame"
+                                      : "Ready, take the photo"}
+                              </span>
+                            </div>
+                          )}
                         </>
                       ) : showLiveVideoExpanded ? (
                         <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gray-100 text-center text-xs text-gray-600">
@@ -1155,8 +1217,13 @@ export default function RAFormV3() {
                           aria-label="Capture selfie (Ctrl + Space)"
                           title="Capture selfie (Ctrl + Space)"
                           onClick={handleCapture}
-                          className="group absolute bottom-3 left-1/2 flex h-11 w-11 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full border-2 border-white/90 bg-transparent p-[3px] shadow-[0_6px_20px_rgba(0,0,0,0.35)] transition-transform duration-200 hover:scale-105 active:scale-95"
+                          className={`group absolute bottom-3 left-1/2 flex h-11 w-11 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full border-2 border-white/90 bg-transparent p-[3px] shadow-[0_6px_20px_rgba(0,0,0,0.35)] transition-[transform,opacity] duration-200 hover:scale-105 active:scale-95 ${
+                            ns && !(faceDetected && idHeld) ? "opacity-60" : ""
+                          }`}
                         >
+                          {ns && faceDetected && idHeld && (
+                            <span aria-hidden="true" className="absolute inset-[-4px] animate-ping rounded-full border-2 border-emerald-400/80 motion-reduce:animate-none" />
+                          )}
                           <span className="h-full w-full rounded-full bg-white transition-transform duration-150 group-active:scale-90" />
                         </button>
                       ) : null}
@@ -1195,7 +1262,29 @@ export default function RAFormV3() {
                       )}
                       {showLiveVideoCompact || showLiveVideoExpanded ? (
                         <div className="flex flex-wrap items-center justify-between gap-2 w-full">
-                          {showLiveVideoCompact && (
+                          {showLiveVideoCompact && ns && (
+                            <div className="flex flex-wrap items-center gap-2">
+                              {[
+                                { ok: faceDetected, todo: "Show your face in the oval", done: "Face found" },
+                                { ok: idHeld, todo: "Hold your ID in the box", done: "ID found" },
+                              ].map((c) => (
+                                <span
+                                  key={c.todo}
+                                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-300 ${
+                                    c.ok ? "bg-[#ECFDF3] text-success-600" : "bg-gray-100 text-gray-600"
+                                  }`}
+                                >
+                                  {c.ok ? (
+                                    <CircleCheckIcon className="h-3.5 w-3.5" />
+                                  ) : (
+                                    <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                                  )}
+                                  {c.ok ? c.done : c.todo}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {showLiveVideoCompact && !ns && (
                             <div className="flex items-center gap-2">
                               <span
                                 className={
@@ -1253,7 +1342,7 @@ export default function RAFormV3() {
                               </span>
                             </div>
                           )}
-                          <span className="flex items-center gap-1.5 text-[12px] font-medium text-gray-400">
+                          <span className={`flex items-center gap-1.5 text-[12px] font-medium text-gray-400 ${ns ? "opacity-80" : ""}`}>
                             <span className="flex items-center gap-0.5">
                               <kbd className="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-[11px] font-semibold leading-none text-gray-500">
                                 Ctrl
@@ -1286,7 +1375,10 @@ export default function RAFormV3() {
                         Check your photo
                       </p>
                       <div className="grid grid-cols-3 md:grid-cols-5 gap-2 w-full">
-                        {THUMBNAIL_ATTEMPTS.map((attempt, index) => (
+                        {(ns
+                          ? [...THUMBNAIL_ATTEMPTS.map((a, i) => ({ a, i }))].sort((x, y) => (x.a.status === "accepted" ? -1 : y.a.status === "accepted" ? 1 : 0))
+                          : THUMBNAIL_ATTEMPTS.map((a, i) => ({ a, i }))
+                        ).map(({ a: attempt, i: index }) => (
                           <div
                             key={attempt.id}
                             className="flex flex-col items-center gap-1"
@@ -1295,11 +1387,17 @@ export default function RAFormV3() {
                               type="button"
                               aria-label={"View example: " + attempt.label}
                               onClick={() => setPreviewIndex(index)}
-                              className={`relative w-full cursor-zoom-in overflow-hidden bg-white min-w-0 border-0 outline outline-[1.4px] -outline-offset-[1.4px] rounded-lg p-0.5 transition-transform duration-150 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${
-                                attempt.status === "accepted"
-                                  ? "outline-[#079455]"
-                                  : "outline-[#f02b2b]"
-                              }`}
+                              className={
+                                ns
+                                  ? `relative w-full cursor-zoom-in overflow-hidden min-w-0 border-0 rounded-lg p-1 transition-transform duration-150 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${
+                                      attempt.status === "accepted" ? "bg-[#ECFDF3] ring-2 ring-inset ring-[#079455]" : "bg-gray-50"
+                                    }`
+                                  : `relative w-full cursor-zoom-in overflow-hidden bg-white min-w-0 border-0 outline outline-[1.4px] -outline-offset-[1.4px] rounded-lg p-0.5 transition-transform duration-150 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${
+                                      attempt.status === "accepted"
+                                        ? "outline-[#079455]"
+                                        : "outline-[#f02b2b]"
+                                    }`
+                              }
                               style={{ aspectRatio: "16 / 9" }}
                             >
                               <img
@@ -1328,8 +1426,8 @@ export default function RAFormV3() {
                             <span
                               className={`text-[10px] md:text-xs leading-4 font-medium text-center ${
                                 attempt.status === "accepted"
-                                  ? "text-emerald-600"
-                                  : "text-error-600"
+                                  ? (ns ? "text-emerald-700 font-semibold" : "text-emerald-600")
+                                  : (ns ? "text-gray-600" : "text-error-600")
                               }`}
                             >
                               {attempt.label}
@@ -1347,8 +1445,15 @@ export default function RAFormV3() {
                   </div>
 
                   {/* Offset by the desktop tab bar (40px) + column gap (12px) so the card lines up with the camera frame */}
+                  {ns && (
+                    <div className="md:hidden flex items-center gap-3 rounded-xl bg-gray-50 p-2.5 -order-1">
+                      <img src={idCardImageUrl} alt="" className="h-9 w-14 rounded-md object-cover" />
+                      <span className="min-w-0 flex-1 text-[13px] font-semibold text-gray-900">Your ID</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600">✓ Verified</span>
+                    </div>
+                  )}
                   <div className="hidden md:flex flex-col md:pt-[52px]">
-                    <div className="bg-white border border-gray-300 rounded-[12px] p-4 flex flex-col gap-3">
+                    <div className={ns ? "bg-gray-50 rounded-2xl p-4 flex flex-col gap-3" : "bg-white border border-gray-300 rounded-[12px] p-4 flex flex-col gap-3"}>
                       <div className="flex items-center justify-between gap-3">
                         <p className="m-0 text-sm leading-5 font-semibold text-gray-700">
                           Your uploaded ID
@@ -1498,7 +1603,7 @@ export default function RAFormV3() {
       </AnimatePresence>
 
       <footer ref={footerRef} className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white shadow-[-2px_-2px_8px_rgba(10,13,18,0.08)] hidden md:flex items-center justify-center p-0 flex-wrap gap-0 flex-shrink-0 h-auto">
-        <div className="w-full max-w-[1280px] flex flex-col md:flex-row md:items-center md:justify-between py-3 md:py-3 gap-2 md:gap-3 px-4 md:px-0">
+        <div className="w-full max-w-[1152px] flex flex-col md:flex-row md:items-center md:justify-between py-3 md:py-3 gap-2 md:gap-3 px-4 md:px-0">
           <Button
             variant="secondary"
             size="sm"
