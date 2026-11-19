@@ -1,6 +1,5 @@
 // RA form v3 copy of TermsStep.tsx: StepHeaderV3 banner, focused card and compact fields. The original stays as v1/v2 use it.
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { motion } from "motion/react";
 import Checkbox from "./Checkbox";
 import StepHeaderV3 from "./StepHeaderV3";
 import "./RepresentativeDetailsStepV3.css";
@@ -134,12 +133,6 @@ function RequirementRows({ rows }: { rows: Row[] }) {
   );
 }
 
-const TERMS_SECTIONS = [
-  { id: "fee", label: "Reservation fee" },
-  { id: "documents", label: "Required documents" },
-  { id: "terms", label: "Terms" },
-] as const;
-
 export default function TermsStepV3({
   onReadyChange,
 }: {
@@ -149,7 +142,6 @@ export default function TermsStepV3({
   const [agreed, setAgreed] = useState(() => AGREEMENTS.map(() => false));
   const ready = agreed.every(Boolean);
   const [progress, setProgress] = useState(0);
-  const [active, setActive] = useState<string>("fee");
   const [reachedEnd, setReachedEnd] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const idp = useId().replace(/:/g, "");
@@ -158,7 +150,7 @@ export default function TermsStepV3({
     onReadyChange?.(ready);
   }, [ready, onReadyChange]);
 
-  // Reading progress, scroll spy, and unlocking the acknowledgements at the end.
+  // Reading progress, and unlocking the acknowledgements at the end.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
@@ -167,13 +159,6 @@ export default function TermsStepV3({
       const pr = max > 0 ? Math.min(1, el.scrollTop / max) : 1;
       setProgress(pr);
       if (pr >= 0.98) setReachedEnd(true);
-      const top = el.getBoundingClientRect().top + 72;
-      let cur: string = TERMS_SECTIONS[0].id;
-      el.querySelectorAll<HTMLElement>("[data-policy-sec]").forEach((sec) => {
-        if (sec.getBoundingClientRect().top <= top) cur = sec.dataset.policySec ?? cur;
-      });
-      if (max > 0 && el.scrollTop >= max - 4) cur = TERMS_SECTIONS[TERMS_SECTIONS.length - 1].id;
-      setActive(cur);
     };
     onScroll();
     el.addEventListener("scroll", onScroll, { passive: true });
@@ -184,11 +169,6 @@ export default function TermsStepV3({
     };
   }, []);
 
-  const jump = (id: string) => {
-    const el = scrollRef.current;
-    const sec = el?.querySelector<HTMLElement>(`[data-policy-sec="${id}"]`);
-    if (el && sec) el.scrollTo({ top: sec.offsetTop - 12, behavior: "smooth" });
-  };
   const pct = Math.round(progress * 100);
 
   // Fills the visible area so only the text column scrolls (one scrollbar), not the page too.
@@ -198,50 +178,7 @@ export default function TermsStepV3({
         Please read the terms and conditions carefully before proceeding next step.
       </StepHeaderV3>
 
-      <div className="flex flex-1 min-h-0 flex-col md:grid md:grid-cols-[180px_minmax(0,1fr)] md:gap-8 px-4 md:px-8">
-        {/* Section list: a sticky rail on desktop, scrollable chips on phones. */}
-        <nav aria-label="Terms sections" className="hidden md:flex flex-col gap-0.5 self-start pt-1">
-          <p className="m-0 mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-gray-400">On this page</p>
-          {TERMS_SECTIONS.map((sec) => {
-            const on = active === sec.id;
-            return (
-              <button
-                key={sec.id}
-                type="button"
-                onClick={() => jump(sec.id)}
-                aria-current={on ? "location" : undefined}
-                className="relative cursor-pointer rounded-md border-0 bg-transparent px-2 py-1.5 text-left text-[13px] leading-5 outline-none"
-              >
-                {on && (
-                  <motion.span
-                    layoutId={`${idp}-toc`}
-                    transition={{ type: "spring", stiffness: 520, damping: 34, mass: 0.7 }}
-                    className="absolute inset-0 rounded-md bg-[#EBF1FF]"
-                  />
-                )}
-                <span className={`relative transition-colors ${on ? "font-semibold text-brand-500" : "text-gray-500 hover:text-gray-900"}`}>
-                  {sec.label}
-                </span>
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="flex min-h-0 flex-col">
-          <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-2 md:hidden [scrollbar-width:none]">
-            {TERMS_SECTIONS.map((sec) => (
-              <button
-                key={sec.id}
-                type="button"
-                onClick={() => jump(sec.id)}
-                className={`h-7 flex-shrink-0 cursor-pointer whitespace-nowrap rounded-full border border-solid px-2.5 text-xs font-medium transition-colors ${
-                  active === sec.id ? "border-brand-400 bg-brand-25 text-brand-500" : "border-gray-200 bg-white text-gray-600"
-                }`}
-              >
-                {sec.label}
-              </button>
-            ))}
-          </div>
+      <div className="flex flex-1 min-h-0 flex-col px-4 md:px-8">
           {/* Reading progress, pinned to the top of the text. */}
           <div className="h-[3px] flex-shrink-0 overflow-hidden rounded-full bg-gray-100">
             <div
@@ -258,16 +195,15 @@ export default function TermsStepV3({
           >
             <TermsAgreementText idp={idp} />
           </div>
-        </div>
       </div>
 
-      {/* Acknowledgements: full width, lined up with the section list; unlocked at the end of the text. */}
+      {/* Acknowledgements: lined up with the text; unlocked at the end of the text. */}
       <div className="flex flex-shrink-0 flex-col gap-1 border-0 border-t border-solid border-gray-100 px-4 py-3 md:px-8 md:py-4">
         {AGREEMENTS.map((text, i) => (
           <label
             key={text}
             title={reachedEnd ? undefined : "Scroll to the end of the terms to agree"}
-            className={`flex items-center gap-3 py-1 md:px-2 ${reachedEnd ? "cursor-pointer" : "cursor-not-allowed"}`}
+            className={`flex items-center gap-3 py-1 ${reachedEnd ? "cursor-pointer" : "cursor-not-allowed"}`}
           >
             <Checkbox
               checked={agreed[i]}
