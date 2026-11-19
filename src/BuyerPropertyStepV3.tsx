@@ -81,7 +81,7 @@ export default function BuyerPropertyStepV3() {
             />
           </Field>
           <Field label="Control Number (RA No.)">
-            <Input size="sm" aria-label="Control Number (RA No.)" placeholder="-" disabled />
+            <Input size="sm" aria-label="Control Number (RA No.)" disabled />
           </Field>
         </div>
 

@@ -1041,7 +1041,6 @@ function NameRow({
         onValueChange={(fn) => onChange({ fn })}
         flashKey={flashKey}
         autoComplete="given-name"
-        placeholder="Enter first name"
       />
       <TextField
         label="Middle name"
@@ -1050,7 +1049,6 @@ function NameRow({
         disabled={noMiddle}
         flashKey={flashKey}
         autoComplete="additional-name"
-        placeholder="Enter middle name"
         extra={
           <CheckRow
             small
@@ -1070,7 +1068,6 @@ function NameRow({
         onValueChange={(ln) => onChange({ ln })}
         flashKey={flashKey}
         autoComplete="family-name"
-        placeholder="Enter last name"
       />
     </div>
   );
@@ -2509,7 +2506,7 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
           <Panel>
             <ChipField label="Role" options={["Attorney-in-fact", "Financer"]} />
             <div className={G2}>
-              <TextField label="Full name" placeholder="Enter full name" />
+              <TextField label="Full name" />
               <PhoneField label="Mobile number" format="mobile" placeholder="917 123 4567" />
             </div>
             <div className={G2}>

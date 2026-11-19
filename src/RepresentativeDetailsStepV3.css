@@ -101,3 +101,19 @@
 @media (prefers-reduced-motion: reduce) {
   .rd-shake { animation: none; }
 }
+
+/* Placeholders: quieter, and format hints only show once the field is focused,
+   so empty fields read as empty. Search boxes and disabled-field hints
+   ("Choose a province first") stay visible because they guide the user. */
+.rd-v3 .input-field::placeholder {
+  color: #b8c0cc;
+  transition: color 0.15s;
+}
+.rd-v3 .input-field:not(:focus):not(:disabled):not([role="combobox"])::placeholder,
+.rd-v3 .input-field[role="combobox"][placeholder="Select or type"]:not(:focus)::placeholder {
+  color: transparent;
+}
+.rd-v3 .select-trigger > [class~="text-gray-400"],
+.rd-v3 .date-picker-trigger > [class~="text-gray-400"] {
+  color: #b8c0cc;
+}

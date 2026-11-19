@@ -16,7 +16,7 @@ const SPRING = { type: "spring", stiffness: 520, damping: 34, mass: 0.7 } as con
 export default function SelectV3({
   options,
   size = "sm",
-  placeholder = "Select one",
+  placeholder = "",
   value,
   defaultValue,
   onChange,
