@@ -220,9 +220,7 @@ export default function DataPrivacyStepV3({
       {/* Agreement: always in view, turns green once ticked. */}
       <div className="flex-shrink-0 border-0 border-t border-solid border-gray-100 px-4 py-3 md:px-8 md:py-4">
         <label
-          className={`flex cursor-pointer items-start gap-3 rounded-xl border-[1.5px] border-solid px-4 py-3 transition-colors duration-200 ${
-            agreed ? "border-success-600 bg-[#ECFDF3]" : "border-gray-200 bg-white hover:border-brand-200"
-          }`}
+          className="flex cursor-pointer items-start gap-3 py-1"
         >
           <span className="pt-0.5">
             <Checkbox checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
@@ -287,7 +285,7 @@ function PolicyBodyV3({ idp }: { idp: string }) {
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {CONTACTS.map((contact) => (
-          <div key={contact.title} className="flex flex-col gap-2 rounded-xl border border-solid border-gray-200 bg-white p-4">
+          <div key={contact.title} className="flex flex-col gap-2 rounded-xl bg-gray-50 p-4">
             <div className="flex items-center gap-2.5">
               <span className="grid size-8 place-items-center rounded-lg bg-[#ECFDF3] text-success-600">
                 <svg viewBox="0 0 16 16" fill="none" className="size-4" aria-hidden="true">
@@ -340,7 +338,7 @@ function PolicyBodyV3({ idp }: { idp: string }) {
         unauthorized or accidental access or disclosure, alteration or
         destruction. We put in effect safeguards such as:
       </p>
-      <ol className="m-0 grid list-none grid-cols-1 gap-2.5 p-0 [counter-reset:sg] sm:grid-cols-2 [&>li]:relative [&>li]:rounded-xl [&>li]:border [&>li]:border-solid [&>li]:border-gray-200 [&>li]:bg-white [&>li]:p-4 [&>li]:pt-11 [&>li]:[counter-increment:sg] [&>li]:before:absolute [&>li]:before:left-4 [&>li]:before:top-4 [&>li]:before:grid [&>li]:before:size-6 [&>li]:before:place-items-center [&>li]:before:rounded-md [&>li]:before:bg-brand-25 [&>li]:before:text-xs [&>li]:before:font-semibold [&>li]:before:text-brand-500 [&>li]:before:content-[counter(sg)]">
+      <ol className="m-0 grid list-none grid-cols-1 gap-2.5 p-0 [counter-reset:sg] sm:grid-cols-2 [&>li]:relative [&>li]:rounded-xl [&>li]:bg-gray-50 [&>li]:p-4 [&>li]:pt-11 [&>li]:[counter-increment:sg] [&>li]:before:absolute [&>li]:before:left-4 [&>li]:before:top-4 [&>li]:before:grid [&>li]:before:size-6 [&>li]:before:place-items-center [&>li]:before:rounded-md [&>li]:before:bg-brand-25 [&>li]:before:text-xs [&>li]:before:font-semibold [&>li]:before:text-brand-500 [&>li]:before:content-[counter(sg)]">
         <li>
           Keeping and protecting your information using a secured server behind
           a firewall, deploying encryption on computing devices and physical
