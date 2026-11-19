@@ -85,11 +85,20 @@ export default function BuyerPropertyStepV3() {
           </Field>
         </div>
 
-        {/* Reservation Agreement: a plain subsection, no box. */}
-        <div className="flex flex-col gap-3 border-0 border-t border-solid border-gray-100 pt-5">
-          <h3 className="m-0 text-[13px] font-semibold leading-5 text-gray-900">Reservation Agreement</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-3 items-start">
-            <Field label="Date of Reservation" required>
+        {/* Reservation Agreement */}
+        <div className="bg-reservation-bg flex flex-col px-1.5 pb-1.5 rounded-2xl">
+          <h3 className="m-0 py-1.5 text-center text-base font-semibold text-reservation-heading">
+            Reservation Agreement
+          </h3>
+          <div className="bg-white flex flex-col md:flex-row md:items-center gap-3 md:gap-5 px-4 md:px-5 py-3 rounded-lg">
+            <div className="flex flex-col gap-0.5 md:w-[283px] shrink-0">
+              <span className="flex gap-0.5 text-sm font-semibold leading-5 text-gray-700">
+                Date of Reservation
+                <span className="font-medium text-brand-600">*</span>
+              </span>
+              <p className="m-0 text-xs leading-[18px] text-gray-700">This is subject to validation of payment.</p>
+            </div>
+            <div className="w-full md:w-[301px]">
               <DatePicker
                 size="sm"
                 aria-label="Date of Reservation"
@@ -97,8 +106,7 @@ export default function BuyerPropertyStepV3() {
                 value={reservationDate}
                 onChange={setReservationDate}
               />
-              <span className="text-[11px] leading-4 text-gray-500">This is subject to validation of payment.</span>
-            </Field>
+            </div>
           </div>
         </div>
 
