@@ -224,7 +224,7 @@ export default function TermsStepV3({
 export function TermsAgreementText({ idp = "terms" }: { idp?: string }) {
   return (
   <div className="flex flex-col gap-10">
-    <section id={`${idp}-fee`} data-policy-sec="fee" aria-label="Reservation fee" className="flex scroll-mt-16 flex-col gap-4 [&>p]:max-w-[68ch]">
+    <section id={`${idp}-fee`} data-policy-sec="fee" aria-label="Reservation fee" className="flex scroll-mt-16 flex-col gap-4">
     <p className="m-0">
       A reservation fee in the amount of PESOS
       <Blank width="w-[100px]" label="Amount in words" />
@@ -233,7 +233,7 @@ export function TermsAgreementText({ idp = "terms" }: { idp?: string }) {
       <Blank width="w-[124px]" label="Payment date" />.
     </p>
     </section>
-    <section id={`${idp}-documents`} data-policy-sec="documents" aria-label="Required documents" className="flex scroll-mt-16 flex-col gap-4 [&>p]:max-w-[68ch]">
+    <section id={`${idp}-documents`} data-policy-sec="documents" aria-label="Required documents" className="flex scroll-mt-16 flex-col gap-4">
     <p className="m-0">
       This reservation will be automatically cancelled in the event that I/we fail to submit the following
       REQUIRED DOCUMENTS WITHIN THIRTY (30) DAYS FROM PAYMENT OF THE RESERVATION FEE and hence, the reservation
@@ -283,7 +283,7 @@ export function TermsAgreementText({ idp = "terms" }: { idp?: string }) {
     </div>
   
     </section>
-    <section id={`${idp}-terms`} data-policy-sec="terms" aria-label="Terms" className="flex scroll-mt-16 flex-col gap-4 [&>p]:max-w-[68ch]">
+    <section id={`${idp}-terms`} data-policy-sec="terms" aria-label="Terms" className="flex scroll-mt-16 flex-col gap-4">
     {CLAUSES.map((clause) => (
       <p key={clause.slice(0, 40)} className="m-0">
         {clause}
