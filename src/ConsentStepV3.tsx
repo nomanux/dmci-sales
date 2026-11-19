@@ -32,32 +32,29 @@ export default function ConsentStepV3({
 
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 bg-white rounded-none md:rounded-2xl flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_0_0_4px_rgba(10,77,224,0.10),0_12px_32px_-12px_rgba(16,24,40,0.18)]">
-      <StepHeaderV3 step={7} title="Customer Acceptance Policy & Client Consent" className="px-4 md:px-6 pt-4 pb-5 md:pt-5">
+      <StepHeaderV3 step={7} title="Customer Acceptance Policy & Client Consent" className="px-4 md:px-8 pt-4 pb-4 md:pt-5 md:pb-5">
         Please review the Customer Acceptance Policy and provide your consent before proceeding to the next step.
       </StepHeaderV3>
 
-      {/* Only the card body scrolls; the title stays put. */}
+      {/* Same text scale as Terms and Data Privacy; no box, one left edge for text and consents. */}
       <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
-      <div className="px-4 md:px-8 pb-6 flex flex-col gap-6">
-        {/* Same panel and text scale as the Terms and Data Privacy steps. */}
-        <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-5 md:px-6 md:py-6 text-sm md:text-[15px] leading-6 text-gray-600">
+        <div className="px-4 pb-5 pt-1 text-[14px] leading-6 text-gray-700 md:px-8">
           <ConsentPolicyText />
         </div>
+      </div>
 
-        <div className="flex flex-col gap-4">
+      <div className="flex flex-shrink-0 flex-col gap-2 border-0 border-t border-solid border-gray-100 px-4 py-4 md:px-8">
         {CONSENTS.map((text, i) => (
-          <label key={text} className="flex cursor-pointer items-start gap-2 text-sm font-medium leading-5 text-gray-700">
-            <span className="pt-0.5">
+          <label key={text} className="flex cursor-pointer items-start gap-3 py-0.5">
+            <span className="flex h-5 items-center">
               <Checkbox
                 checked={agreed[i]}
                 onChange={(e) => setAgreed((prev) => prev.map((v, j) => (j === i ? e.target.checked : v)))}
               />
             </span>
-            {text}
+            <span className="text-sm font-medium leading-5 text-gray-900">{text}</span>
           </label>
         ))}
-        </div>
-      </div>
       </div>
     </section>
   );
