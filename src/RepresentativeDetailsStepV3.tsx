@@ -237,10 +237,11 @@ function applyMask(format: Format | undefined, v: string): string {
 // errors once touched.
 const ShowErrors = createContext(false);
 
-function useFieldError(error: string, value: string) {
+function useFieldError(error: string, _value: string) {
   const showAll = useContext(ShowErrors);
   const [touched, setTouched] = useState(false);
-  const shown = error && (showAll || (touched && value.trim())) ? error : "";
+  // v3: show the error as soon as the buyer leaves the field, empty or not.
+  const shown = error && (showAll || touched) ? error : "";
   return { shown, onBlur: () => setTouched(true) };
 }
 
@@ -1957,8 +1958,12 @@ function Section({
   missing,
   summary,
   nextTitle,
+  fields,
+  attempted,
   onOpen,
   onNext,
+  onSkip,
+  onFocusField,
   onBack,
   children,
 }: {
@@ -1971,13 +1976,20 @@ function Section({
   missing?: number;
   summary: string;
   nextTitle?: string;
+  /** Labels of the required fields still empty or invalid, in page order. */
+  fields: string[];
+  /** The buyer tried to move on or skipped: show every error, mark the row amber. */
+  attempted: boolean;
   onOpen: () => void;
   onNext: () => void;
+  onSkip: () => void;
+  onFocusField: (index: number) => void;
   onBack?: () => void;
   children: ReactNode;
 }) {
   const done = missing === 0;
   const left = missing ?? 0;
+  const shownFields = fields.slice(0, 3);
 
   if (open) {
     return (
@@ -2005,9 +2017,27 @@ function Section({
             <span className="rounded-full bg-[#FFFAEB] px-2 py-0.5 text-[11px] font-semibold text-[#B54708]">{left} left</span>
           )}
         </div>
-        <div data-section-body={id} className={STACK}>
-          {children}
-        </div>
+        {!done && shownFields.length > 0 && (
+          <div className="-mt-2 mb-4 flex flex-wrap items-center gap-1.5 rounded-lg bg-[#FFFAEB] px-2.5 py-2 text-xs text-[#93370D]">
+            <span className="font-medium">Still needed:</span>
+            {shownFields.map((f, i) => (
+              <button
+                key={f + i}
+                type="button"
+                onClick={() => onFocusField(i)}
+                className="cursor-pointer rounded-full border border-solid border-[#FEDF89] bg-white px-2 py-0.5 text-xs font-medium text-[#93370D] transition-colors hover:border-[#FDB022] hover:bg-[#FEF0C7]"
+              >
+                {f}
+              </button>
+            ))}
+            {fields.length > 3 && <span className="text-[#B54708]">+{fields.length - 3} more</span>}
+          </div>
+        )}
+        <ShowErrors.Provider value={attempted}>
+          <div data-section-body={id} className={STACK}>
+            {children}
+          </div>
+        </ShowErrors.Provider>
         <div className="mt-5 flex items-center gap-2.5 border-0 border-t border-solid border-gray-100 pt-3.5">
           {onBack && (
             <button
@@ -2019,12 +2049,23 @@ function Section({
             </button>
           )}
           <span className="text-xs text-gray-500">{nextTitle ? `Next: ${nextTitle}` : "Last section"}</span>
+          {!done && nextTitle && (
+            <button
+              type="button"
+              onClick={onSkip}
+              className="ml-auto cursor-pointer border-0 bg-transparent px-1 text-xs font-semibold text-gray-500 hover:text-gray-900"
+            >
+              Skip for now
+            </button>
+          )}
           <button
             type="button"
             onClick={onNext}
-            className="ml-auto h-9 cursor-pointer rounded-lg border-0 bg-brand-500 px-4 text-[13px] font-semibold text-white hover:bg-brand-700"
+            className={`h-9 cursor-pointer rounded-lg border-0 px-4 text-[13px] font-semibold transition-colors ${
+              !done && nextTitle ? "" : "ml-auto"
+            } ${done ? "bg-brand-500 text-white hover:bg-brand-700" : "bg-brand-500/90 text-white hover:bg-brand-600"}`}
           >
-            {nextTitle ? "Save and continue" : "Finish this step"}
+            {!done ? `${left} ${left === 1 ? "field" : "fields"} left` : nextTitle ? "Save and continue" : "Finish this step"}
           </button>
         </div>
       </section>
@@ -2037,7 +2078,11 @@ function Section({
         type="button"
         onClick={onOpen}
         className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border border-solid bg-white px-3.5 py-2.5 text-left transition-[border-color,opacity] ${
-          done ? "border-gray-200 hover:border-gray-300" : "border-dashed border-gray-300 opacity-70 hover:opacity-100"
+          done
+            ? "border-gray-200 hover:border-gray-300"
+            : attempted
+              ? "border-[#FEDF89] bg-[#FFFCF5] hover:border-[#FDB022]"
+              : "border-dashed border-gray-300 opacity-70 hover:opacity-100"
         }`}
       >
         <SectionIcon id={id} />
@@ -2047,7 +2092,13 @@ function Section({
             {optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
           </strong>
           <small className={`block truncate text-xs leading-4 ${done ? "text-gray-600" : "text-gray-500"}`}>
-            {done ? summary || "Complete" : missing === undefined ? "" : `${left} ${left === 1 ? "answer" : "answers"} to go`}
+            {done
+              ? summary || "Complete"
+              : missing === undefined
+                ? ""
+                : attempted
+                  ? `Needs: ${fields.join(", ")}`
+                  : `${left} ${left === 1 ? "answer" : "answers"} to go`}
           </small>
         </span>
         {done ? (
@@ -2058,13 +2109,20 @@ function Section({
             <span className="text-xs font-semibold text-brand-400">Edit</span>
           </>
         ) : (
-          <ChevronDownIcon className="size-4 flex-shrink-0 -rotate-90 text-gray-400" />
+          <>
+            {attempted && (
+              <span className="flex-shrink-0 rounded-full bg-[#FEF0C7] px-2 py-0.5 text-[11px] font-semibold text-[#B54708]">{left} left</span>
+            )}
+            <ChevronDownIcon className="size-4 flex-shrink-0 -rotate-90 text-gray-400" />
+          </>
         )}
       </button>
       {/* Kept mounted so answers stay and missing answers keep counting. */}
-      <div data-section-body={id} className="hidden">
-        <div className={STACK}>{children}</div>
-      </div>
+      <ShowErrors.Provider value={attempted}>
+        <div data-section-body={id} className="hidden">
+          <div className={STACK}>{children}</div>
+        </div>
+      </ShowErrors.Provider>
     </section>
   );
 }
@@ -2074,8 +2132,10 @@ const countOf = (v: string) => v.split(";").filter(Boolean).length;
 
 /** Section list the page's left stepper shows under this step (one progress system). */
 export type SectionNav = {
-  items: { id: string; label: string; done: boolean; active: boolean }[];
+  items: { id: string; label: string; done: boolean; active: boolean; partial: boolean; fields: string[] }[];
   jump: (id: string) => void;
+  /** Open the section and put the cursor in its first missing field. */
+  jumpField: (id: string) => void;
 };
 
 export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChange?: (nav: SectionNav) => void } = {}) {
@@ -2084,6 +2144,10 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
   // The one section the side list highlights: the last one opened or moved to.
   const [activeId, setActiveId] = useState<SectionId>("personal");
   const [missing, setMissing] = useState<Partial<Record<SectionId, number>>>({});
+  // Labels of each section's missing required fields, read from the DOM with the counts.
+  const [missingLabels, setMissingLabels] = useState<Partial<Record<SectionId, string[]>>>({});
+  // Sections the buyer tried to leave unfinished or skipped: errors show, rows go amber.
+  const [attempted, setAttempted] = useState<Set<SectionId>>(() => new Set());
   const [toastMsg, setToastMsg] = useState<{ text: string; key: number } | null>(null);
 
   // Values the section summaries are built from.
@@ -2124,9 +2188,17 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
     const scan = () => {
       pending = 0;
       const next: Partial<Record<SectionId, number>> = {};
+      const labels: Partial<Record<SectionId, string[]>> = {};
       root.querySelectorAll<HTMLElement>("[data-section-body]").forEach((el) => {
-        next[el.dataset.sectionBody as SectionId] = el.querySelectorAll('[data-req="missing"]').length;
+        const sid = el.dataset.sectionBody as SectionId;
+        const wraps = el.querySelectorAll<HTMLElement>('[data-req="missing"]');
+        next[sid] = wraps.length;
+        labels[sid] = Array.from(wraps).map((w) => {
+          const t = (w.querySelector("label")?.textContent ?? "Field").replace(/\(optional\)/g, "").replace(/[~|^]/g, " ").trim();
+          return t.length > 34 ? t.slice(0, 32).trimEnd() + "…" : t;
+        });
       });
+      setMissingLabels((prev) => (JSON.stringify(prev) === JSON.stringify(labels) ? prev : labels));
       setMissing((prev) => {
         const keys = Object.keys(next) as SectionId[];
         const same = keys.length === Object.keys(prev).length && keys.every((k) => prev[k] === next[k]);
@@ -2159,16 +2231,48 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
   };
   // Save and continue: next unfinished section after this one, else the
   // first unfinished one, else stay and confirm the step is done.
-  const goNext = (id: SectionId) => {
+  // Put the cursor in a missing field of a section (opening it first) and nudge it.
+  const focusMissing = (id: SectionId, index = 0) => {
+    if (activeId !== id) openSection(id);
+    window.setTimeout(() => {
+      const body = rootRef.current?.querySelector(`[data-section-body="${id}"]`);
+      const wrap = body?.querySelectorAll<HTMLElement>('[data-req="missing"]')[index];
+      if (!wrap) return;
+      wrap.scrollIntoView({ behavior: "smooth", block: "center" });
+      wrap.querySelector<HTMLElement>("input:not([type=hidden]):not([disabled]), textarea, select, button")?.focus({ preventScroll: true });
+      wrap.classList.remove("rd-shake");
+      void wrap.offsetWidth;
+      wrap.classList.add("rd-shake");
+      window.setTimeout(() => wrap.classList.remove("rd-shake"), 600);
+    }, activeId === id ? 0 : 140);
+  };
+  // Move on: next unfinished section after this one, else the first
+  // unfinished one, else stay and confirm the step is done.
+  const advance = (id: SectionId) => {
     const order = visible.map((s) => s.id);
     const at = order.indexOf(id);
-    const after = [...order.slice(at + 1), ...order.slice(0, at)].find((x) => missing[x] !== 0);
+    const after = [...order.slice(at + 1), ...order.slice(0, at)].find((x) => missing[x] !== 0 && x !== id);
     if (after) openSection(after);
     else {
       const last = order[order.length - 1];
       if (last !== id) openSection(last);
       toast("All sections are complete. Press Next to continue.");
     }
+  };
+  const markAttempted = (id: SectionId) => setAttempted((s) => (s.has(id) ? s : new Set(s).add(id)));
+  // The button only moves on when the section is complete; otherwise it shows
+  // every error and takes the buyer to the first missing field.
+  const goNext = (id: SectionId) => {
+    if ((missing[id] ?? 0) > 0) {
+      markAttempted(id);
+      focusMissing(id, 0);
+      return;
+    }
+    advance(id);
+  };
+  const skip = (id: SectionId) => {
+    markAttempted(id);
+    advance(id);
   };
   const goBack = (id: SectionId) => {
     const order = visible.map((s) => s.id);
@@ -2462,14 +2566,22 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
   // array each render doesn't loop; jump goes through a ref for the same reason.
   const openRef = useRef(openSection);
   openRef.current = openSection;
-  const navKey = visible.map((s) => `${s.id}~${s.nav}~${missing[s.id] === 0 ? 1 : 0}~${activeId === s.id ? 1 : 0}`).join("|");
+  const focusRef = useRef(focusMissing);
+  focusRef.current = focusMissing;
+  const navKey = visible
+    .map(
+      (s) =>
+        `${s.id}~${s.nav}~${missing[s.id] === 0 ? 1 : 0}~${activeId === s.id ? 1 : 0}~${attempted.has(s.id) ? 1 : 0}~${(missingLabels[s.id] ?? []).join("^")}`,
+    )
+    .join("|");
   useEffect(() => {
     onNavChange?.({
       items: navKey.split("|").map((row) => {
-        const [id, label, done, active] = row.split("~");
-        return { id, label, done: done === "1", active: active === "1" };
+        const [id, label, done, active, partial, fields] = row.split("~");
+        return { id, label, done: done === "1", active: active === "1", partial: partial === "1", fields: fields ? fields.split("^") : [] };
       }),
       jump: (id) => openRef.current(id as SectionId),
+      jumpField: (id) => focusRef.current(id as SectionId, 0),
     });
   }, [navKey, onNavChange]);
 
@@ -2539,8 +2651,12 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
             missing={missing[s.id]}
             summary={summaries[s.id]}
             nextTitle={visible[i + 1]?.title}
+            fields={missingLabels[s.id] ?? []}
+            attempted={attempted.has(s.id)}
             onOpen={() => openSection(s.id)}
             onNext={() => goNext(s.id)}
+            onSkip={() => skip(s.id)}
+            onFocusField={(n) => focusMissing(s.id, n)}
             onBack={i > 0 ? () => goBack(s.id) : undefined}
           >
             {bodies[s.id]()}

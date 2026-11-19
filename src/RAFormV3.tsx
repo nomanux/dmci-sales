@@ -282,6 +282,8 @@ export default function RAFormV3() {
   const [sectionNav, setSectionNav] = useState<SectionNav | null>(null);
   // Phones: the full step list opens as a panel under the top bar.
   const [mobileStepsOpen, setMobileStepsOpen] = useState(false);
+  // Step 2: Next with unfinished sections opens a list of what is missing.
+  const [guardOpen, setGuardOpen] = useState(false);
   // Hover targets for the sliding highlight (same idea as Motion Brew's ActionMenu).
   const [hoverStep, setHoverStep] = useState<string | null>(null);
   const [hoverSection, setHoverSection] = useState<string | null>(null);
@@ -645,8 +647,17 @@ export default function RAFormV3() {
               : null;
   const nextBlocked = nextBlockedHint !== null;
   const handlePrevious = () => goToStep(previousStep);
-  const handleNext = () =>
-    currentStep === REVIEW_STEP ? setSubmitted(true) : nextStep !== undefined && goToStep(nextStep);
+  const incompleteSections =
+    currentStep === BUYER_DETAILS_STEP && sectionNav ? sectionNav.items.filter((it) => !it.done) : [];
+  const handleNext = () => {
+    if (incompleteSections.length) {
+      setGuardOpen(true);
+      return;
+    }
+    setGuardOpen(false);
+    if (currentStep === REVIEW_STEP) setSubmitted(true);
+    else if (nextStep !== undefined) goToStep(nextStep);
+  };
   const nextLabel =
     currentStep === REVIEW_STEP ? (
       <>
@@ -750,7 +761,11 @@ export default function RAFormV3() {
                     {it.done ? (
                       <span className="relative grid size-3.5 flex-shrink-0 place-items-center rounded-full bg-success-600 text-white">{tick("size-2")}</span>
                     ) : (
-                      <span className={`relative mx-1 size-1.5 flex-shrink-0 rounded-full transition-colors ${it.active ? "bg-brand-400" : "bg-gray-300"}`} />
+                      <span
+                        className={`relative mx-1 size-1.5 flex-shrink-0 rounded-full transition-colors ${
+                          it.active ? "bg-brand-400" : it.partial ? "bg-[#F79009] ring-2 ring-[#FEF0C7]" : "bg-gray-300"
+                        }`}
+                      />
                     )}
                     <span className="relative truncate">{it.label}</span>
                   </button>
@@ -899,6 +914,7 @@ export default function RAFormV3() {
                     <motion.span layoutId="chip-active" transition={SPRING} className="absolute inset-0 rounded-full bg-brand-25" />
                   )}
                   {it.done && <span className="relative flex">{tick("size-3 text-success-600")}</span>}
+                  {!it.done && it.partial && <span className="relative size-1.5 rounded-full bg-[#F79009]" />}
                   <span className="relative">{it.label}</span>
                 </motion.button>
               ))}
@@ -1401,6 +1417,86 @@ export default function RAFormV3() {
         </main>
       </div>
 
+      {/* Step guard: what is still missing, with a jump to each field. */}
+      <AnimatePresence>
+        {guardOpen && incompleteSections.length > 0 && (
+          <>
+            <motion.div
+              key="guard-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-gray-900/10 md:bg-transparent"
+              onClick={() => setGuardOpen(false)}
+              aria-hidden="true"
+            />
+            <motion.div
+              key="guard"
+              role="dialog"
+              aria-label="Sections that need answers"
+              initial={{ opacity: 0, scale: 0.96, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97, y: 8, transition: { duration: 0.15, ease: GLIDE } }}
+              transition={SPRING}
+              style={{ transformOrigin: "bottom right" }}
+              className="fixed inset-x-2 bottom-2 z-50 max-h-[70dvh] overflow-y-auto rounded-2xl bg-white p-2 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_24px_48px_-12px_rgba(16,24,40,0.3)] ring-1 ring-black/5 md:inset-x-auto md:bottom-[calc(var(--footer-h)+8px)] md:right-[max(16px,calc((100vw-1280px)/2))] md:w-[360px]"
+            >
+              <div className="flex items-start justify-between gap-3 px-2 pb-2 pt-1.5">
+                <div>
+                  <p className="m-0 text-sm font-semibold text-gray-900">
+                    {incompleteSections.length} {incompleteSections.length === 1 ? "section needs" : "sections need"} answers
+                  </p>
+                  <p className="m-0 text-xs text-gray-500">Finish these to go to {steps[currentStep]?.name.toLowerCase()}.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setGuardOpen(false)}
+                  aria-label="Close"
+                  className="grid size-7 cursor-pointer place-items-center rounded-md border-0 bg-transparent text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                >
+                  <svg viewBox="0 0 16 16" fill="none" className="size-3.5" aria-hidden="true">
+                    <path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+              <motion.ul
+                className="m-0 flex list-none flex-col gap-1 p-0"
+                initial="hidden"
+                animate="shown"
+                variants={{ shown: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } } }}
+              >
+                {incompleteSections.map((it) => (
+                  <motion.li
+                    key={it.id}
+                    variants={{ hidden: { opacity: 0, y: 6 }, shown: { opacity: 1, y: 0, transition: { duration: 0.25, ease: GLIDE } } }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sectionNav?.jumpField(it.id);
+                        setGuardOpen(false);
+                      }}
+                      className="group flex w-full cursor-pointer items-center gap-3 rounded-xl border-0 bg-transparent px-2.5 py-2 text-left transition-colors hover:bg-[#F7F9FF]"
+                    >
+                      <span className={`size-2 flex-shrink-0 rounded-full ${it.partial ? "bg-[#F79009]" : "bg-gray-300"}`} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[13px] font-medium leading-5 text-gray-900">{it.label}</span>
+                        <span className="block truncate text-xs leading-4 text-gray-500">
+                          {it.fields.length ? it.fields.join(", ") : "Not started"}
+                        </span>
+                      </span>
+                      <span className="flex-shrink-0 text-xs font-semibold text-brand-400 transition-transform group-hover:translate-x-0.5">
+                        Go →
+                      </span>
+                    </button>
+                  </motion.li>
+                ))}
+              </motion.ul>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <footer ref={footerRef} className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white shadow-[-2px_-2px_8px_rgba(10,13,18,0.08)] hidden md:flex items-center justify-center p-0 flex-wrap gap-0 flex-shrink-0 h-auto">
         <div className="w-full max-w-[1280px] flex flex-col md:flex-row md:items-center md:justify-between py-3 md:py-3 gap-2 md:gap-3 px-4 md:px-0">
           <Button
@@ -1417,6 +1513,16 @@ export default function RAFormV3() {
               <span className="w-full md:w-auto text-xs text-gray-500 text-center md:text-left">
                 {nextBlockedHint}
               </span>
+            )}
+            {!nextBlocked && incompleteSections.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setGuardOpen((o) => !o)}
+                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 bg-[#FFFAEB] px-2.5 py-1 text-xs font-medium text-[#B54708] hover:bg-[#FEF0C7]"
+              >
+                <span className="size-1.5 rounded-full bg-[#F79009]" />
+                {incompleteSections.length} {incompleteSections.length === 1 ? "section needs" : "sections need"} answers
+              </button>
             )}
             <Button
               variant="tertiary"
