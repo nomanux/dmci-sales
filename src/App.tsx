@@ -30,6 +30,7 @@ import ReservationPayment from "./ReservationPayment";
 import RAForm from "./RAForm";
 import CaptureSelfieTrack from "./CaptureSelfieTrack";
 import RAFormV2 from "./RAFormV2";
+import RAFormV3 from "./RAFormV3";
 import NoResults from "./NoResults";
 
 // Set to true to show the old Unit Availability details design.
@@ -99,6 +100,8 @@ function Screens() {
       return <CaptureSelfieTrack />;
     case "ra-form-v2":
       return <RAFormV2 />;
+    case "ra-form-v3":
+      return <RAFormV3 />;
     case "no-results":
       return <NoResults />;
     default:
@@ -117,6 +120,9 @@ export default function App() {
       }
       if (path === "/ra-form2") {
         return { screen: "ra-form-v2" as const, step };
+      }
+      if (path === "/ra-form3") {
+        return { screen: "ra-form-v3" as const, step };
       }
     }
     return undefined;

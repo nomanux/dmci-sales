@@ -1,0 +1,53 @@
+/*
+ * RA form v3 · Representative details: compact scale.
+ * Scoped to .rd-v3 so the shared .input-field / .select-trigger /
+ * .date-picker-trigger classes stay unchanged everywhere else.
+ */
+.rd-v3 .input-field,
+.rd-v3 .select-trigger,
+.rd-v3 .date-picker-trigger {
+  height: 32px;
+  min-height: 32px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-radius: 7px;
+  border-color: #e4e7ec;
+  font-size: 13px;
+  box-shadow: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.rd-v3 .input-field:hover,
+.rd-v3 .select-trigger:hover,
+.rd-v3 .date-picker-trigger:hover {
+  border-color: #d0d5dd;
+}
+.rd-v3 .input-field:focus,
+.rd-v3 .select-trigger:focus-visible,
+.rd-v3 .select-trigger-open,
+.rd-v3 .date-picker-trigger:focus-visible,
+.rd-v3 .date-picker-trigger-open {
+  border-color: #0a4de0;
+  box-shadow: 0 0 0 3px rgba(10, 77, 224, 0.12);
+  outline: none;
+  --tw-ring-shadow: 0 0 #0000;
+}
+.rd-v3 .input-field::placeholder {
+  color: #98a2b3;
+}
+.rd-v3 textarea.input-field {
+  height: auto;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.rd-v3 .select-trigger svg,
+.rd-v3 .date-picker-trigger svg {
+  width: 14px;
+  height: 14px;
+}
+/* No clear (x) icon inside text fields in v3. */
+.rd-v3 button[aria-label="Clear"] {
+  display: none;
+}
+.rd-v3 .input-field.pr-8 {
+  padding-right: 10px;
+}
