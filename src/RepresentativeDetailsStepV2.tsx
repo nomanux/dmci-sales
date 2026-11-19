@@ -580,7 +580,7 @@ function SelectField({
       <Select
         size="sm"
         aria-label={typeof label === "string" ? label : undefined}
-        placeholder="Select"
+        placeholder=""
         options={options.map((o) => ({ value: o, label: o }))}
         value={v}
         onChange={(next) => {
