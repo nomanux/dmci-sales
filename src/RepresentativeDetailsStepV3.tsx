@@ -1877,65 +1877,153 @@ const SECTIONS: { id: SectionId; title: string; nav: string; optional?: boolean 
   { id: "rep", title: "Representative information and PEP", nav: "Representative and PEP" },
 ];
 
+/** Icon and colour per section, so each one is easy to tell apart. */
+const SECTION_LOOK: Record<SectionId, { fg: string; bg: string; d: string }> = {
+  company: { fg: "#0A4DE0", bg: "#EEF4FF", d: "M2.5 13.5h11M4 13.5V3.5h5v10M9 6h3v7.5M6 5.5h1M6 8h1M6 10.5h1" },
+  personal: { fg: "#0A4DE0", bg: "#EEF4FF", d: "M8 8.25a2.75 2.75 0 1 0 0-5.5 2.75 2.75 0 0 0 0 5.5zM2.75 13.5c.8-2.3 2.8-3.5 5.25-3.5s4.45 1.2 5.25 3.5" },
+  contact: { fg: "#0E7090", bg: "#F0F9FF", d: "M6 1.75h4a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8.5a2 2 0 0 1 2-2zM7 11.75h2" },
+  present: { fg: "#6941C6", bg: "#F4F3FF", d: "M8 14s4.5-3.9 4.5-7.5a4.5 4.5 0 0 0-9 0C3.5 10.1 8 14 8 14zM8 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" },
+  home: { fg: "#6941C6", bg: "#F4F3FF", d: "M2.5 7 8 2.5 13.5 7v6.5h-11zM6.5 13.5V10h3v3.5" },
+  work: { fg: "#B54708", bg: "#FFFAEB", d: "M3.5 4.75h9a1.5 1.5 0 0 1 1.5 1.5v5.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.75v-5.5a1.5 1.5 0 0 1 1.5-1.5zM5.75 4.75V3.5a1 1 0 0 1 1-1h2.5a1 1 0 0 1 1 1v1.25" },
+  mailing: { fg: "#0E7090", bg: "#F0F9FF", d: "M3 3.75h10a1 1 0 0 1 1 1v6.5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-6.5a1 1 0 0 1 1-1zM2.25 4.5 8 8.75l5.75-4.25" },
+  purchase: { fg: "#C01048", bg: "#FFF1F3", d: "M8 13.5S2.5 10.4 2.5 6.4A2.9 2.9 0 0 1 8 5a2.9 2.9 0 0 1 5.5 1.4c0 4-5.5 7.1-5.5 7.1z" },
+  guardian: { fg: "#039855", bg: "#ECFDF3", d: "M5.5 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM11 8a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM1.75 13c.5-2 1.9-3 3.75-3s3.25 1 3.75 3M9.5 10.25c.5-.2 1-.25 1.5-.25 1.5 0 2.6.9 3 3" },
+  cob: { fg: "#6941C6", bg: "#F4F3FF", d: "M6 7.5a2.25 2.25 0 1 0 0-4.5 2.25 2.25 0 0 0 0 4.5zM1.75 13.25c.6-2 2.2-3 4.25-3s3.65 1 4.25 3M12 5.5v4M10 7.5h4" },
+  rep: { fg: "#039855", bg: "#ECFDF3", d: "M8 1.75 13 3.5v4.25c0 3-2.2 5.3-5 6.5-2.8-1.2-5-3.5-5-6.5V3.5zM5.75 8l1.5 1.5 3-3" },
+};
+
+function SectionIcon({ id }: { id: SectionId }) {
+  const look = SECTION_LOOK[id];
+  return (
+    <span className="grid size-8 flex-shrink-0 place-items-center rounded-[9px]" style={{ color: look.fg, background: look.bg }}>
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="size-4">
+        <path d={look.d} />
+      </svg>
+    </span>
+  );
+}
+
+/**
+ * Focused flow: only the active section is open. Finished sections collapse
+ * to a one-line summary with Edit; the rest wait as faded rows. Bodies stay
+ * mounted (only hidden) so answers are kept and missing answers still count.
+ */
 function Section({
   id,
+  index,
+  total,
   title,
   optional,
   open,
   missing,
   summary,
-  onToggle,
+  nextTitle,
+  onOpen,
+  onNext,
+  onBack,
   children,
 }: {
   id: SectionId;
+  index: number;
+  total: number;
   title: string;
   optional?: boolean;
   open: boolean;
   missing?: number;
   summary: string;
-  onToggle: () => void;
+  nextTitle?: string;
+  onOpen: () => void;
+  onNext: () => void;
+  onBack?: () => void;
   children: ReactNode;
 }) {
   const done = missing === 0;
+  const left = missing ?? 0;
+
+  if (open) {
+    return (
+      <section
+        id={`rd-${id}`}
+        className="rd-active mb-2.5 scroll-mt-4 rounded-2xl border-[1.5px] border-solid border-brand-400 bg-white px-5 pb-5 pt-4 shadow-[0_0_0_4px_rgba(10,77,224,0.12),0_12px_32px_-12px_rgba(16,24,40,0.18)]"
+      >
+        <div className="mb-4 flex items-center gap-3">
+          <SectionIcon id={id} />
+          <span className="min-w-0 flex-1">
+            <strong className="block text-base font-semibold leading-5 tracking-[-0.01em] text-gray-900">
+              {title}
+              {optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
+            </strong>
+            <small className="block text-xs leading-4 text-gray-500">
+              Section {index + 1} of {total}
+            </small>
+          </span>
+          {done ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#ECFDF3] px-2 py-0.5 text-[11px] font-semibold text-success-600">
+              <CheckIcon className="size-2.5" />
+              Complete
+            </span>
+          ) : (
+            <span className="rounded-full bg-[#FFFAEB] px-2 py-0.5 text-[11px] font-semibold text-[#B54708]">{left} left</span>
+          )}
+        </div>
+        <div data-section-body={id} className={STACK}>
+          {children}
+        </div>
+        <div className="mt-5 flex items-center gap-2.5 border-0 border-t border-solid border-gray-100 pt-3.5">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="h-9 cursor-pointer rounded-lg border border-solid border-gray-300 bg-white px-3.5 text-[13px] font-semibold text-gray-700 hover:bg-gray-50"
+            >
+              Back
+            </button>
+          )}
+          <span className="text-xs text-gray-500">{nextTitle ? `Next: ${nextTitle}` : "Last section"}</span>
+          <button
+            type="button"
+            onClick={onNext}
+            className="ml-auto h-9 cursor-pointer rounded-lg border-0 bg-brand-500 px-4 text-[13px] font-semibold text-white hover:bg-brand-700"
+          >
+            {nextTitle ? "Save and continue" : "Finish this step"}
+          </button>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section
-      id={`rd-${id}`}
-      className={`mb-2.5 scroll-mt-4 bg-white transition-shadow md:rounded-xl ${
-        open
-          ? "shadow-[0_1px_2px_rgba(15,23,42,0.04),0_4px_16px_rgba(15,23,42,0.06)]"
-          : "shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:shadow-[0_1px_2px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.05)]"
-      }`}
-    >
+    <section id={`rd-${id}`} className="mb-1.5 scroll-mt-4">
       <button
         type="button"
-        aria-expanded={open}
-        onClick={onToggle}
-        className="flex w-full cursor-pointer items-center gap-3 rounded-xl border-0 bg-transparent px-5 py-3.5 text-left"
+        onClick={onOpen}
+        className={`flex w-full cursor-pointer items-center gap-3 rounded-xl border border-solid bg-white px-3.5 py-2.5 text-left transition-[border-color,opacity] ${
+          done ? "border-gray-200 hover:border-gray-300" : "border-dashed border-gray-300 opacity-70 hover:opacity-100"
+        }`}
       >
+        <SectionIcon id={id} />
         <span className="min-w-0 flex-1">
-          <strong className="block text-[15px] font-semibold leading-5 tracking-[-0.01em] text-gray-900">
+          <strong className="block text-[13.5px] font-semibold leading-5 text-gray-900">
             {title}
             {optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
           </strong>
-          {done && summary && !open && (
-            <small className="mt-0.5 block truncate text-xs leading-4 text-gray-500">{summary}</small>
-          )}
+          <small className={`block truncate text-xs leading-4 ${done ? "text-gray-600" : "text-gray-500"}`}>
+            {done ? summary || "Complete" : missing === undefined ? "" : `${left} ${left === 1 ? "answer" : "answers"} to go`}
+          </small>
         </span>
-        {missing !== undefined &&
-          (done ? (
-            <span className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-[#ecfdf3] px-2 py-0.5 text-[11px] font-medium text-success-600">
+        {done ? (
+          <>
+            <span className="grid size-[18px] flex-shrink-0 place-items-center rounded-full bg-success-600 text-white">
               <CheckIcon className="size-2.5" />
-              Done
             </span>
-          ) : (
-            <span className="flex-shrink-0 rounded-full bg-brand-25 px-2 py-0.5 text-[11px] font-medium text-brand-500">
-              {missing} left
-            </span>
-          ))}
-        <ChevronDownIcon className={`size-4 flex-shrink-0 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+            <span className="text-xs font-semibold text-brand-400">Edit</span>
+          </>
+        ) : (
+          <ChevronDownIcon className="size-4 flex-shrink-0 -rotate-90 text-gray-400" />
+        )}
       </button>
-      {/* Closed sections stay mounted (only hidden) so their answers are kept. */}
-      <div data-section-body={id} className={open ? "px-5 pb-5 pt-0.5" : "hidden"}>
+      {/* Kept mounted so answers stay and missing answers keep counting. */}
+      <div data-section-body={id} className="hidden">
         <div className={STACK}>{children}</div>
       </div>
     </section>
@@ -1954,7 +2042,6 @@ export type SectionNav = {
 export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChange?: (nav: SectionNav) => void } = {}) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [clientType, setClientType] = useState("Private individual");
-  const [openIds, setOpenIds] = useState<Set<SectionId>>(() => new Set(["personal"]));
   // The one section the side list highlights: the last one opened or moved to.
   const [activeId, setActiveId] = useState<SectionId>("personal");
   const [missing, setMissing] = useState<Partial<Record<SectionId, number>>>({});
@@ -2026,20 +2113,28 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
 
   const toast = (text: string) => setToastMsg({ text, key: Date.now() });
   const scrollTo = (id: SectionId) =>
-    setTimeout(() => document.getElementById(`rd-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+    setTimeout(() => document.getElementById(`rd-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
   const openSection = (id: SectionId) => {
-    setOpenIds((s) => new Set(s).add(id));
     setActiveId(id);
     scrollTo(id);
   };
-  const toggleSection = (id: SectionId) => {
-    if (!openIds.has(id)) setActiveId(id);
-    setOpenIds((s) => {
-      const next = new Set(s);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  // Save and continue: next unfinished section after this one, else the
+  // first unfinished one, else stay and confirm the step is done.
+  const goNext = (id: SectionId) => {
+    const order = visible.map((s) => s.id);
+    const at = order.indexOf(id);
+    const after = [...order.slice(at + 1), ...order.slice(0, at)].find((x) => missing[x] !== 0);
+    if (after) openSection(after);
+    else {
+      const last = order[order.length - 1];
+      if (last !== id) openSection(last);
+      toast("All sections are complete. Press Next to continue.");
+    }
+  };
+  const goBack = (id: SectionId) => {
+    const order = visible.map((s) => s.id);
+    const at = order.indexOf(id);
+    if (at > 0) openSection(order[at - 1]);
   };
 
   const mailSourceOptions = ["Primary buyer", ...coBuyers.map((_, i) => `Co-buyer #${i + 1}`)];
@@ -2340,11 +2435,28 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
   }, [navKey, onNavChange]);
 
   return (
-    <div ref={rootRef} className="form-lg rd-v3 mx-auto w-full max-w-[760px] px-4 pt-6 md:px-0">
+    <div ref={rootRef} className="form-lg rd-v3 mx-auto w-full max-w-[760px] px-4 pb-6 pt-6 md:px-0">
       <div className="min-w-0">
-        <p className="m-0 text-xs font-medium leading-4 text-gray-500">Representative details</p>
-        <h1 className="m-0 mt-0.5 text-xl font-bold leading-7 tracking-[-0.015em] text-gray-900">Tell us about the buyer</h1>
-        <p className="m-0 mt-1 text-[13px] leading-5 text-gray-600">Check your details and fill in the rest. About 4 minutes.</p>
+        <div className="flex items-center justify-between gap-5 rounded-2xl bg-[linear-gradient(135deg,#EEF4FF_0%,#F5F3FF_55%,#FDF2FA_100%)] px-5 py-4 md:px-6 md:py-5">
+          <div className="min-w-0">
+            <p className="m-0 text-xs font-semibold leading-4 text-brand-400">Step 2 of 8 · Representative details</p>
+            <h1 className="m-0 mt-1 text-[22px] font-bold leading-7 tracking-[-0.02em] text-gray-900">Tell us about the buyer</h1>
+            <p className="m-0 mt-1 text-[13px] leading-5 text-gray-600">
+              {doneCount === visible.length
+                ? "All sections done. Press Next to continue."
+                : `${visible.length - doneCount} short sections left. About ${Math.max(1, Math.ceil((visible.length - doneCount) * 0.6))} min.`}
+            </p>
+          </div>
+          <div
+            className="grid size-16 flex-shrink-0 place-items-center rounded-full transition-[background] duration-500"
+            style={{ background: `conic-gradient(#0a4de0 ${pct}%, #ffffff 0)` }}
+            aria-label={`${doneCount} of ${visible.length} sections done`}
+          >
+            <span className="grid size-[50px] place-items-center rounded-full bg-white text-[13px] font-semibold text-brand-500">
+              {doneCount}/{visible.length}
+            </span>
+          </div>
+        </div>
 
         <div className="mb-4 mt-4 grid grid-cols-1 gap-2 md:grid-cols-2">
           {[
@@ -2376,29 +2488,21 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
           })}
         </div>
 
-        {/* The page stepper lists the sections on md+; on phones they show here. */}
-        <div className="mb-3 md:hidden">
-          <div className="flex justify-between text-[11px] text-gray-500">
-            <span>This step</span>
-            <span>
-              {doneCount} of {visible.length} done
-            </span>
-          </div>
-          <div className="mt-1.5 h-[3px] overflow-hidden rounded-full bg-gray-200">
-            <div className="h-full rounded-full bg-brand-500 transition-[width] duration-300" style={{ width: `${pct}%` }} />
-          </div>
-        </div>
-
-        {visible.map((s) => (
+        {visible.map((s, i) => (
           <Section
             key={s.id}
             id={s.id}
+            index={i}
+            total={visible.length}
             title={s.title}
             optional={s.optional}
-            open={openIds.has(s.id)}
+            open={activeId === s.id}
             missing={missing[s.id]}
             summary={summaries[s.id]}
-            onToggle={() => toggleSection(s.id)}
+            nextTitle={visible[i + 1]?.title}
+            onOpen={() => openSection(s.id)}
+            onNext={() => goNext(s.id)}
+            onBack={i > 0 ? () => goBack(s.id) : undefined}
           >
             {bodies[s.id]()}
           </Section>
