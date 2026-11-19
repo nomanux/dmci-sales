@@ -2586,7 +2586,7 @@ export default function RepresentativeDetailsStepV3({ onNavChange }: { onNavChan
   }, [navKey, onNavChange]);
 
   return (
-    <div ref={rootRef} className="form-lg rd-v3 mx-auto w-full max-w-[760px] px-4 pb-6 pt-6 md:px-0">
+    <div ref={rootRef} className="form-lg rd-v3 w-full px-4 pb-6 pt-4 md:px-0 md:pt-0">
       <div className="min-w-0">
         <div className="flex items-center justify-between gap-5 rounded-2xl bg-[linear-gradient(135deg,#EEF4FF_0%,#F5F3FF_55%,#FDF2FA_100%)] px-5 py-4 md:px-6 md:py-5">
           <div className="min-w-0">
