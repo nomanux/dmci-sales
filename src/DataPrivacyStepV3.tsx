@@ -222,13 +222,12 @@ export default function DataPrivacyStepV3({
         </div>
       </div>
 
-      {/* Agreement: always in view, lined up with the policy text column.
+      {/* Agreement: always in view, full width, lined up with the "On this page" labels.
           It unlocks once the buyer has scrolled to the end of the policy. */}
-      <div className="flex-shrink-0 border-0 border-t border-solid border-gray-100 px-4 py-3 md:grid md:grid-cols-[180px_minmax(0,1fr)] md:gap-8 md:px-8 md:py-4">
-        <div className="hidden md:block" />
+      <div className="flex-shrink-0 border-0 border-t border-solid border-gray-100 px-4 py-3 md:px-8 md:py-4">
         <label
           title={reachedEnd ? undefined : "Scroll to the end of the policy to agree"}
-          className={`flex items-center gap-3 py-1 transition-opacity duration-200 ${reachedEnd ? "cursor-pointer" : "cursor-not-allowed"}`}
+          className={`flex items-center gap-3 py-1 md:px-2 transition-opacity duration-200 ${reachedEnd ? "cursor-pointer" : "cursor-not-allowed"}`}
         >
           <Checkbox
             checked={agreed}
