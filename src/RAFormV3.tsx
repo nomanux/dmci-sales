@@ -1040,12 +1040,12 @@ export default function RAFormV3() {
                 </div>
                 <div className={`grid grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] min-h-0 ${ns ? "gap-5 md:gap-8" : "gap-6 md:gap-12"}`}>
                   <div className="flex flex-col gap-4">
-                    <div className={`md:flex gap-0 p-1 bg-gray-100 w-full md:w-fit hidden ${ns ? "rounded-[10px] [&_button]:focus:outline-none [&_button]:focus-visible:ring-2 [&_button]:focus-visible:ring-brand-400" : "rounded-[12px]"}`}>
+                    <div className={ns ? "hidden md:inline-flex h-9 w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-[3px] [&_button]:focus:outline-none [&_button]:focus-visible:ring-2 [&_button]:focus-visible:ring-brand-400" : "md:flex gap-0 p-1 bg-gray-100 rounded-[12px] w-full md:w-fit hidden"}>
                       <button
                         type="button"
                         role="tab"
                         aria-selected={captureMode === "selfie"}
-                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-3.5 py-3 md:py-1.5 rounded-lg border-none ${captureMode === "selfie" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 md:flex-none flex items-center justify-center rounded-lg border-none ${ns ? "h-full gap-1.5 rounded-md px-3 [&_svg]:h-4 [&_svg]:w-4 !text-[13px] !font-medium" : "gap-2 px-4 md:px-3.5 py-3 md:py-1.5"} ${captureMode === "selfie" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                         onClick={() => handleModeChange("selfie")}
                       >
                         <CameraIcon className="h-5 w-5 flex-shrink-0" />
@@ -1055,7 +1055,7 @@ export default function RAFormV3() {
                         type="button"
                         role="tab"
                         aria-selected={captureMode === "upload"}
-                        className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-3.5 py-3 md:py-1.5 rounded-lg border-none ${captureMode === "upload" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 md:flex-none flex items-center justify-center rounded-lg border-none ${ns ? "h-full gap-1.5 rounded-md px-3 [&_svg]:h-4 [&_svg]:w-4 !text-[13px] !font-medium" : "gap-2 px-4 md:px-3.5 py-3 md:py-1.5"} ${captureMode === "upload" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                         onClick={() => handleModeChange("upload")}
                       >
                         <UploadIcon className="h-5 w-5 flex-shrink-0" />
@@ -1064,7 +1064,7 @@ export default function RAFormV3() {
                     </div>
 
                     {/* Phones: Upload Photo first (the default), Take Selfie on the right. */}
-                    <div className="md:hidden flex gap-0 p-1 bg-gray-100 rounded-[12px] w-full">
+                    <div className={`md:hidden flex w-full bg-gray-100 ${ns ? "h-10 gap-0.5 rounded-lg p-[3px] [&_button]:py-0 [&_button]:rounded-md [&_button]:text-[13px] [&_button]:font-medium [&_svg]:h-4 [&_svg]:w-4" : "gap-0 p-1 rounded-[12px]"}`}>
                       <button
                         type="button"
                         onClick={() => handleModeChange("upload")}
@@ -1139,24 +1139,6 @@ export default function RAFormV3() {
                           />
                           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-linear-to-t from-black/55 to-transparent" />
                           <CaptureGuides faceFit={faceFit} idOk={idHeld} countdown={countdown} />
-                          {ns && countdown === null && (
-                            <div className="pointer-events-none absolute left-3 top-3 flex max-w-[60%]">
-                              <span
-                                key={faceFit + String(idHeld)}
-                                className={`rounded-full px-3 py-1 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.25)] backdrop-blur-md transition-colors ${
-                                  faceDetected && idHeld ? "bg-emerald-600/90" : "bg-black/55"
-                                }`}
-                              >
-                                {faceFit === "none"
-                                  ? "Place your face inside the oval"
-                                  : faceFit === "outside"
-                                    ? "Move so your whole face is inside the oval"
-                                    : !idHeld
-                                      ? "Hold your ID inside the card frame"
-                                      : "Ready, take the photo"}
-                              </span>
-                            </div>
-                          )}
                         </>
                       ) : showLiveVideoExpanded ? (
                         <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gray-100 text-center text-xs text-gray-600">
@@ -1261,16 +1243,16 @@ export default function RAFormV3() {
                         </button>
                       )}
                       {showLiveVideoCompact || showLiveVideoExpanded ? (
-                        <div className="flex flex-wrap items-center justify-between gap-2 w-full">
+                        <div className={`flex items-center justify-between gap-2 w-full ${ns ? "flex-nowrap" : "flex-wrap"}`}>
                           {showLiveVideoCompact && ns && (
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex items-center gap-1.5" aria-live="polite">
                               {[
-                                { ok: faceDetected, todo: "Show your face in the oval", done: "Face found" },
-                                { ok: idHeld, todo: "Hold your ID in the box", done: "ID found" },
+                                { ok: faceDetected, todo: "Face", done: "Face" },
+                                { ok: idHeld, todo: "ID", done: "ID" },
                               ].map((c) => (
                                 <span
                                   key={c.todo}
-                                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-300 ${
+                                  className={`inline-flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 text-xs font-medium transition-colors duration-300 ${
                                     c.ok ? "bg-[#ECFDF3] text-success-600" : "bg-gray-100 text-gray-600"
                                   }`}
                                 >
@@ -1279,7 +1261,8 @@ export default function RAFormV3() {
                                   ) : (
                                     <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
                                   )}
-                                  {c.ok ? c.done : c.todo}
+                                  {c.todo}
+                                  <span className={c.ok ? "font-semibold" : "text-gray-400"}>{c.ok ? "found" : "not yet"}</span>
                                 </span>
                               ))}
                             </div>
@@ -1342,7 +1325,7 @@ export default function RAFormV3() {
                               </span>
                             </div>
                           )}
-                          <span className={`flex items-center gap-1.5 text-[12px] font-medium text-gray-400 ${ns ? "opacity-80" : ""}`}>
+                          <span className={`flex items-center gap-1.5 text-[12px] font-medium text-gray-400 ${ns ? "flex-shrink-0 whitespace-nowrap opacity-80" : ""}`}>
                             <span className="flex items-center gap-0.5">
                               <kbd className="rounded border border-gray-200 bg-gray-50 px-2 py-1 font-mono text-[11px] font-semibold leading-none text-gray-500">
                                 Ctrl
