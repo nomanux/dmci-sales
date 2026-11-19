@@ -1045,9 +1045,16 @@ export default function RAFormV3() {
                         type="button"
                         role="tab"
                         aria-selected={captureMode === "selfie"}
-                        className={`flex-1 md:flex-none flex items-center justify-center rounded-lg border-none ${ns ? "h-full gap-1.5 rounded-md px-3 [&_svg]:h-4 [&_svg]:w-4 !text-[13px] !font-medium" : "gap-2 px-4 md:px-3.5 py-3 md:py-1.5"} ${captureMode === "selfie" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 md:flex-none flex items-center justify-center rounded-lg border-none ${ns ? "relative isolate h-full gap-1.5 rounded-md px-3 [&_svg]:h-4 [&_svg]:w-4 !text-[13px] !font-medium" : "gap-2 px-4 md:px-3.5 py-3 md:py-1.5"} ${captureMode === "selfie" ? (ns ? "bg-transparent text-gray-900 outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : (ns ? "bg-transparent text-gray-500 hover:text-gray-900" : "bg-transparent text-gray-700 hover:bg-blue-50")} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                         onClick={() => handleModeChange("selfie")}
                       >
+                        {ns && captureMode === "selfie" && (
+                          <motion.span
+                            layoutId="seg-d"
+                            transition={SPRING}
+                            className="absolute inset-0 -z-10 rounded-md bg-white shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
+                          />
+                        )}
                         <CameraIcon className="h-5 w-5 flex-shrink-0" />
                         <span>Take Selfie</span>
                       </button>
@@ -1055,29 +1062,50 @@ export default function RAFormV3() {
                         type="button"
                         role="tab"
                         aria-selected={captureMode === "upload"}
-                        className={`flex-1 md:flex-none flex items-center justify-center rounded-lg border-none ${ns ? "h-full gap-1.5 rounded-md px-3 [&_svg]:h-4 [&_svg]:w-4 !text-[13px] !font-medium" : "gap-2 px-4 md:px-3.5 py-3 md:py-1.5"} ${captureMode === "upload" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 md:flex-none flex items-center justify-center rounded-lg border-none ${ns ? "relative isolate h-full gap-1.5 rounded-md px-3 [&_svg]:h-4 [&_svg]:w-4 !text-[13px] !font-medium" : "gap-2 px-4 md:px-3.5 py-3 md:py-1.5"} ${captureMode === "upload" ? (ns ? "bg-transparent text-gray-900 outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : (ns ? "bg-transparent text-gray-500 hover:text-gray-900" : "bg-transparent text-gray-700 hover:bg-blue-50")} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                         onClick={() => handleModeChange("upload")}
                       >
+                        {ns && captureMode === "upload" && (
+                          <motion.span
+                            layoutId="seg-d"
+                            transition={SPRING}
+                            className="absolute inset-0 -z-10 rounded-md bg-white shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
+                          />
+                        )}
                         <UploadIcon className="h-5 w-5 flex-shrink-0" />
                         <span>Upload Photo</span>
                       </button>
                     </div>
 
                     {/* Phones: Upload Photo first (the default), Take Selfie on the right. */}
-                    <div className={`md:hidden flex w-full bg-gray-100 ${ns ? "h-10 gap-0.5 rounded-lg p-[3px] [&_button]:py-0 [&_button]:rounded-md [&_button]:text-[13px] [&_button]:font-medium [&_svg]:h-4 [&_svg]:w-4" : "gap-0 p-1 rounded-[12px]"}`}>
+                    <div className={`md:hidden flex w-full bg-gray-100 ${ns ? "h-10 gap-0.5 rounded-lg p-[3px] [&_button]:relative [&_button]:isolate [&_button]:py-0 [&_button]:rounded-md [&_button]:text-[13px] [&_button]:font-medium [&_svg]:h-4 [&_svg]:w-4" : "gap-0 p-1 rounded-[12px]"}`}>
                       <button
                         type="button"
                         onClick={() => handleModeChange("upload")}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-none ${captureMode === "upload" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-none ${captureMode === "upload" ? (ns ? "bg-transparent text-gray-900 outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : (ns ? "bg-transparent text-gray-500 hover:text-gray-900" : "bg-transparent text-gray-700 hover:bg-blue-50")} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                       >
+                        {ns && captureMode === "upload" && (
+                          <motion.span
+                            layoutId="seg-m"
+                            transition={SPRING}
+                            className="absolute inset-0 -z-10 rounded-md bg-white shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
+                          />
+                        )}
                         <UploadIcon className="h-5 w-5 flex-shrink-0" />
                         <span>Upload Photo</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => handleModeChange("selfie")}
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-none ${captureMode === "selfie" ? (ns ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(15,23,42,0.12)] outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : "bg-transparent text-gray-700 hover:bg-blue-50"} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
+                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-none ${captureMode === "selfie" ? (ns ? "bg-transparent text-gray-900 outline-none" : "bg-white text-[#052b78] shadow-[0_1px_2px_-1px_rgba(10,12.67,18,0.1),0_1px_3px_rgba(10,12.67,18,0.1)]") : (ns ? "bg-transparent text-gray-500 hover:text-gray-900" : "bg-transparent text-gray-700 hover:bg-blue-50")} text-sm font-semibold leading-5 cursor-pointer transition-all duration-200`}
                       >
+                        {ns && captureMode === "selfie" && (
+                          <motion.span
+                            layoutId="seg-m"
+                            transition={SPRING}
+                            className="absolute inset-0 -z-10 rounded-md bg-white shadow-[0_1px_3px_rgba(15,23,42,0.12)]"
+                          />
+                        )}
                         <CameraIcon className="h-5 w-5 flex-shrink-0" />
                         <span>Take Selfie</span>
                       </button>
