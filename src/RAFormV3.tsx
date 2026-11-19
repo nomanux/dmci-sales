@@ -1040,7 +1040,7 @@ export default function RAFormV3() {
                 </div>
                 <div className={`grid grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] min-h-0 ${ns ? "gap-5 md:gap-8" : "gap-6 md:gap-12"}`}>
                   <div className="flex flex-col gap-4">
-                    <div className={ns ? "hidden md:inline-flex h-9 w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-[3px] [&_button]:focus:outline-none [&_button]:focus-visible:ring-2 [&_button]:focus-visible:ring-brand-400" : "md:flex gap-0 p-1 bg-gray-100 rounded-[12px] w-full md:w-fit hidden"}>
+                    <div className={ns ? "hidden md:inline-flex h-9 w-fit items-center gap-0.5 rounded-lg bg-gray-100 p-[3px] [&_button]:outline-none [&_button]:focus-visible:outline-none [&_button]:focus-visible:underline [&_button]:focus-visible:underline-offset-4" : "md:flex gap-0 p-1 bg-gray-100 rounded-[12px] w-full md:w-fit hidden"}>
                       <button
                         type="button"
                         role="tab"
@@ -1078,7 +1078,7 @@ export default function RAFormV3() {
                     </div>
 
                     {/* Phones: Upload Photo first (the default), Take Selfie on the right. */}
-                    <div className={`md:hidden flex w-full bg-gray-100 ${ns ? "h-10 gap-0.5 rounded-lg p-[3px] [&_button]:relative [&_button]:isolate [&_button]:py-0 [&_button]:rounded-md [&_button]:text-[13px] [&_button]:font-medium [&_svg]:h-4 [&_svg]:w-4" : "gap-0 p-1 rounded-[12px]"}`}>
+                    <div className={`md:hidden flex w-full bg-gray-100 ${ns ? "h-10 gap-0.5 rounded-lg p-[3px] [&_button]:outline-none [&_button]:focus-visible:outline-none [&_button]:relative [&_button]:isolate [&_button]:py-0 [&_button]:rounded-md [&_button]:text-[13px] [&_button]:font-medium [&_svg]:h-4 [&_svg]:w-4" : "gap-0 p-1 rounded-[12px]"}`}>
                       <button
                         type="button"
                         onClick={() => handleModeChange("upload")}
