@@ -138,6 +138,11 @@ export default function DataPrivacyStepV3({
     el.scrollTo({ top: sec.offsetTop - 12, behavior: "smooth" });
   };
   const readAll = progress >= 0.98;
+  // Once the end has been reached the agreement stays unlocked, even if the buyer scrolls back up.
+  const [reachedEnd, setReachedEnd] = useState(false);
+  useEffect(() => {
+    if (readAll) setReachedEnd(true);
+  }, [readAll]);
   const pct = Math.round(progress * 100);
 
   // Fills the visible area so only the policy column scrolls (one scrollbar), not the page too.
@@ -217,15 +222,22 @@ export default function DataPrivacyStepV3({
         </div>
       </div>
 
-      {/* Agreement: always in view, turns green once ticked. */}
-      <div className="flex-shrink-0 border-0 border-t border-solid border-gray-100 px-4 py-3 md:px-8 md:py-4">
+      {/* Agreement: always in view, lined up with the policy text column.
+          It unlocks once the buyer has scrolled to the end of the policy. */}
+      <div className="flex-shrink-0 border-0 border-t border-solid border-gray-100 px-4 py-3 md:grid md:grid-cols-[180px_minmax(0,1fr)] md:gap-8 md:px-8 md:py-4">
+        <div className="hidden md:block" />
         <label
-          className="flex cursor-pointer items-start gap-3 py-1"
+          title={reachedEnd ? undefined : "Scroll to the end of the policy to agree"}
+          className={`flex items-center gap-3 py-1 transition-opacity duration-200 ${reachedEnd ? "cursor-pointer" : "cursor-not-allowed"}`}
         >
-          <span className="pt-0.5">
-            <Checkbox checked={agreed} onChange={(e) => setAgreed(e.target.checked)} />
+          <Checkbox
+            checked={agreed}
+            disabled={!reachedEnd}
+            onChange={(e) => setAgreed(e.target.checked)}
+          />
+          <span className={`text-sm font-medium leading-5 transition-colors ${reachedEnd ? "text-gray-900" : "text-gray-400"}`}>
+            {PRIVACY_AGREEMENT}
           </span>
-          <span className="text-sm font-medium leading-5 text-gray-900">{PRIVACY_AGREEMENT}</span>
         </label>
       </div>
     </section>
