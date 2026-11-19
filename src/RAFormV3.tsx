@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Button from "./Button";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import RepresentativeDetailsStepV3, { type SectionNav } from "./RepresentativeDetailsStepV3";
 import BuyerPropertyStepV3 from "./BuyerPropertyStepV3";
 import IdentityVerificationStepV3 from "./IdentityVerificationStepV3";
@@ -164,27 +165,6 @@ function CircleAlertIcon({ className }: IconProps) {
   );
 }
 
-function CheckmarkIcon({ className }: IconProps) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      <path
-        d="M13.3327 4L5.99935 11.3333L2.66602 8"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 function CheckIcon() {
   return (
     <svg
@@ -300,6 +280,11 @@ function readStepFromUrl(): number {
 export default function RAFormV3() {
   // Step 2's sections, shown as sub-items under it in the stepper.
   const [sectionNav, setSectionNav] = useState<SectionNav | null>(null);
+  // Phones: the full step list opens as a panel under the top bar.
+  const [mobileStepsOpen, setMobileStepsOpen] = useState(false);
+  // Hover targets for the sliding highlight (same idea as Motion Brew's ActionMenu).
+  const [hoverStep, setHoverStep] = useState<string | null>(null);
+  const [hoverSection, setHoverSection] = useState<string | null>(null);
   // Phones: the live camera only runs full screen in landscape (an upright
   // 16:9 frame is too small to fit face + ID), so they start on Upload.
   // Upright, or after closing the full-screen view, a rotate / open-camera
@@ -614,14 +599,14 @@ export default function RAFormV3() {
   const showLiveVideoExpanded =
     captureMode === "selfie" && !capturedImage && !cameraError && isExpanded;
   const steps = [
-    "Buyer & Property",
-    "Representative Details",
-    "Identity Verification",
-    "Live Selfie",
-    "Terms & Conditions",
-    "Data Privacy",
-    "Consent & Acceptance",
-    "Review & Submit",
+    "Buyer & property",
+    "Representative details",
+    "Identity verification",
+    "Live selfie",
+    "Terms & conditions",
+    "Data privacy",
+    "Consent & acceptance",
+    "Review & submit",
   ].map((name, index) => {
     const id = index + 1;
     const status =
@@ -672,7 +657,170 @@ export default function RAFormV3() {
       "Next"
     );
 
+  /* ---------- v3 stepper ---------- */
+  // Motion: a soft highlight glides between rows on hover (layoutId), the
+  // section panel and the phone step list spring open, rows cascade in.
+  const GLIDE = [0.22, 1, 0.36, 1] as const;
+  const SPRING = { type: "spring", stiffness: 520, damping: 34, mass: 0.7 } as const;
+  const tick = (cls: string) => (
+    <svg viewBox="0 0 16 16" fill="none" className={cls} aria-hidden="true">
+      <path d="M13 4.5 6.5 11 3 7.5" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  const stepMarker = (status: string, id: number) => (
+    <span
+      className={`relative grid size-[22px] flex-shrink-0 place-items-center rounded-md text-[11px] font-semibold transition-[background-color,color,box-shadow] duration-300 ${
+        status === "completed"
+          ? "bg-[#DCFAE6] text-success-600"
+          : status === "current"
+            ? "bg-brand-500 text-white shadow-[0_2px_6px_-1px_rgba(7,56,157,0.45)]"
+            : "bg-gray-100 text-gray-500"
+      }`}
+    >
+      <AnimatePresence initial={false} mode="popLayout">
+        <motion.span
+          key={status === "completed" ? "done" : "num"}
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.5 }}
+          transition={{ duration: 0.2, ease: GLIDE }}
+          className="grid place-items-center"
+        >
+          {status === "completed" ? tick("size-3") : id}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+  const sectionsDone = sectionNav ? sectionNav.items.filter((it) => it.done).length : 0;
+  const sectionPanel = (scope: string) => (
+    <AnimatePresence initial={false}>
+      {sectionNav && currentStep === BUYER_DETAILS_STEP && (
+        <motion.div
+          key="sections"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.3, ease: GLIDE }}
+          className="overflow-hidden"
+        >
+          <div className="mb-1 ml-[18px] mt-1 rounded-xl bg-gray-50 p-2.5">
+            <div className="mb-1.5 flex items-center justify-between px-1 text-[11px] leading-4">
+              <span className="font-semibold text-gray-700">Sections</span>
+              <span className="text-gray-500">
+                {sectionsDone} of {sectionNav.items.length} done
+              </span>
+            </div>
+            <div className="mx-1 mb-1.5 h-1 overflow-hidden rounded-full bg-gray-200">
+              <motion.div
+                className="h-full rounded-full bg-success-600"
+                initial={false}
+                animate={{ width: `${Math.round((sectionsDone / sectionNav.items.length) * 100)}%` }}
+                transition={{ duration: 0.4, ease: GLIDE }}
+              />
+            </div>
+            <ul className="m-0 flex list-none flex-col p-0" onPointerLeave={() => setHoverSection(null)}>
+              {sectionNav.items.map((it) => (
+                <li key={it.id}>
+                  <button
+                    type="button"
+                    onPointerEnter={() => setHoverSection(it.id)}
+                    onFocus={() => setHoverSection(it.id)}
+                    onClick={() => {
+                      sectionNav.jump(it.id);
+                      setMobileStepsOpen(false);
+                    }}
+                    className={`relative flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-1.5 py-1 text-left text-xs leading-4 outline-none transition-colors duration-200 ${
+                      it.active ? "font-semibold text-gray-900" : it.done ? "text-gray-600" : "text-gray-500"
+                    } ${hoverSection === it.id ? "text-gray-900" : ""}`}
+                  >
+                    {it.active && (
+                      <motion.span
+                        layoutId={`${scope}-section-active`}
+                        transition={SPRING}
+                        className="absolute inset-0 rounded-md bg-white shadow-[0_1px_2px_rgba(16,24,40,0.08)]"
+                      />
+                    )}
+                    {hoverSection === it.id && !it.active && (
+                      <motion.span
+                        layoutId={`${scope}-section-hover`}
+                        transition={{ duration: 0.25, ease: GLIDE }}
+                        className="absolute inset-0 rounded-md bg-gray-900/[0.05]"
+                      />
+                    )}
+                    {it.done ? (
+                      <span className="relative grid size-3.5 flex-shrink-0 place-items-center rounded-full bg-success-600 text-white">{tick("size-2")}</span>
+                    ) : (
+                      <span className={`relative mx-1 size-1.5 flex-shrink-0 rounded-full transition-colors ${it.active ? "bg-brand-400" : "bg-gray-300"}`} />
+                    )}
+                    <span className="relative truncate">{it.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+  const stepList = (scope: string, cascade = false) => (
+    <motion.ol
+      className="m-0 flex list-none flex-col gap-0.5 p-0"
+      onPointerLeave={() => setHoverStep(null)}
+      initial={cascade ? "hidden" : false}
+      animate="shown"
+      variants={{ shown: { transition: { staggerChildren: 0.035, delayChildren: 0.04 } } }}
+    >
+      {steps.map((step) => (
+        <motion.li
+          key={step.id}
+          variants={{ hidden: { opacity: 0, y: 6 }, shown: { opacity: 1, y: 0, transition: { duration: 0.3, ease: GLIDE } } }}
+        >
+          <button
+            type="button"
+            onPointerEnter={() => setHoverStep(`${scope}-${step.id}`)}
+            onFocus={() => setHoverStep(`${scope}-${step.id}`)}
+            onClick={() => {
+              goToStep(step.id);
+              setMobileStepsOpen(false);
+            }}
+            disabled={!STEPS_WITH_CONTENT.includes(step.id)}
+            aria-current={step.status === "current" ? "step" : undefined}
+            className="relative flex w-full items-center gap-2.5 rounded-lg border-0 bg-transparent px-2 py-1.5 text-left outline-none enabled:cursor-pointer disabled:cursor-default"
+          >
+            {step.status === "current" && (
+              <motion.span layoutId={`${scope}-step-current`} transition={SPRING} className="absolute inset-0 rounded-lg bg-brand-25" />
+            )}
+            {hoverStep === `${scope}-${step.id}` && step.status !== "current" && (
+              <motion.span
+                layoutId={`${scope}-step-hover`}
+                transition={{ duration: 0.25, ease: GLIDE }}
+                className="absolute inset-0 rounded-lg bg-gray-900/[0.05]"
+              />
+            )}
+            {stepMarker(step.status, step.id)}
+            <span
+              className={`relative min-w-0 truncate text-[13px] leading-5 transition-colors duration-200 ${
+                step.status === "current"
+                  ? "font-semibold text-gray-900"
+                  : hoverStep === `${scope}-${step.id}`
+                    ? "font-medium text-gray-900"
+                    : step.status === "completed"
+                      ? "font-medium text-gray-700"
+                      : "font-medium text-gray-500"
+              }`}
+            >
+              {step.name}
+            </span>
+          </button>
+          {step.id === BUYER_DETAILS_STEP && sectionPanel(scope)}
+        </motion.li>
+      ))}
+    </motion.ol>
+  );
+  const overallPct = Math.round(((currentStep - 1) / TOTAL_STEPS) * 100);
+
   return (
+    <MotionConfig reducedMotion="user">
     <div
       className={`flex flex-col h-[100dvh] w-full font-sans overflow-hidden bg-white`}
       style={{ "--footer-h": footerHeight + "px" } as CSSProperties}
@@ -690,123 +838,116 @@ export default function RAFormV3() {
       </header>
 
       <div className="flex-1 min-h-0 flex flex-col md:flex-row justify-center items-start gap-0 md:gap-4 md:px-4 md:py-3">
-        {/* Phones: current step name and count above thin segments. */}
-        <div className="md:hidden w-full bg-white border-b border-gray-200 px-4 py-2 flex flex-col gap-1.5">
-          <div className="flex items-baseline justify-between gap-3">
-            <span aria-current="step" className="min-w-0 truncate text-sm font-semibold leading-5 text-gray-900">
-              {steps[currentStep - 1]?.name}
+        {/* Phones: current step bar; tap to open the full step list. Step 2 adds scrollable section chips. */}
+        <div className="relative z-20 w-full flex-shrink-0 border-0 border-b border-solid border-gray-200 bg-white md:hidden">
+          <motion.button
+            type="button"
+            onClick={() => setMobileStepsOpen((o) => !o)}
+            aria-expanded={mobileStepsOpen}
+            whileTap={{ scale: 0.99 }}
+            className="flex w-full cursor-pointer items-center gap-2.5 border-0 bg-transparent px-4 pb-2 pt-2.5 text-left"
+          >
+            {stepMarker("current", currentStep)}
+            <span className="min-w-0 flex-1">
+              <span aria-current="step" className="block truncate text-sm font-semibold leading-5 text-gray-900">
+                {steps[currentStep - 1]?.name}
+              </span>
+              <span className="block text-[11px] leading-4 text-gray-500">
+                Step {currentStep} of {TOTAL_STEPS}
+                {sectionNav && currentStep === BUYER_DETAILS_STEP ? ` · ${sectionsDone} of ${sectionNav.items.length} sections done` : ""}
+              </span>
             </span>
-            <span className="shrink-0 text-xs font-medium text-gray-500">
-              Step {currentStep} of {TOTAL_STEPS}
+            <span className="flex items-center gap-1 rounded-full bg-gray-900/[0.05] px-2.5 py-1 text-xs font-semibold text-gray-700">
+              {mobileStepsOpen ? "Close" : "All steps"}
+              <motion.svg
+                viewBox="0 0 16 16"
+                fill="none"
+                className="size-3.5"
+                aria-hidden="true"
+                animate={{ rotate: mobileStepsOpen ? 180 : 0 }}
+                transition={{ duration: 0.3, ease: GLIDE }}
+              >
+                <path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+              </motion.svg>
             </span>
-          </div>
-          <div className="flex gap-1">
-            {Array.from({ length: TOTAL_STEPS }).map((_, idx) => (
-              <div
-                key={idx}
-                className={`flex-1 h-1 rounded-full transition-all duration-300 ${
-                  idx < currentStep ? "bg-brand-400" : "bg-gray-200"
-                }`}
-              />
+          </motion.button>
+          <div className="flex gap-1 px-4 pb-2.5">
+            {steps.map((step) => (
+              <div key={step.id} className="h-1 flex-1 overflow-hidden rounded-full bg-gray-200">
+                <motion.div
+                  className={`h-full rounded-full ${step.status === "completed" ? "bg-success-600" : "bg-brand-400"}`}
+                  initial={false}
+                  animate={{ width: step.status === "pending" ? "0%" : "100%" }}
+                  transition={{ duration: 0.4, ease: GLIDE }}
+                />
+              </div>
             ))}
           </div>
-        </div>
-
-        <aside className="hidden md:flex items-center flex-shrink-0 min-h-0 w-[240px]">
-          <div className="  rounded-xl  py-8 flex flex-col gap-1 w-full self-start">
-            <div className="px-3 mb-1">
-              <p className="text-xs font-medium text-gray-400 m-0">
-                Step {currentStep} of {TOTAL_STEPS}
-              </p>
-            </div>
-            <div className="flex flex-col gap-0">
-              {steps.map((step, index) => (
-                <div key={step.id} className="flex flex-col self-start">
-                  <button
-                    type="button"
-                    onClick={() => goToStep(step.id)}
-                    disabled={!STEPS_WITH_CONTENT.includes(step.id)}
-                    aria-current={
-                      step.status === "current" ? "step" : undefined
-                    }
-                    className="flex items-center gap-3 px-1 py-1 bg-transparent border-none text-left rounded-md enabled:cursor-pointer enabled:hover:bg-gray-100 disabled:cursor-default"
-                  >
-                    <div
-                      className={`size-5 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        step.status === "completed"
-                          ? "bg-brand-400"
-                          : step.status === "current"
-                            ? "border-2 border-brand-400 bg-white"
-                            : "border-2 border-gray-300 bg-white"
-                      }`}
-                      style={
-                        step.status === "current"
-                          ? { boxShadow: "0 0 0 4px rgba(13, 77, 224, 0.15)" }
-                          : {}
-                      }
-                    >
-                      {step.status === "completed" && (
-                        <CheckmarkIcon className="h-4 w-4 text-white" />
-                      )}
-                      {step.status === "current" && (
-                        <div
-                          className="rounded-full bg-brand-400"
-                          style={{ width: "8px", height: "8px" }}
-                        />
-                      )}
-                    </div>
-                    <p
-                      className={`text-sm leading-normal m-0 whitespace-nowrap ${
-                        step.status === "completed"
-                          ? "font-normal text-gray-900"
-                          : step.status === "current"
-                            ? "font-semibold text-brand-500"
-                            : "font-medium text-gray-500"
-                      }`}
-                      style={{ width: "162px" }}
-                    >
-                      {step.name}
-                    </p>
-                  </button>
-                  {step.id === BUYER_DETAILS_STEP && currentStep === BUYER_DETAILS_STEP && sectionNav && (
-                    <ul className="m-0 ml-[11px] mt-1 flex list-none flex-col border-0 border-l-[1.5px] border-solid border-gray-200 py-0.5 pl-4">
-                      {sectionNav.items.map((it) => (
-                        <li key={it.id}>
-                          <button
-                            type="button"
-                            onClick={() => sectionNav.jump(it.id)}
-                            className={`flex w-full cursor-pointer items-center gap-2 border-0 bg-transparent px-0 py-[3px] text-left text-xs leading-4 ${
-                              it.active ? "font-semibold text-brand-500" : it.done ? "text-gray-700 hover:text-gray-900" : "text-gray-500 hover:text-gray-900"
-                            }`}
-                          >
-                            {it.done ? (
-                              <span className="grid size-3 flex-shrink-0 place-items-center rounded-full bg-success-600"><CheckmarkIcon className="size-2" /></span>
-                            ) : (
-                              <span className={`mx-[3px] size-1.5 flex-shrink-0 rounded-full ${it.active ? "bg-brand-500" : "bg-gray-300"}`} />
-                            )}
-                            {it.label}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+          {sectionNav && currentStep === BUYER_DETAILS_STEP && (
+            <div className="flex gap-1.5 overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {sectionNav.items.map((it) => (
+                <motion.button
+                  key={it.id}
+                  type="button"
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => sectionNav.jump(it.id)}
+                  className={`relative inline-flex h-7 flex-shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap rounded-full border border-solid px-2.5 text-xs font-medium transition-colors duration-200 ${
+                    it.active ? "border-brand-400 text-brand-500" : it.done ? "border-gray-200 bg-white text-gray-700" : "border-gray-200 bg-gray-50 text-gray-500"
+                  }`}
+                >
+                  {it.active && (
+                    <motion.span layoutId="chip-active" transition={SPRING} className="absolute inset-0 rounded-full bg-brand-25" />
                   )}
-                  {index < steps.length - 1 && (
-                    <div className="flex h-6 items-center px-0.5 py-0 w-full">
-                      <div className="flex h-full items-center justify-center w-6">
-                        <div
-                          className={`w-px h-full rounded ${
-                            step.status === "completed"
-                              ? "bg-brand-400"
-                              : "bg-gray-300"
-                          }`}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  {it.done && <span className="relative flex">{tick("size-3 text-success-600")}</span>}
+                  <span className="relative">{it.label}</span>
+                </motion.button>
               ))}
             </div>
-          </div>
+          )}
+          <AnimatePresence>
+            {mobileStepsOpen && (
+              <>
+                <motion.div
+                  key="backdrop"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 -z-10 bg-gray-900/20 backdrop-blur-[1px]"
+                  onClick={() => setMobileStepsOpen(false)}
+                  aria-hidden="true"
+                />
+                <motion.div
+                  key="panel"
+                  initial={{ opacity: 0, scale: 0.96, y: -8 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.97, y: -6, transition: { duration: 0.15, ease: GLIDE } }}
+                  transition={SPRING}
+                  style={{ transformOrigin: "top right" }}
+                  className="absolute inset-x-2 top-full mt-1.5 max-h-[70dvh] overflow-y-auto rounded-2xl bg-white p-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_16px_40px_-12px_rgba(0,0,0,0.25)] ring-1 ring-black/5"
+                >
+                  {stepList("m", true)}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <aside className="hidden md:flex flex-shrink-0 min-h-0 w-[240px] self-stretch overflow-y-auto [scrollbar-width:none]">
+          <nav aria-label="Reservation steps" className="flex w-full flex-col gap-3 self-start py-6 pr-2">
+            <div className="px-2">
+              <div className="flex items-baseline justify-between text-xs leading-4">
+                <span className="font-semibold text-gray-900">Reservation</span>
+                <span className="text-gray-500">
+                  Step {currentStep} of {TOTAL_STEPS}
+                </span>
+              </div>
+              <div className="mt-2 h-1 overflow-hidden rounded-full bg-gray-100">
+                <div className="h-full rounded-full bg-brand-400 transition-[width] duration-300" style={{ width: `${Math.max(overallPct, 4)}%` }} />
+              </div>
+            </div>
+            {stepList("d")}
+          </nav>
         </aside>
 
         {/* self-stretch (and flex-1 when stacked on mobile) pins main to the
@@ -1467,5 +1608,6 @@ export default function RAFormV3() {
         />
       )}
     </div>
+    </MotionConfig>
   );
 }
