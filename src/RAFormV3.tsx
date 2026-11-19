@@ -274,6 +274,14 @@ export default function RAFormV3() {
   const [mobileStepsOpen, setMobileStepsOpen] = useState(false);
   // Step 2: Next with unfinished sections opens a list of what is missing.
   const [guardOpen, setGuardOpen] = useState(false);
+  // Live selfie: the uploaded ID opens larger on click.
+  const [idZoom, setIdZoom] = useState(false);
+  useEffect(() => {
+    if (!idZoom) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setIdZoom(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [idZoom]);
   // Hover targets for the sliding highlight (same idea as Motion Brew's ActionMenu).
   const [hoverStep, setHoverStep] = useState<string | null>(null);
   const [hoverSection, setHoverSection] = useState<string | null>(null);
@@ -1333,33 +1341,24 @@ export default function RAFormV3() {
                     <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600">✓ Verified</span>
                   </div>
                   <div className="hidden md:flex flex-col md:pt-[52px]">
-                    <div className="bg-gray-50 rounded-2xl p-4 flex flex-col gap-3">
+                    <div className="bg-gray-50 rounded-2xl p-4 flex flex-col gap-3.5">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="m-0 text-sm leading-5 font-semibold text-gray-700">
+                        <p className="m-0 text-[13px] leading-5 font-semibold text-gray-900">
                           Your uploaded ID
                         </p>
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs leading-4 font-semibold text-emerald-600">
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 16 16"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="w-3.5 h-3.5"
-                          >
-                            <path
-                              d="M13.3327 4L5.99935 11.3333L2.66602 8"
-                              stroke="#059669"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
+                        <span className="inline-flex items-center gap-1 rounded-full bg-[#DCFAE6] px-2 py-0.5 text-[11px] leading-4 font-semibold text-success-600">
+                          <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3" aria-hidden="true">
+                            <path d="M13.3327 4L5.99935 11.3333L2.66602 8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                           Verified
                         </span>
                       </div>
-                      <div
-                        className="w-full rounded-lg overflow-hidden"
+                      {/* The ID shown like the physical card; click to see it larger. */}
+                      <button
+                        type="button"
+                        onClick={() => setIdZoom(true)}
+                        aria-label="View your uploaded ID larger"
+                        className="group relative w-full cursor-zoom-in overflow-hidden rounded-xl border-0 bg-white p-0 shadow-[0_1px_2px_rgba(16,24,40,0.06),0_10px_24px_-10px_rgba(16,24,40,0.35)] ring-1 ring-black/5 transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
                         style={{ aspectRatio: "303/194" }}
                       >
                         <img
@@ -1367,17 +1366,47 @@ export default function RAFormV3() {
                           src={idCardImageUrl}
                           alt="Uploaded government issued ID"
                         />
-                      </div>
-                      <div className="flex gap-2 items-start">
-                        <div className="w-4 h-4 shrink-0 flex items-center justify-center">
+                        <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-[11px] font-semibold text-white opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 group-focus-visible:opacity-100">
+                          <ExpandIcon className="h-3 w-3" />
+                          View
+                        </span>
+                      </button>
+                      <div className="flex gap-2.5 items-start rounded-lg bg-white px-3 py-2.5">
+                        <span className="mt-px grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gray-100 [&_svg]:h-3 [&_svg]:w-3">
                           <LockIcon />
-                        </div>
-                        <p className="m-0 text-xs leading-4 font-normal text-gray-400">
+                        </span>
+                        <p className="m-0 text-xs leading-[18px] font-normal text-gray-500">
                           Government-issued ID, locked for this session. Used
                           only to check against your live selfie.
                         </p>
                       </div>
                     </div>
+                    <AnimatePresence>
+                      {idZoom && (
+                        <motion.div
+                          key="id-zoom"
+                          role="dialog"
+                          aria-modal="true"
+                          aria-label="Your uploaded ID"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          onClick={() => setIdZoom(false)}
+                          className="fixed inset-0 z-[60] flex cursor-zoom-out items-center justify-center bg-gray-900/70 p-6 backdrop-blur-sm"
+                        >
+                          <motion.img
+                            src={idCardImageUrl}
+                            alt="Uploaded government issued ID"
+                            initial={{ scale: 0.92, y: 8 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 6 }}
+                            transition={SPRING}
+                            className="max-h-[80vh] w-full max-w-[640px] rounded-2xl object-contain shadow-[0_24px_64px_-12px_rgba(0,0,0,0.5)]"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
               </div>
