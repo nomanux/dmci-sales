@@ -8,7 +8,6 @@ import { AGREEMENTS as TERMS_AGREEMENTS, TermsAgreementText } from "./TermsStep"
 import { PRIVACY_AGREEMENT, PrivacyPolicyText } from "./DataPrivacyStep";
 import { CONSENTS, ConsentPolicyText } from "./ConsentStep";
 import {
-  arrowSquareRightIconUrl,
   coBuyerIconUrl,
   reviewSampleIdUrl,
   reviewSamplePassportUrl,
@@ -175,17 +174,14 @@ const PEP_CONNECTION: Pair[] = [
 /* Building blocks                                                     */
 /* ------------------------------------------------------------------ */
 
-/** Label : value list, two pairs per row on desktop. `wide` = one pair per row. */
+/** Label above value, in a responsive grid. `wide` = one pair per row (long answers). */
 function Pairs({ pairs, wide = false }: { pairs: Pair[]; wide?: boolean }) {
   return (
-    <dl className={`m-0 grid grid-cols-1 gap-x-6 gap-y-2.5 ${wide ? "" : "md:grid-cols-2"}`}>
+    <dl className={`m-0 grid gap-x-6 gap-y-4 ${wide ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(190px,1fr))]"}`}>
       {pairs.map(([label, value]) => (
-        <div key={label} className="flex min-w-0 gap-2 text-sm leading-5">
-          <dt className="w-[116px] md:w-[180px] shrink-0 text-gray-500">{label}</dt>
-          <span aria-hidden="true" className="text-gray-400">
-            :
-          </span>
-          <dd className="m-0 min-w-0 break-words font-medium text-gray-900">{value}</dd>
+        <div key={label} className="flex min-w-0 flex-col gap-0.5">
+          <dt className="text-xs leading-4 text-gray-500">{label}</dt>
+          <dd className="m-0 min-w-0 break-words text-sm font-medium leading-5 text-gray-900">{value}</dd>
         </div>
       ))}
     </dl>
@@ -194,18 +190,15 @@ function Pairs({ pairs, wide = false }: { pairs: Pair[]; wide?: boolean }) {
 
 function SubSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-2">
-      <h4 className="m-0 flex items-center gap-3 text-base leading-6 md:text-lg md:leading-7 font-semibold text-brand-500">
-        <img src={arrowSquareRightIconUrl} alt="" width={24} height={24} />
-        {title}
-      </h4>
+    <div className="flex flex-col gap-3 border-0 border-t border-solid border-gray-100 pt-4">
+      <h4 className="m-0 text-[13px] font-semibold leading-5 text-gray-900">{title}</h4>
       {children}
     </div>
   );
 }
 
 function MinorHeading({ children }: { children: ReactNode }) {
-  return <h5 className="m-0 mt-2 text-sm font-medium leading-5 text-brand-500">{children}</h5>;
+  return <h5 className="m-0 mt-1 text-xs font-semibold leading-4 text-gray-600">{children}</h5>;
 }
 
 function EditButton({ label, onClick }: { label: string; onClick: () => void }) {
@@ -214,14 +207,17 @@ function EditButton({ label, onClick }: { label: string; onClick: () => void }) 
       type="button"
       aria-label={"Edit " + label}
       onClick={onClick}
-      className="inline-flex h-8 md:h-9 cursor-pointer items-center rounded-lg border border-brand-600 bg-white px-3 text-sm font-semibold text-brand-600 hover:bg-brand-25"
+      className="ml-auto inline-flex h-8 flex-shrink-0 cursor-pointer items-center gap-1.5 rounded-md border-0 bg-transparent px-2.5 text-[13px] font-semibold text-brand-400 transition-colors hover:bg-[#F2F6FF]"
     >
+      <svg viewBox="0 0 16 16" fill="none" className="size-3.5" aria-hidden="true">
+        <path d="M10.5 2.5 13.5 5.5 6 13H3v-3z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
       Edit
     </button>
   );
 }
 
-/** Grey outer card for each top-level section. */
+/** One top-level section: title and Edit on one line, a thin line between sections, no box. */
 function SectionCard({
   title,
   icon = false,
@@ -234,10 +230,10 @@ function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-5 -mx-2 md:mx-0 rounded-xl border border-gray-200 bg-gray-50 px-2 py-4 md:p-5">
-      <div className="flex flex-wrap items-center gap-3">
-        {icon && <img src={coBuyerIconUrl} alt="" width={24} height={24} />}
-        <h3 className="m-0 text-base leading-6 md:text-xl md:leading-[30px] font-semibold text-brand-500">{title}</h3>
+    <section className="flex flex-col gap-4 border-0 border-t border-solid border-gray-100 pt-6 first:border-t-0 first:pt-0">
+      <div className="flex items-center gap-2.5">
+        {icon && <img src={coBuyerIconUrl} alt="" width={20} height={20} />}
+        <h3 className="m-0 text-base font-semibold leading-6 tracking-[-0.01em] text-gray-900">{title}</h3>
         {onEdit && <EditButton label={title} onClick={onEdit} />}
       </div>
       {children}
@@ -245,29 +241,27 @@ function SectionCard({
   );
 }
 
-/** White collapsible card inside a section (co-buyer, PEP entry, representative). */
+/** Collapsible entry inside a section (co-buyer, PEP entry, representative), on a soft fill. */
 function EntryCard({ title, onEdit, children }: { title?: string; onEdit?: () => void; children: ReactNode }) {
   const [open, setOpen] = useState(true);
   return (
-    <div className="rounded-xl border border-gray-200 bg-white px-2 md:px-5">
+    <div className="rounded-xl bg-gray-50 px-3 md:px-5">
       {title && (
-        <div className={`flex items-center justify-between gap-3 py-3 md:py-4 ${open ? "border-b border-gray-200" : ""}`}>
-          <div className="flex items-center gap-3">
-            <h4 className="m-0 text-base font-semibold leading-6 text-brand-500">{title}</h4>
-            {onEdit && <EditButton label={title} onClick={onEdit} />}
-          </div>
+        <div className="flex items-center gap-2 py-3">
+          <h4 className="m-0 text-sm font-semibold leading-5 text-gray-900">{title}</h4>
+          {onEdit && <EditButton label={title} onClick={onEdit} />}
           <button
             type="button"
             aria-label={(open ? "Collapse " : "Expand ") + title}
             aria-expanded={open}
             onClick={() => setOpen((o) => !o)}
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-brand-700 hover:bg-gray-50"
+            className={`${onEdit ? "" : "ml-auto "}flex h-8 w-8 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-gray-500 hover:bg-white`}
           >
-            {open ? <ChevronUpIcon className="h-5 w-5" /> : <ChevronDownIcon className="h-5 w-5" />}
+            {open ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />}
           </button>
         </div>
       )}
-      {open && <div className="flex flex-col gap-5 py-4">{children}</div>}
+      {open && <div className={`flex flex-col gap-4 pb-4 ${title ? "" : "pt-4"} [&>div:first-child]:border-t-0 [&>div:first-child]:pt-0`}>{children}</div>}
     </div>
   );
 }
@@ -280,11 +274,11 @@ function WithPhotos({ photos, children }: { photos: { label: string; src: string
       <div className="flex flex-row gap-4 md:w-[144px] md:flex-col">
         {photos.map((photo) => (
           <figure key={photo.label} className="m-0 flex flex-col gap-2">
-            <figcaption className="text-sm leading-5 text-gray-500">{photo.label}</figcaption>
+            <figcaption className="text-xs leading-4 text-gray-500">{photo.label}</figcaption>
             <img
               src={photo.src}
               alt={photo.alt}
-              className="block h-[100px] w-[144px] rounded border-[3px] border-white object-cover shadow-[0_0_0_1px_#e5e7eb]"
+              className="block h-[100px] w-[144px] rounded-lg object-cover ring-1 ring-black/5"
             />
           </figure>
         ))}
@@ -295,7 +289,7 @@ function WithPhotos({ photos, children }: { photos: { label: string; src: string
 
 function SpouseBanner() {
   return (
-    <h4 className="m-0 rounded-md bg-brand-50 px-2 py-1 text-base leading-6 md:text-xl md:leading-[30px] font-semibold text-brand-500">
+    <h4 className="m-0 w-fit rounded-full bg-[#F4F3FF] px-2.5 py-0.5 text-xs font-semibold leading-5 text-[#6941C6]">
       Spouse information
     </h4>
   );
@@ -335,7 +329,7 @@ function SpouseBlock() {
 
 function ReadOnlyCheck({ children }: { children: ReactNode }) {
   return (
-    <span className="flex items-start gap-2 text-sm font-medium leading-5 text-gray-700">
+    <span className="flex items-start gap-2.5 text-sm font-medium leading-5 text-gray-800">
       <span className="pt-0.5">
         <Checkbox checked readOnly disabled aria-label={typeof children === "string" ? children : undefined} />
       </span>
@@ -348,16 +342,16 @@ function ReadOnlyCheck({ children }: { children: ReactNode }) {
 function AgreementPreview({ title, agreement, children }: { title: string; agreement: string; children: ReactNode }) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <section className="flex flex-col gap-4 -mx-2 md:mx-0 rounded-xl border border-gray-200 bg-gray-50 px-2 py-4 md:p-5">
-      <h3 className="m-0 text-base leading-6 md:text-xl md:leading-[30px] font-semibold text-brand-500">{title}</h3>
+    <section className="flex flex-col gap-3 border-0 border-t border-solid border-gray-100 pt-6">
+      <h3 className="m-0 text-base font-semibold leading-6 tracking-[-0.01em] text-gray-900">{title}</h3>
       <div
-        className={`relative text-sm leading-6 text-gray-600 ${expanded ? "" : "max-h-[112px] overflow-hidden"}`}
+        className={`relative text-sm leading-6 text-gray-700 ${expanded ? "" : "max-h-[112px] overflow-hidden"}`}
       >
         {children}
         {!expanded && (
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-gray-50 to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-white to-transparent"
           />
         )}
       </div>
@@ -366,7 +360,7 @@ function AgreementPreview({ title, agreement, children }: { title: string; agree
         type="button"
         aria-expanded={expanded}
         onClick={() => setExpanded((e) => !e)}
-        className="w-fit cursor-pointer border-0 bg-transparent p-0 text-sm font-semibold text-brand-600 hover:text-brand-700"
+        className="w-fit cursor-pointer border-0 bg-transparent p-0 text-[13px] font-semibold text-brand-400 hover:underline"
       >
         {expanded ? "See Less" : "See More"}
       </button>
@@ -395,13 +389,13 @@ export default function ReviewStepV3({
 
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 bg-white rounded-none md:rounded-2xl flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_0_0_4px_rgba(10,77,224,0.10),0_12px_32px_-12px_rgba(16,24,40,0.18)]">
-      <StepHeaderV3 step={8} title="Review & Submit" className="px-4 md:px-6 pt-4 pb-5 md:pt-5">
+      <StepHeaderV3 step={8} title="Review & Submit" className="px-4 md:px-8 pt-4 pb-4 md:pt-5 md:pb-5">
         Review the details below to ensure they are correct and up to date before submission.
       </StepHeaderV3>
 
       {/* Only the card body scrolls; the title stays put. */}
-      <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
-      <div className="px-4 md:px-8 pb-6 flex flex-col gap-6">
+      <div className="md:flex-1 md:min-h-0 md:overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent] [scrollbar-gutter:stable]">
+      <div className="px-4 md:pl-8 md:pr-6 pb-6 pt-1 flex flex-col gap-6">
         <SectionCard title="Buyer & Property Information" onEdit={() => onEdit(1)}>
           <Pairs pairs={BUYER_PROPERTY} />
         </SectionCard>
@@ -482,7 +476,7 @@ export default function ReviewStepV3({
                     {["Upgrade", "Relocate", "Other"].map((reason) => (
                       <span
                         key={reason}
-                        className="rounded-md border border-gray-300 bg-white px-2 py-0.5 text-xs font-medium leading-[18px] text-gray-700"
+                        className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium leading-[18px] text-gray-700"
                       >
                         {reason}
                       </span>
@@ -511,7 +505,7 @@ export default function ReviewStepV3({
               ]}
             />
           </SubSection>
-          <hr className="m-0 border-0 border-t border-gray-300" />
+          <hr className="m-0 border-0 border-t border-solid border-gray-100" />
           <SpouseBlock />
         </SectionCard>
 
@@ -535,7 +529,7 @@ export default function ReviewStepV3({
               <Pairs pairs={ADDRESS} />
             </SubSection>
             <OccupationBlock />
-            <hr className="m-0 border-0 border-t border-gray-300" />
+            <hr className="m-0 border-0 border-t border-solid border-gray-100" />
             <SpouseBlock />
           </EntryCard>
         </SectionCard>
@@ -592,11 +586,11 @@ export default function ReviewStepV3({
           <PrivacyPolicyText />
         </AgreementPreview>
 
-        <section className="flex flex-col gap-4 -mx-2 md:mx-0 rounded-xl border border-gray-200 bg-gray-50 px-2 py-4 md:p-5">
-          <h3 className="m-0 text-base leading-6 md:text-xl md:leading-[30px] font-semibold text-brand-500">
+        <section className="flex flex-col gap-3 border-0 border-t border-solid border-gray-100 pt-6">
+          <h3 className="m-0 text-base font-semibold leading-6 tracking-[-0.01em] text-gray-900">
             Customer Acceptance Policy &amp; Client Consent
           </h3>
-          <div className="text-sm leading-6 text-gray-600">
+          <div className="text-sm leading-6 text-gray-700">
             <ConsentPolicyText />
           </div>
           <div className="flex flex-col gap-3">
@@ -606,13 +600,17 @@ export default function ReviewStepV3({
           </div>
         </section>
 
-        <label className="flex cursor-pointer items-start gap-2 px-1 text-sm font-medium leading-5 text-gray-700">
-          <span className="pt-0.5">
-            <Checkbox checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
-          </span>
-          I confirm that all information provided is accurate and complete to the best of my knowledge.
-        </label>
       </div>
+      </div>
+
+      {/* Final confirmation: always in view, like the agreements on Terms and Data privacy. */}
+      <div className="flex-shrink-0 border-0 border-t border-solid border-gray-100 px-4 py-4 md:px-8">
+        <label className="flex cursor-pointer items-center gap-3 py-0.5">
+          <Checkbox checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} />
+          <span className="text-sm font-medium leading-5 text-gray-900">
+            I confirm that all information provided is accurate and complete to the best of my knowledge.
+          </span>
+        </label>
       </div>
     </section>
   );
