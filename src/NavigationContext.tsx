@@ -41,6 +41,7 @@ export type Screen =
   | "capture-selfie-track"
   | "ra-form-v2"
   | "ra-form-v3"
+  | "ra-form-v4"
   | "no-results";
 
 export interface Route {
@@ -101,6 +102,8 @@ const SCREEN_PATHS: Record<Screen, string> = {
   "ra-form-v2": "/ra-form2",
   // v3: same as v2 except a compact Representative details step.
   "ra-form-v3": "/ra-form3",
+  // v4: v3 reworked as a quieter enterprise form.
+  "ra-form-v4": "/ra-form4",
   "no-results": "/no-results",
 };
 

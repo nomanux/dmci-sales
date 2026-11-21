@@ -2139,7 +2139,7 @@ function Section({
 }) {
   const done = missing === 0;
   const left = missing ?? 0;
-  const shownFields = fields.slice(0, 3);
+  const shownFields = fields.slice(0, 4);
 
   if (open) {
     return (
@@ -2154,35 +2154,36 @@ function Section({
               {title}
               {optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
             </strong>
-            <small className="block text-xs leading-4 text-gray-500">
-              Section {index + 1} of {total}
-            </small>
+            {done ? (
+              <small className="mt-0.5 flex items-center gap-1 text-[13px] leading-5 text-success-600">
+                <CheckIcon className="size-3" />
+                All filled in
+              </small>
+            ) : fields.length > 0 ? (
+              <small className="mt-1 block border-0 border-l-2 border-solid border-brand-400 pl-2 text-[13px] leading-5 text-gray-600">
+                <span className="font-semibold text-brand-400">{left} to fill in:</span>{" "}
+                {shownFields.map((f, i) => (
+                  <span key={f + i}>
+                    <button
+                      type="button"
+                      onClick={() => onFocusField(i)}
+                      className="cursor-pointer border-0 bg-transparent p-0 text-[13px] font-medium text-gray-900 underline decoration-brand-200 decoration-dotted decoration-[1.5px] underline-offset-[3px] hover:text-brand-400 hover:decoration-solid"
+                    >
+                      {f}
+                    </button>
+                    {i < shownFields.length - 2 ? ", " : i === shownFields.length - 2 ? (fields.length > shownFields.length ? ", " : " and ") : ""}
+                  </span>
+                ))}
+                {fields.length > shownFields.length && ` and ${fields.length - shownFields.length} more`}
+              </small>
+            ) : (
+              <small className="mt-0.5 block text-[13px] leading-5 text-gray-500">{summary}</small>
+            )}
           </span>
-          {done ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#ECFDF3] px-2 py-0.5 text-[11px] font-semibold text-success-600">
-              <CheckIcon className="size-2.5" />
-              Complete
-            </span>
-          ) : (
-            <span className="rounded-full bg-[#FFFAEB] px-2 py-0.5 text-[11px] font-semibold text-[#B54708]">{left} left</span>
-          )}
+          <span className="flex-shrink-0 self-start pt-0.5 text-xs tabular-nums text-gray-400">
+            {index + 1}/{total}
+          </span>
         </div>
-        {!done && shownFields.length > 0 && (
-          <div className="-mt-2 mb-4 flex flex-wrap items-center gap-1.5 rounded-lg bg-[#FFFAEB] px-2.5 py-2 text-xs text-[#93370D]">
-            <span className="font-medium">Still needed:</span>
-            {shownFields.map((f, i) => (
-              <button
-                key={f + i}
-                type="button"
-                onClick={() => onFocusField(i)}
-                className="cursor-pointer rounded-full border border-solid border-[#FEDF89] bg-white px-2 py-0.5 text-xs font-medium text-[#93370D] transition-colors hover:border-[#FDB022] hover:bg-[#FEF0C7]"
-              >
-                {f}
-              </button>
-            ))}
-            {fields.length > 3 && <span className="text-[#B54708]">+{fields.length - 3} more</span>}
-          </div>
-        )}
         <ShowErrors.Provider value={attempted}>
           <div data-section-body={id} className={STACK}>
             {children}

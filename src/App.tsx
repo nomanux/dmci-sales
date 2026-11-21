@@ -31,6 +31,7 @@ import RAForm from "./RAForm";
 import CaptureSelfieTrack from "./CaptureSelfieTrack";
 import RAFormV2 from "./RAFormV2";
 import RAFormV3 from "./RAFormV3";
+import RAFormV4 from "./RAFormV4";
 import NoResults from "./NoResults";
 
 // Set to true to show the old Unit Availability details design.
@@ -102,6 +103,8 @@ function Screens() {
       return <RAFormV2 />;
     case "ra-form-v3":
       return <RAFormV3 />;
+    case "ra-form-v4":
+      return <RAFormV4 />;
     case "no-results":
       return <NoResults />;
     default:
@@ -123,6 +126,9 @@ export default function App() {
       }
       if (path === "/ra-form3") {
         return { screen: "ra-form-v3" as const, step };
+      }
+      if (path === "/ra-form4") {
+        return { screen: "ra-form-v4" as const, step };
       }
     }
     return undefined;
