@@ -17,7 +17,9 @@ import Input from "./Input";
 import Select from "./SelectV3";
 import { PHONE_COUNTRIES, PhilippinesFlag } from "./BuyerDetailsStep";
 import { CheckIcon, ChevronDownIcon, SearchIcon } from "./icons";
+import StepHeaderV3 from "./StepHeaderV3";
 import "./RepresentativeDetailsStepV3.css";
+import "./RepresentativeDetailsStepV4.css";
 import { AnimatePresence, motion } from "motion/react";
 
 /**
@@ -177,12 +179,12 @@ const OCCUPATIONS = ["Employed", "Self-employed", "Business owner", "OFW", "Reti
 // Occupations that come with an employer or business, so the work details and office address apply.
 const WORKING_OCCUPATIONS = ["Employed", "Self-employed", "Business owner", "OFW"];
 
-const STACK = "flex flex-col gap-3";
-const G2 = "grid grid-cols-1 items-start gap-3 md:grid-cols-2";
-const G3 = "grid grid-cols-1 items-start gap-3 md:grid-cols-3";
+const STACK = "flex flex-col gap-5";
+const G2 = "grid grid-cols-1 items-start gap-x-3 gap-y-4 md:grid-cols-2";
+const G3 = "grid grid-cols-1 items-start gap-x-3 gap-y-4 md:grid-cols-3";
 // Title | First | Middle | Last | Suffix: the full name on one line, the short pickers narrow.
 const NAME_GRID =
-  "grid grid-cols-2 items-start gap-3 md:grid-cols-[104px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_104px] max-md:[&>*:not(:first-child):not(:last-child)]:col-span-2";
+  "grid grid-cols-2 items-start gap-x-3 gap-y-4 md:grid-cols-[104px_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_104px] max-md:[&>*:not(:first-child):not(:last-child)]:col-span-2";
 const LINK =
   "self-start border-0 bg-transparent p-0 text-xs font-semibold text-brand-500 hover:text-brand-700 hover:underline cursor-pointer";
 
@@ -295,10 +297,12 @@ function Field({
     <div
       className={`flex min-w-0 flex-col gap-1 ${className}`}
       data-req={missing === undefined ? undefined : missing ? "missing" : "ok"}
+      data-err={error ? "" : undefined}
     >
       <label htmlFor={htmlFor} className="flex flex-wrap items-center gap-1.5 text-xs font-medium leading-4 text-gray-600">
         {label}
         {optional && <span className="font-normal text-gray-400">(optional)</span>}
+        {missing && !error && <span data-skip className="ml-auto text-[11px] font-medium text-brand-400">Required</span>}
         {tag}
       </label>
       {intro}
@@ -1725,8 +1729,6 @@ function BirthPlace() {
   const loading = ph && !data ? "Loading places…" : undefined;
   return (
     <div className={STACK}>
-      <div className={G2}>
-        <SelectField label="Country" options={COUNTRIES} value={country} onValueChange={setCountry} />
         {ph && (
           <ComboField
             label="Find the city of birth"
@@ -1744,8 +1746,8 @@ function BirthPlace() {
             }}
           />
         )}
-      </div>
-      <div className={G2}>
+      <div className={G3}>
+        <SelectField label="Country" options={COUNTRIES} value={country} onValueChange={setCountry} />
         {ph ? (
           <>
             <ComboField
@@ -2054,29 +2056,36 @@ type SectionId =
   | "rep";
 
 // `nav` is the short name for the side list; `title` heads the section itself.
-const SECTIONS: { id: SectionId; title: string; nav: string; optional?: boolean }[] = [
-  { id: "company", title: "Company details", nav: "Company details" },
-  { id: "personal", title: "Personal details and birth place", nav: "Personal details" },
-  { id: "contact", title: "Contact information", nav: "Contact details" },
-  { id: "present", title: "Present address", nav: "Current address" },
-  { id: "home", title: "Home address and home ownership", nav: "Permanent home" },
-  { id: "work", title: "Occupation information", nav: "Work and income" },
-  { id: "mailing", title: "Preferred mailing address", nav: "Mailing address" },
-  { id: "purchase", title: "Reason for buying and source of awareness", nav: "Why you are buying" },
-  { id: "guardian", title: "Guardian information", nav: "Guardian" },
-  { id: "cob", title: "Co-buyer information", nav: "Co-buyer (optional)", optional: true },
-  { id: "rep", title: "Representative information and PEP", nav: "Representative and PEP" },
+type GroupId = "buyer" | "address" | "work" | "people";
+const GROUPS: { id: GroupId; label: string }[] = [
+  { id: "buyer", label: "About the buyer" },
+  { id: "address", label: "Addresses" },
+  { id: "work", label: "Work and purpose" },
+  { id: "people", label: "Other people" },
+];
+const SECTIONS: { id: SectionId; title: string; nav: string; group: GroupId; optional?: boolean }[] = [
+  { id: "company", title: "Company details", nav: "Company details", group: "buyer" },
+  { id: "personal", title: "Personal details", nav: "Personal details", group: "buyer" },
+  { id: "contact", title: "Contact details", nav: "Contact details", group: "buyer" },
+  { id: "present", title: "Current address", nav: "Current address", group: "address" },
+  { id: "home", title: "Permanent home", nav: "Permanent home", group: "address" },
+  { id: "mailing", title: "Mailing address", nav: "Mailing address", group: "address" },
+  { id: "work", title: "Work and income", nav: "Work and income", group: "work" },
+  { id: "purchase", title: "Why you're buying", nav: "Why you're buying", group: "work" },
+  { id: "guardian", title: "Guardian", nav: "Guardian", group: "people" },
+  { id: "cob", title: "Co-buyer", nav: "Co-buyer", group: "people", optional: true },
+  { id: "rep", title: "Representative and PEP", nav: "Representative and PEP", group: "people" },
 ];
 
 /** Clause-style section number, like a numbered agreement. One muted column. */
-function SectionNumber({ n, done }: { n: number; done?: boolean }) {
+function SectionNumber({ done }: { n?: number; done?: boolean }) {
   return (
-    <span
-      className={`w-6 flex-shrink-0 pt-px text-[13px] font-medium leading-5 tabular-nums ${
-        done ? "text-success-600" : "text-gray-400"
-      }`}
-    >
-      {done ? <CheckIcon className="size-3.5" /> : String(n).padStart(2, "0")}
+    <span className="grid size-5 flex-shrink-0 place-items-center">
+      {done ? (
+        <CheckIcon className="size-3.5 text-success-600" />
+      ) : (
+        <span className="size-3 rounded-full border-[1.5px] border-solid border-gray-300" />
+      )}
     </span>
   );
 }
@@ -2098,6 +2107,7 @@ function Section({
   fields,
   attempted,
   onOpen,
+  onClose,
   onNext,
   onSkip,
   onFocusField,
@@ -2117,6 +2127,8 @@ function Section({
   /** The buyer tried to move on or skipped: show every error, mark the row amber. */
   attempted: boolean;
   onOpen: () => void;
+  /** Collapse this section, leaving every section closed. */
+  onClose: () => void;
   onNext: () => void;
   onSkip: () => void;
   onFocusField: (index: number) => void;
@@ -2131,17 +2143,27 @@ function Section({
     return (
       <section
         id={`rd-${id}`}
-        className="rd-active relative scroll-mt-4 border-0 border-b border-solid border-gray-200 bg-white px-5 pb-5 pt-4 last:border-b-0"
+        className="rd-active group/sec relative z-10 -mx-px scroll-mt-4 bg-white px-5 pb-5 pt-4 shadow-[0_12px_32px_-12px_rgba(16,24,40,0.28)] ring-[1.5px] ring-brand-400 first:-mt-px first:rounded-t-xl last:-mb-px last:rounded-b-xl"
       >
-        {/* The section being filled in: one brand rule down the left edge. */}
-        <span aria-hidden="true" className="absolute inset-y-0 left-0 w-[3px] bg-brand-500" />
-        <div className="mb-5 flex items-start gap-3">
+        {/* Header band: reads as a bar you can click to close the section. */}
+        <div
+          onClick={onClose}
+          className="group/head -mx-5 -mt-4 mb-5 flex cursor-pointer items-start gap-3 border-0 border-b border-solid border-gray-200 bg-gray-50 px-5 py-3.5 transition-colors hover:bg-gray-100 group-first/sec:rounded-t-xl"
+        >
           <SectionNumber n={index + 1} />
           <span className="min-w-0 flex-1">
-            <strong className="block text-base font-semibold leading-5 text-gray-900">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              aria-expanded="true"
+              className="block cursor-pointer border-0 bg-transparent p-0 text-left text-base font-semibold leading-5 text-gray-900"
+            >
               {title}
               {optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
-            </strong>
+            </button>
             {done ? (
               <small className="mt-0.5 flex items-center gap-1 text-[13px] leading-5 text-success-600">
                 <CheckIcon className="size-3" />
@@ -2154,7 +2176,10 @@ function Section({
                   <span key={f + i}>
                     <button
                       type="button"
-                      onClick={() => onFocusField(i)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onFocusField(i);
+                      }}
                       className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-gray-900 underline decoration-gray-300 underline-offset-[3px] transition-colors hover:text-brand-500 hover:decoration-brand-400"
                     >
                       {f}
@@ -2168,6 +2193,18 @@ function Section({
               <small className="mt-0.5 block text-[13px] leading-5 text-gray-500">{summary}</small>
             )}
           </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            aria-label={`Close ${title}`}
+            className="-mr-1 flex h-7 flex-shrink-0 cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 text-xs font-semibold text-gray-500 transition-colors group-hover/head:text-gray-900"
+          >
+            Close
+            <ChevronDownIcon className="size-3.5 rotate-180" />
+          </button>
         </div>
         <ShowErrors.Provider value={attempted}>
           <div data-section-body={id} className={STACK}>
@@ -2197,7 +2234,7 @@ function Section({
           <button
             type="button"
             onClick={onNext}
-            className={`h-9 cursor-pointer rounded-lg border-0 bg-brand-500 px-4 text-[13px] font-semibold text-white transition-colors hover:bg-brand-700 ${
+            className={`h-9 cursor-pointer rounded-lg border border-solid border-gray-300 bg-white px-4 text-[13px] font-semibold text-gray-900 shadow-[0_1px_2px_rgba(16,24,40,0.05)] transition-colors hover:bg-gray-50 ${
               !done && nextTitle ? "" : "ml-auto"
             }`}
           >
@@ -2213,6 +2250,7 @@ function Section({
       <button
         type="button"
         onClick={onOpen}
+        aria-expanded="false"
         className="group flex w-full cursor-pointer items-center gap-3 border-0 bg-transparent px-5 py-3.5 text-left transition-colors hover:bg-gray-50"
       >
         <SectionNumber n={index + 1} done={done} />
@@ -2221,19 +2259,16 @@ function Section({
             {title}
             {optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
           </strong>
-          <small className={`block truncate text-xs leading-4 ${attempted && !done ? "text-[#B54708]" : "text-gray-500"}`}>
-            {done
-              ? summary || "Complete"
-              : missing === undefined
-                ? ""
-                : attempted
-                  ? `Needs: ${fields.join(", ")}`
-                  : `${left} required ${left === 1 ? "field" : "fields"}`}
-          </small>
+          {(done || (attempted && fields.length > 0)) && (
+            <small className={`block truncate text-xs leading-4 ${done ? "text-gray-500" : "text-brand-400"}`}>
+              {done ? summary || "Complete" : `Still needs ${fields.join(", ")}`}
+            </small>
+          )}
         </span>
         <span className="flex-shrink-0 text-xs font-semibold text-brand-500 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
           {done ? "Edit" : "Open"}
         </span>
+        <ChevronDownIcon className="size-4 flex-shrink-0 text-gray-400" />
       </button>
       {/* Kept mounted so answers stay and missing answers keep counting. */}
       <ShowErrors.Provider value={attempted}>
@@ -2260,7 +2295,8 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
   const rootRef = useRef<HTMLDivElement>(null);
   const [clientType, setClientType] = useState("Private individual");
   // The one section the side list highlights: the last one opened or moved to.
-  const [activeId, setActiveId] = useState<SectionId>("personal");
+  // null = every section closed; the buyer can collapse the open one.
+  const [activeId, setActiveId] = useState<SectionId | null>("personal");
   const [missing, setMissing] = useState<Partial<Record<SectionId, number>>>({});
   // Labels of each section's missing required fields, read from the DOM with the counts.
   const [missingLabels, setMissingLabels] = useState<Partial<Record<SectionId, string[]>>>({});
@@ -2312,7 +2348,9 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
         const wraps = el.querySelectorAll<HTMLElement>('[data-req="missing"]');
         next[sid] = wraps.length;
         labels[sid] = Array.from(wraps).map((w) => {
-          const t = (w.querySelector("label")?.textContent ?? "Field").replace(/\(optional\)/g, "").replace(/[~|^]/g, " ").trim();
+          const lab = w.querySelector("label")?.cloneNode(true) as HTMLElement | undefined;
+          lab?.querySelectorAll("[data-skip]").forEach((n) => n.remove());
+          const t = (lab?.textContent ?? "Field").replace(/\(optional\)/g, "").replace(/[~|^]/g, " ").trim();
           return t.length > 34 ? t.slice(0, 32).trimEnd() + "…" : t;
         });
       });
@@ -2449,20 +2487,20 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
     personal: () => (
       <>
         {isCompany && <Note>Enter the details of the person signing for the company.</Note>}
-        <NameRow
-          value={name}
-          onChange={(n) => setName((p) => ({ ...p, ...n }))}
-          lead={<SelectField label="Title" options={TITLES} />}
-          trail={<SelectField label="Suffix" options={SUFFIXES} optional defaultValue="None" />}
-        />
+        {/* Every row sits on the same 3-column grid, so the columns line up down the section. */}
+        <NameRow value={name} onChange={(n) => setName((p) => ({ ...p, ...n }))} />
         <div className={G3}>
+          <SelectField label="Title" options={TITLES} />
+          <SelectField label="Suffix" options={SUFFIXES} optional defaultValue="None" />
           <BirthDateField value={dob} onValueChange={setDob} allowMinor />
+        </div>
+        <div className={G3}>
           <ChipField label="Gender" options={["Female", "Male"]} defaultValue="Female" />
           <SelectField label="Civil status" options={CIVIL_STATUSES} />
+          <SelectField label="Religion" options={RELIGIONS} optional />
         </div>
         <div className={G3}>
           <NationalityFields fromId />
-          <SelectField label="Religion" options={RELIGIONS} optional />
         </div>
         <SubHead>Birth place</SubHead>
         <BirthPlace />
@@ -2703,25 +2741,28 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
   }, [navKey, onNavChange]);
 
   return (
-    <div ref={rootRef} className="form-lg rd-v3 w-full px-4 pb-6 pt-4 md:px-0 md:pt-0">
+    <div ref={rootRef} className="form-lg rd-v3 rd-v4 w-full max-w-[800px] px-4 pb-6 pt-4 md:px-0 md:pt-0">
       <div className="min-w-0">
-        <header className="pb-5 pt-2">
-          <h1 className="m-0 text-xl font-semibold leading-7 text-gray-900">Tell us about the buyer</h1>
-          <p className="m-0 mt-1 max-w-[60ch] text-sm leading-5 text-gray-600">
-            Enter the details exactly as they appear on the buyer's ID. They go into the reservation agreement.
-          </p>
-        </header>
+        {/* Same step banner as step 1, so every step opens the same way. */}
+        <StepHeaderV3 step={2} title="Representative Details" className="pb-6">
+          Enter the buyer's details exactly as they appear on their ID.
+        </StepHeaderV3>
 
-        <fieldset className="m-0 mb-6 border-0 border-t border-solid border-gray-200 p-0 pt-5">
-          <legend className="float-left mb-2 p-0 text-sm font-medium leading-5 text-gray-900">Buying as</legend>
-          <div className="clear-left flex flex-col gap-2 sm:flex-row sm:gap-8">
+        <fieldset className="m-0 mb-8 border-0 p-0">
+          <legend className="mb-2 p-0 text-sm font-semibold leading-5 text-gray-900">Buying as</legend>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {[
               ["Private individual", "Yourself or a private partnership"],
               ["Company representative", "On behalf of a company or corporation"],
             ].map(([value, hint]) => {
               const on = clientType === value;
               return (
-                <label key={value} className="flex cursor-pointer items-start gap-2.5">
+                <label
+                  key={value}
+                  className={`flex cursor-pointer items-start gap-3 rounded-xl border-[1.5px] border-solid px-4 py-3.5 transition-colors ${
+                    on ? "border-brand-400 bg-brand-25" : "border-gray-200 bg-white hover:border-gray-300"
+                  }`}
+                >
                   <input
                     type="radio"
                     name="rd-client-type"
@@ -2730,7 +2771,7 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
                     className="mt-0.5 size-4 flex-shrink-0 cursor-pointer accent-brand-500"
                   />
                   <span className="min-w-0">
-                    <span className="block text-sm font-medium leading-5 text-gray-900">{value}</span>
+                    <span className="block text-sm font-semibold leading-5 text-gray-900">{value}</span>
                     <span className="block text-xs leading-4 text-gray-500">{hint}</span>
                   </span>
                 </label>
@@ -2739,29 +2780,44 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
           </div>
         </fieldset>
 
-        <div className="rounded-xl border border-solid border-gray-200 bg-white [&>section:first-child>button]:rounded-t-xl [&>section:last-child>button]:rounded-b-xl">
-        {visible.map((s, i) => (
-          <Section
-            key={s.id}
-            id={s.id}
-            index={i}
-            title={s.title}
-            optional={s.optional}
-            open={activeId === s.id}
-            missing={missing[s.id]}
-            summary={summaries[s.id]}
-            nextTitle={visible[i + 1]?.title}
-            fields={missingLabels[s.id] ?? []}
-            attempted={attempted.has(s.id)}
-            onOpen={() => openSection(s.id)}
-            onNext={() => goNext(s.id)}
-            onSkip={() => skip(s.id)}
-            onFocusField={(n) => focusMissing(s.id, n)}
-            onBack={i > 0 ? () => goBack(s.id) : undefined}
-          >
-            {bodies[s.id]()}
-          </Section>
-        ))}
+        <div className="flex flex-col gap-7">
+          {GROUPS.map((g) => {
+            const list = visible.filter((s) => s.group === g.id);
+            if (!list.length) return null;
+            return (
+              <div key={g.id}>
+                <h2 className="m-0 mb-2 text-sm font-semibold leading-5 text-gray-900">{g.label}</h2>
+                <div className="rounded-xl border border-solid border-gray-200 bg-white [&>section:first-child>button]:rounded-t-xl [&>section:last-child>button]:rounded-b-xl">
+                  {list.map((s) => {
+                    const i = visible.indexOf(s);
+                    return (
+                      <Section
+                        key={s.id}
+                        id={s.id}
+                        index={i}
+                        title={s.title}
+                        optional={s.optional}
+                        open={activeId === s.id}
+                        missing={missing[s.id]}
+                        summary={summaries[s.id]}
+                        nextTitle={visible[i + 1]?.title}
+                        fields={missingLabels[s.id] ?? []}
+                        attempted={attempted.has(s.id)}
+                        onOpen={() => openSection(s.id)}
+                        onClose={() => setActiveId(null)}
+                        onNext={() => goNext(s.id)}
+                        onSkip={() => skip(s.id)}
+                        onFocusField={(n) => focusMissing(s.id, n)}
+                        onBack={i > 0 ? () => goBack(s.id) : undefined}
+                      >
+                        {bodies[s.id]()}
+                      </Section>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

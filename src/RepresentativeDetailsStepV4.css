@@ -1,0 +1,34 @@
+/*
+ * RA form v4 · Representative details.
+ * Three field states, each with its own look:
+ * - required and still empty: light brand tint, light brand border
+ * - focused: white, strong brand border and a soft ring (always wins)
+ * - error after Next: red border (set by the INVALID class on the wrapper)
+ * Loaded after the v3 sheet so these win at equal specificity.
+ */
+.rd-v4 [data-req="missing"]:not([data-err]) .input-field,
+.rd-v4 [data-req="missing"]:not([data-err]) .select-trigger,
+.rd-v4 [data-req="missing"]:not([data-err]) .date-picker-trigger {
+  background-color: #f0f5ff;
+  border-color: #b3ccff;
+}
+.rd-v4 [data-req="missing"]:not([data-err]) .input-field:hover,
+.rd-v4 [data-req="missing"]:not([data-err]) .select-trigger:hover,
+.rd-v4 [data-req="missing"]:not([data-err]) .date-picker-trigger:hover {
+  border-color: #4c69f0;
+}
+.rd-v4 .input-field:focus,
+.rd-v4 .select-trigger:focus-visible,
+.rd-v4 .select-trigger-open,
+.rd-v4 .date-picker-trigger:focus-visible,
+.rd-v4 .date-picker-trigger-open,
+.rd-v4 [data-req="missing"]:not([data-err]) .input-field:focus,
+.rd-v4 [data-req="missing"]:not([data-err]) .select-trigger:focus-visible,
+.rd-v4 [data-req="missing"]:not([data-err]) .select-trigger-open,
+.rd-v4 [data-req="missing"]:not([data-err]) .date-picker-trigger:focus-visible,
+.rd-v4 [data-req="missing"]:not([data-err]) .date-picker-trigger-open {
+  background-color: #ffffff;
+  border-color: #0a4de0;
+  box-shadow: 0 0 0 3px rgba(10, 77, 224, 0.18);
+  outline: none;
+}

@@ -2,12 +2,12 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Button from "./Button";
 import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import RepresentativeDetailsStepV4, { type SectionNav } from "./RepresentativeDetailsStepV4";
-import BuyerPropertyStepV3 from "./BuyerPropertyStepV3";
-import IdentityVerificationStepV3 from "./IdentityVerificationStepV3";
-import TermsStepV3 from "./TermsStepV3";
-import DataPrivacyStepV3 from "./DataPrivacyStepV3";
-import ConsentStepV3 from "./ConsentStepV3";
-import ReviewStepV3 from "./ReviewStepV3";
+import BuyerPropertyStepV4 from "./BuyerPropertyStepV4";
+import IdentityVerificationStepV4 from "./IdentityVerificationStepV4";
+import TermsStepV4 from "./TermsStepV4";
+import DataPrivacyStepV4 from "./DataPrivacyStepV4";
+import ConsentStepV4 from "./ConsentStepV4";
+import ReviewStepV4 from "./ReviewStepV4";
 import StepHeaderV3 from "./StepHeaderV3";
 import ExamplePhotoPreview, { type ExamplePhoto } from "./ExamplePhotoPreview";
 import {
@@ -735,14 +735,14 @@ export default function RAFormV4() {
                       <motion.span
                         layoutId={`${scope}-section-active`}
                         transition={SPRING}
-                        className="absolute inset-0 rounded-md bg-gray-100"
+                        className="absolute inset-0 rounded-md bg-white shadow-[0_1px_2px_rgba(16,24,40,0.08)] ring-1 ring-gray-200"
                       />
                     )}
                     {hoverSection === it.id && !it.active && (
                       <motion.span
                         layoutId={`${scope}-section-hover`}
                         transition={{ duration: 0.25, ease: GLIDE }}
-                        className="absolute inset-0 rounded-md bg-gray-50"
+                        className="absolute inset-0 rounded-md bg-gray-100"
                       />
                     )}
                     {/* One status column: tick = complete, amber = skipped with gaps, ring = not started. */}
@@ -792,14 +792,14 @@ export default function RAFormV4() {
             aria-current={step.status === "current" ? "step" : undefined}
             className="relative flex w-full items-center gap-2.5 rounded-lg border-0 bg-transparent px-2 py-2 text-left outline-none enabled:cursor-pointer disabled:cursor-default focus-visible:ring-2 focus-visible:ring-brand-400"
           >
-            {step.status === "current" && (
+            {step.status === "current" && !(step.id === BUYER_DETAILS_STEP && sectionNav) && (
               <motion.span layoutId={`${scope}-step-current`} transition={SPRING} className="absolute inset-0 rounded-lg bg-gray-100" />
             )}
             {hoverStep === `${scope}-${step.id}` && step.status !== "current" && (
               <motion.span
                 layoutId={`${scope}-step-hover`}
                 transition={{ duration: 0.25, ease: GLIDE }}
-                className="absolute inset-0 rounded-lg bg-gray-50"
+                className="absolute inset-0 rounded-lg bg-white shadow-[0_1px_2px_rgba(16,24,40,0.06)]"
               />
             )}
             {stepMarker(step.status, step.id)}
@@ -826,7 +826,7 @@ export default function RAFormV4() {
   return (
     <MotionConfig reducedMotion="user">
     <div
-      className={`flex flex-col h-[100dvh] w-full font-sans overflow-hidden bg-white`}
+      className="flex flex-col h-[100dvh] w-full font-sans overflow-hidden bg-gray-50"
       style={{ "--footer-h": footerHeight + "px" } as CSSProperties}
     >
       <header className="bg-white border-b border-gray-200 flex justify-center">
@@ -953,36 +953,38 @@ export default function RAFormV4() {
         {/* self-stretch (and flex-1 when stacked on mobile) pins main to the
             viewport height so long steps scroll inside it; under the row's
             items-start it would otherwise grow to its content and get clipped. */}
-        <main ref={mainRef} className="w-full md:w-[56rem] min-h-0 max-md:flex-1 self-stretch flex justify-center items-start overflow-y-auto pb-[var(--footer-h)] [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
+        <main ref={mainRef} className="w-full md:w-[56rem] md:pl-12 min-h-0 max-md:flex-1 self-stretch flex justify-center items-start overflow-y-auto pb-[var(--footer-h)] [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
           {/* Fill-height steps scroll inside their card, so the wrapper is pinned
               to the viewport. Step 2 scrolls the page instead: its wrapper must
               grow with it, or main's footer padding lands mid-content and the
               last fields slide under the fixed footer. */}
           <div className={`w-full flex flex-col ${currentStep === BUYER_DETAILS_STEP ? "" : "md:h-full"}`}>
           {currentStep === BUYER_PROPERTY_STEP ? (
-            <BuyerPropertyStepV3 />
+            <BuyerPropertyStepV4 />
           ) : currentStep === BUYER_DETAILS_STEP ? (
             <RepresentativeDetailsStepV4 onNavChange={setSectionNav} />
           ) : currentStep === IDENTITY_STEP ? (
-            <IdentityVerificationStepV3 onReadyChange={setIdentityReady} />
+            <IdentityVerificationStepV4 onReadyChange={setIdentityReady} />
           ) : currentStep === TERMS_STEP ? (
-            <TermsStepV3 onReadyChange={setTermsReady} />
+            <TermsStepV4 onReadyChange={setTermsReady} />
           ) : currentStep === PRIVACY_STEP ? (
-            <DataPrivacyStepV3 onReadyChange={setPrivacyReady} />
+            <DataPrivacyStepV4 onReadyChange={setPrivacyReady} />
           ) : currentStep === CONSENT_STEP ? (
-            <ConsentStepV3 onReadyChange={setConsentReady} />
+            <ConsentStepV4 onReadyChange={setConsentReady} />
           ) : currentStep === REVIEW_STEP ? (
-            <ReviewStepV3 onEdit={goToStep} onReadyChange={setReviewReady} />
+            <ReviewStepV4 onEdit={goToStep} onReadyChange={setReviewReady} />
           ) : (
-            <section className="rd-v3 w-full md:max-h-full bg-white rounded-none md:rounded-2xl overflow-hidden flex flex-col md:border-[1.5px] md:border-solid md:border-brand-400 md:shadow-[0_1px_2px_rgba(16,24,40,0.05)]">
+            <section className="rd-v3 w-full md:max-h-full flex flex-col px-4 pt-4 md:px-0 md:pt-0">
               <StepHeaderV3
                 step={4}
                 title="Capture Live Selfie with ID"
-                className="px-4 md:px-8 pt-4 pb-4 md:pt-5 md:pb-5 flex-shrink-0"
+                className="flex-shrink-0 pb-6"
               >
                 Take a live selfie holding your ID. Make sure your face and ID
                 are clear.
               </StepHeaderV3>
+
+              <div className="flex min-h-0 flex-col overflow-hidden bg-white md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
 
               {/* Only the card body scrolls; the title stays put. */}
               <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
@@ -1397,6 +1399,7 @@ export default function RAFormV4() {
                 </div>
               </div>
               </div>
+              </div>
             </section>
           )}
           {/* Phones: actions sit at the end of the step (scroll down to reach
@@ -1518,16 +1521,15 @@ export default function RAFormV4() {
               <button
                 type="button"
                 onClick={() => setGuardOpen((o) => !o)}
-                className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border-0 bg-[#FFFAEB] px-2.5 py-1 text-xs font-medium text-[#B54708] hover:bg-[#FEF0C7]"
+                className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-gray-500 underline decoration-gray-300 underline-offset-[3px] hover:text-gray-900"
               >
-                <span className="size-1.5 rounded-full bg-[#F79009]" />
-                {incompleteSections.length} {incompleteSections.length === 1 ? "section" : "sections"} incomplete
+                {incompleteSections.length} {incompleteSections.length === 1 ? "section" : "sections"} left
               </button>
             )}
             <Button
               variant="tertiary"
               size="sm"
-              className="flex-1 md:flex-none"
+              className="flex-1 md:flex-none !font-medium !text-gray-600 hover:!text-gray-900"
             >
               Save as draft
             </Button>
