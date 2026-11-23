@@ -662,9 +662,12 @@ function ChipField({
   tag,
   intro,
   className,
+  radio,
 }: {
   label: ReactNode;
   options: string[];
+  /** Plain radio buttons in a row instead of the segmented toggle. */
+  radio?: boolean;
   multi?: boolean;
   optional?: boolean;
   value?: string;
@@ -676,6 +679,7 @@ function ChipField({
   className?: string;
 }) {
   const [own, setOwn] = useState(defaultValue);
+  const radioName = useId();
   const v = value ?? own;
   const selected = v ? v.split(";") : [];
   const showAll = useContext(ShowErrors);
@@ -698,7 +702,22 @@ function ChipField({
       missing={optional ? undefined : !!error}
       className={className}
     >
-      {!multi && options.length <= 3 && options.every((o) => o.length <= 16) ? (
+      {radio && !multi ? (
+        <div role="radiogroup" className="flex flex-wrap items-center gap-x-6 gap-y-2 py-0.5">
+          {options.map((o) => (
+            <label key={o} className="flex cursor-pointer items-center gap-2 text-[13px] leading-5 text-gray-900">
+              <input
+                type="radio"
+                name={radioName}
+                checked={selected.includes(o)}
+                onChange={() => toggle(o)}
+                className="size-4 flex-shrink-0 cursor-pointer accent-brand-500"
+              />
+              {o}
+            </label>
+          ))}
+        </div>
+      ) : !multi && options.length <= 3 && options.every((o) => o.length <= 16) ? (
         <div
           role="group"
           className={`grid h-8 w-full max-w-[320px] grid-flow-col auto-cols-fr gap-0.5 rounded-[7px] p-[3px] ${
@@ -2238,8 +2257,8 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
   const [sources, setSources] = useState("");
   const [coBuyers, setCoBuyers] = useState<{ id: number; name: string }[]>([]);
   const [coBuyerConfirmed, setCoBuyerConfirmed] = useState(false);
-  const [hasRep, setHasRep] = useState("");
-  const [isPep, setIsPep] = useState("");
+  const [hasRep, setHasRep] = useState("No");
+  const [isPep, setIsPep] = useState("No");
   const [pepIds, setPepIds] = useState<number[]>([1]);
   const [pepCertified, setPepCertified] = useState(false);
   const nextId = useRef(2);
@@ -2608,13 +2627,14 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
         <SubHead>Representative information</SubHead>
         <ChipField
           label="Do you have an attorney-in-fact or a financer?"
+          radio
           options={["No", "Yes"]}
           value={hasRep}
           onValueChange={setHasRep}
         />
         {hasRep === "Yes" && (
           <Panel>
-            <ChipField label="Role" options={["Attorney-in-fact", "Financer"]} />
+            <ChipField label="Role" radio options={["Attorney-in-fact", "Financer"]} />
             <div className={G2}>
               <TextField label="Full name" />
               <PhoneField label="Mobile number" format="mobile" placeholder="917 123 4567" />
@@ -2630,6 +2650,7 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
         <SubHead>Political exposure questionnaire</SubHead>
         <ChipField
           label="Have you or any of your immediate family members or close associates ever held, or now hold, an elected or appointed government position in the Philippines or any other country?"
+          radio
           options={["No", "Yes"]}
           value={isPep}
           onValueChange={setIsPep}
