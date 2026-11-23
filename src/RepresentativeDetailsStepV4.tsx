@@ -18,6 +18,7 @@ import Select from "./SelectV3";
 import { PHONE_COUNTRIES, PhilippinesFlag } from "./BuyerDetailsStep";
 import { CheckIcon, ChevronDownIcon, SearchIcon } from "./icons";
 import StepHeaderV3 from "./StepHeaderV3";
+import IdCaptureField from "./IdCaptureField";
 import "./RepresentativeDetailsStepV3.css";
 import "./RepresentativeDetailsStepV4.css";
 import { AnimatePresence, motion } from "motion/react";
@@ -1895,12 +1896,10 @@ function CoBuyerPanel({
 
   return (
     <Panel title={`Co-buyer #${number}`} onRemove={onRemove}>
-      <Field label="ID front side">
-        <UploadDrop
-          title="Upload or scan their ID"
-          help="JPG, PNG or PDF, up to 10 MB. We fill name and birth date for you."
-          icon={<IdCardIcon />}
-          onUploaded={() => {
+      <Field label="Selfie holding their ID">
+        {/* Same pattern as the Live Selfie step: Upload file / Take photo toggle over one capture area. */}
+        <IdCaptureField
+          onCaptured={() => {
             setName({ fn: "Juan", mn: "Reyes", ln: "Dela Cruz" });
             setDob("1986-07-22");
             setGender("Male");
