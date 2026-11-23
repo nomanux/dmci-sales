@@ -2102,12 +2102,12 @@ function Section({
   optional,
   open,
   missing,
-  summary,
+  summary: _summary,
   nextTitle: _nextTitle,
   fields,
   attempted,
   onOpen,
-  onClose,
+  onClose: _onClose,
   onNext: _onNext,
   onSkip: _onSkip,
   onFocusField,
@@ -2139,112 +2139,54 @@ function Section({
   const left = missing ?? 0;
   const shownFields = fields.slice(0, 4);
 
-  if (open) {
-    return (
-      <section
-        id={`rd-${id}`}
-        className="rd-active group/sec relative z-10 -mx-px scroll-mt-4 bg-white px-5 pb-5 pt-4 shadow-[0_12px_32px_-12px_rgba(16,24,40,0.28)] ring-[1.5px] ring-brand-400 first:-mt-px first:rounded-t-xl last:-mb-px last:rounded-b-xl"
-      >
-        {/* Header band: reads as a bar you can click to close the section. */}
-        <div
-          onClick={onClose}
-          className="group/head -mx-5 -mt-4 mb-5 flex cursor-pointer items-start gap-3 border-0 border-b border-solid border-gray-200 bg-gray-50 px-5 py-3.5 transition-colors hover:bg-gray-100 group-first/sec:rounded-t-xl"
-        >
-          <SectionNumber n={index + 1} />
-          <span className="min-w-0 flex-1">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              aria-expanded="true"
-              className="block cursor-pointer border-0 bg-transparent p-0 text-left text-base font-semibold leading-5 text-gray-900"
-            >
-              {title}
-              {optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
-            </button>
-            {done ? (
-              <small className="mt-0.5 flex items-center gap-1 text-[13px] leading-5 text-success-600">
-                <CheckIcon className="size-3" />
-                All filled in
-              </small>
-            ) : fields.length > 0 ? (
-              <small className="mt-1 block text-[13px] leading-5 text-gray-600">
-                <span className="text-gray-500">{left} required:</span>{" "}
-                {shownFields.map((f, i) => (
-                  <span key={f + i}>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onFocusField(i);
-                      }}
-                      className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-gray-900 underline decoration-gray-300 underline-offset-[3px] transition-colors hover:text-brand-500 hover:decoration-brand-400"
-                    >
-                      {f}
-                    </button>
-                    {i < shownFields.length - 2 ? ", " : i === shownFields.length - 2 ? (fields.length > shownFields.length ? ", " : " and ") : ""}
-                  </span>
-                ))}
-                {fields.length > shownFields.length && ` and ${fields.length - shownFields.length} more`}
-              </small>
-            ) : (
-              <small className="mt-0.5 block text-[13px] leading-5 text-gray-500">{summary}</small>
-            )}
-          </span>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onClose();
-            }}
-            aria-label={`Close ${title}`}
-            className="-mr-1 flex h-7 flex-shrink-0 cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 text-xs font-semibold text-gray-500 transition-colors group-hover/head:text-gray-900"
-          >
-            Close
-            <ChevronDownIcon className="size-3.5 rotate-180" />
-          </button>
-        </div>
-        {/* Same element, same place as in the closed row below, so React keeps the
-            fields (and what the buyer typed) when the section opens or closes. */}
-        <ShowErrors.Provider value={attempted}>
-          <div data-section-body={id} className={STACK}>
-            {children}
-          </div>
-        </ShowErrors.Provider>
-      </section>
-    );
-  }
-
+  // Every section is always open. `open` marks the active one (focused or
+  // jumped to): it gets the blue border, the rest stay plain.
   return (
-    <section id={`rd-${id}`} className="scroll-mt-4 border-0 border-b border-solid border-gray-200 last:border-b-0">
-      <button
-        type="button"
-        onClick={onOpen}
-        aria-expanded="false"
-        className="group flex w-full cursor-pointer items-center gap-3 border-0 bg-transparent px-5 py-3.5 text-left transition-colors hover:bg-gray-50"
-      >
+    <section
+      id={`rd-${id}`}
+      onFocusCapture={onOpen}
+      onPointerDown={onOpen}
+      className={`group/sec relative scroll-mt-4 border-0 border-b border-solid border-gray-200 bg-white px-5 pb-6 pt-4 transition-shadow first:rounded-t-xl last:rounded-b-xl last:border-b-0 ${
+        open ? "z-10 shadow-[0_12px_32px_-12px_rgba(16,24,40,0.28)] ring-[1.5px] ring-brand-400" : ""
+      }`}
+    >
+      <div className="-mx-5 -mt-4 mb-5 flex items-start gap-3 border-0 border-b border-solid border-gray-200 bg-gray-50 px-5 py-3.5 group-first/sec:rounded-t-xl">
         <SectionNumber n={index + 1} done={done} />
         <span className="min-w-0 flex-1">
-          <strong className={`block text-sm font-medium leading-5 ${done || attempted ? "text-gray-900" : "text-gray-700"}`}>
+          <h3 className="m-0 text-base font-semibold leading-5 text-gray-900">
             {title}
             {optional && <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>}
-          </strong>
-          {(done || (attempted && fields.length > 0)) && (
-            <small className={`block truncate text-xs leading-4 ${done ? "text-gray-500" : "text-brand-400"}`}>
-              {done ? summary || "Complete" : `Still needs ${fields.join(", ")}`}
+          </h3>
+          {done ? (
+            <small className="mt-0.5 flex items-center gap-1 text-[13px] leading-5 text-success-600">
+              <CheckIcon className="size-3" />
+              All filled in
             </small>
-          )}
+          ) : fields.length > 0 ? (
+            <small className="mt-1 block text-[13px] leading-5 text-gray-600">
+              <span className="text-gray-500">{left} required:</span>{" "}
+              {shownFields.map((f, i) => (
+                <span key={f + i}>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onFocusField(i);
+                    }}
+                    className="cursor-pointer border-0 bg-transparent p-0 text-[13px] text-gray-900 underline decoration-gray-300 underline-offset-[3px] transition-colors hover:text-brand-500 hover:decoration-brand-400"
+                  >
+                    {f}
+                  </button>
+                  {i < shownFields.length - 2 ? ", " : i === shownFields.length - 2 ? (fields.length > shownFields.length ? ", " : " and ") : ""}
+                </span>
+              ))}
+              {fields.length > shownFields.length && ` and ${fields.length - shownFields.length} more`}
+            </small>
+          ) : null}
         </span>
-        <span className="flex-shrink-0 text-xs font-semibold text-brand-500 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-          {done ? "Edit" : "Open"}
-        </span>
-        <ChevronDownIcon className="size-4 flex-shrink-0 text-gray-400" />
-      </button>
-      {/* Kept mounted so answers stay and missing answers keep counting. */}
+      </div>
       <ShowErrors.Provider value={attempted}>
-        <div data-section-body={id} className="hidden">
+        <div data-section-body={id} className={STACK}>
           {children}
         </div>
       </ShowErrors.Provider>
@@ -2269,6 +2211,9 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
   // The one section the side list highlights: the last one opened or moved to.
   // null = every section closed; the buyer can collapse the open one.
   const [activeId, setActiveId] = useState<SectionId | null>("personal");
+  // The section the sidebar highlights: follows the scroll position.
+  const [spyId, setSpyId] = useState<SectionId>("personal");
+  const spyLock = useRef(0);
   const [missing, setMissing] = useState<Partial<Record<SectionId, number>>>({});
   // Labels of each section's missing required fields, read from the DOM with the counts.
   const [missingLabels, setMissingLabels] = useState<Partial<Record<SectionId, string[]>>>({});
@@ -2345,6 +2290,38 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
   }, []);
 
   useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const scroller: HTMLElement | null = root.closest("main");
+    const target: HTMLElement | Window = scroller ?? window;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      if (Date.now() < spyLock.current || !root.offsetParent) return;
+      const sections = Array.from(root.querySelectorAll<HTMLElement>("section[id^='rd-']"));
+      if (!sections.length) return;
+      const top = scroller ? scroller.getBoundingClientRect().top : 0;
+      const height = scroller ? scroller.clientHeight : window.innerHeight;
+      const atBottom = scroller ? scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 4 : false;
+      // The last section whose top has passed a line a third of the way down the view.
+      let pick = sections[0];
+      for (const el of sections) if (el.getBoundingClientRect().top - top <= height * 0.33) pick = el;
+      if (atBottom) pick = sections[sections.length - 1];
+      const id = pick.id.slice(3) as SectionId;
+      setSpyId((prev) => (prev === id ? prev : id));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    target.addEventListener("scroll", onScroll, { passive: true });
+    update();
+    return () => {
+      target.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!toastMsg) return;
     const t = setTimeout(() => setToastMsg(null), 2400);
     return () => clearTimeout(t);
@@ -2352,16 +2329,18 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
 
   const toast = (text: string) => setToastMsg({ text, key: Date.now() });
   const scrollTo = (id: SectionId) =>
-    setTimeout(() => document.getElementById(`rd-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 60);
+    setTimeout(() => document.getElementById(`rd-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
   const openSection = (id: SectionId) => {
     setActiveId(id);
+    setSpyId(id);
+    spyLock.current = Date.now() + 900; // let the smooth scroll land before the spy takes over again
     scrollTo(id);
   };
   // Save and continue: next unfinished section after this one, else the
   // first unfinished one, else stay and confirm the step is done.
   // Put the cursor in a missing field of a section (opening it first) and nudge it.
   const focusMissing = (id: SectionId, index = 0) => {
-    if (activeId !== id) openSection(id);
+    setActiveId(id);
     window.setTimeout(() => {
       const body = rootRef.current?.querySelector(`[data-section-body="${id}"]`);
       const wrap = body?.querySelectorAll<HTMLElement>('[data-req="missing"]')[index];
@@ -2372,7 +2351,7 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
       void wrap.offsetWidth;
       wrap.classList.add("rd-shake");
       window.setTimeout(() => wrap.classList.remove("rd-shake"), 600);
-    }, activeId === id ? 0 : 140);
+    }, 0);
   };
   // Move on: next unfinished section after this one, else the first
   // unfinished one, else stay and confirm the step is done.
@@ -2698,7 +2677,7 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
   const navKey = visible
     .map(
       (s) =>
-        `${s.id}~${s.nav}~${missing[s.id] === 0 ? 1 : 0}~${activeId === s.id ? 1 : 0}~${attempted.has(s.id) ? 1 : 0}~${(missingLabels[s.id] ?? []).join("^")}`,
+        `${s.id}~${s.nav}~${missing[s.id] === 0 ? 1 : 0}~${spyId === s.id ? 1 : 0}~${attempted.has(s.id) ? 1 : 0}~${(missingLabels[s.id] ?? []).join("^")}`,
     )
     .join("|");
   useEffect(() => {
@@ -2775,7 +2754,7 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
                         nextTitle={visible[i + 1]?.title}
                         fields={missingLabels[s.id] ?? []}
                         attempted={attempted.has(s.id)}
-                        onOpen={() => openSection(s.id)}
+                        onOpen={() => setActiveId(s.id)}
                         onClose={() => setActiveId(null)}
                         onNext={() => goNext(s.id)}
                         onSkip={() => skip(s.id)}
