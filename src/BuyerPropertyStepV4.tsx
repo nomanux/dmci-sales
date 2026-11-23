@@ -57,15 +57,15 @@ export default function BuyerPropertyStepV4() {
 
   return (
     <section className="form-lg w-full md:max-h-full rd-v3 rd-v4 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3 step={1} title="Buyer & Property Information" className="flex-shrink-0 pb-6">
+      <StepHeaderV3 hideStep step={1} title="Buyer & Property Information" className="flex-shrink-0 pb-6">
         Review and confirm buyer type and property details for this reservation.
       </StepHeaderV3>
 
-      <div className="flex min-h-0 flex-col overflow-hidden bg-white md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
+      <div className="flex min-h-0 flex-col overflow-hidden bg-white pt-6 md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
 
       {/* Only the card body scrolls; the title stays put. */}
       <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
-      <div className="px-4 md:px-8 pb-6 pt-1 flex flex-col gap-6">
+      <div className="px-4 md:px-8 pb-6 flex flex-col gap-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-3 items-start">
           <Field label="Buyer Type" required filled={!!buyerType}>
             <Select

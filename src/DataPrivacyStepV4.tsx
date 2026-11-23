@@ -148,7 +148,7 @@ export default function DataPrivacyStepV4({
   // Fills the visible area so only the policy column scrolls (one scrollbar), not the page too.
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3
+      <StepHeaderV3 hideStep
         step={6}
         title="Data Privacy Policy"
         className="flex-shrink-0 pb-6"
@@ -157,7 +157,7 @@ export default function DataPrivacyStepV4({
         step.
       </StepHeaderV3>
 
-      <div className="flex min-h-0 flex-col overflow-hidden bg-white md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
+      <div className="flex min-h-0 flex-col overflow-hidden bg-white pt-6 md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
 
       <div className="flex flex-1 min-h-0 flex-col md:grid md:grid-cols-[180px_minmax(0,1fr)] md:gap-8 px-4 md:px-8">
         {/* Section list: a sticky rail on desktop, scrollable chips on phones. */}

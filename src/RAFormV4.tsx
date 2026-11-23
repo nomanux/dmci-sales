@@ -680,10 +680,10 @@ export default function RAFormV4() {
     <span
       className={`relative grid size-[22px] flex-shrink-0 place-items-center rounded-md text-[11px] font-semibold transition-[background-color,color,box-shadow] duration-300 ${
         status === "completed"
-          ? "bg-[#DCFAE6] text-success-600"
+          ? "bg-[#079455] text-white"
           : status === "current"
             ? "bg-brand-500 text-white"
-            : "bg-gray-100 text-gray-500"
+            : "bg-white text-gray-500 ring-1 ring-inset ring-gray-200"
       }`}
     >
       <AnimatePresence initial={false} mode="popLayout">
@@ -959,11 +959,15 @@ export default function RAFormV4() {
               grow with it, or main's footer padding lands mid-content and the
               last fields slide under the fixed footer. */}
           <div className={`w-full flex flex-col ${currentStep === BUYER_DETAILS_STEP ? "" : "md:h-full"}`}>
-          {currentStep === BUYER_PROPERTY_STEP ? (
+          {/* The two form steps stay mounted (only hidden) so what the buyer typed
+              is still there after visiting another step and coming back. */}
+          <div className={currentStep === BUYER_PROPERTY_STEP ? "contents" : "hidden"}>
             <BuyerPropertyStepV4 />
-          ) : currentStep === BUYER_DETAILS_STEP ? (
+          </div>
+          <div className={currentStep === BUYER_DETAILS_STEP ? "contents" : "hidden"}>
             <RepresentativeDetailsStepV4 onNavChange={setSectionNav} />
-          ) : currentStep === IDENTITY_STEP ? (
+          </div>
+          {currentStep === BUYER_PROPERTY_STEP || currentStep === BUYER_DETAILS_STEP ? null : currentStep === IDENTITY_STEP ? (
             <IdentityVerificationStepV4 onReadyChange={setIdentityReady} />
           ) : currentStep === TERMS_STEP ? (
             <TermsStepV4 onReadyChange={setTermsReady} />
@@ -975,7 +979,7 @@ export default function RAFormV4() {
             <ReviewStepV4 onEdit={goToStep} onReadyChange={setReviewReady} />
           ) : (
             <section className="rd-v3 w-full md:max-h-full flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-              <StepHeaderV3
+              <StepHeaderV3 hideStep
                 step={4}
                 title="Capture Live Selfie with ID"
                 className="flex-shrink-0 pb-6"
@@ -984,7 +988,7 @@ export default function RAFormV4() {
                 are clear.
               </StepHeaderV3>
 
-              <div className="flex min-h-0 flex-col overflow-hidden bg-white md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
+              <div className="flex min-h-0 flex-col overflow-hidden bg-white pt-6 md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
 
               {/* Only the card body scrolls; the title stays put. */}
               <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
@@ -1463,7 +1467,7 @@ export default function RAFormV4() {
                 </button>
               </div>
               <motion.ul
-                className="m-0 flex list-none flex-col gap-1 p-0"
+                className="m-0 flex list-none flex-col gap-2 p-0"
                 initial="hidden"
                 animate="shown"
                 variants={{ shown: { transition: { staggerChildren: 0.04, delayChildren: 0.05 } } }}
@@ -1479,7 +1483,7 @@ export default function RAFormV4() {
                         sectionNav?.jumpField(it.id);
                         setGuardOpen(false);
                       }}
-                      className="group flex w-full cursor-pointer items-center gap-3 rounded-xl border-0 bg-transparent px-2.5 py-2 text-left transition-colors hover:bg-[#F7F9FF]"
+                      className="group flex w-full cursor-pointer items-center gap-3 rounded-xl border border-solid border-gray-200 bg-white px-3 py-2.5 text-left transition-colors hover:border-brand-200 hover:bg-brand-25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
                     >
                       <span className={`size-2 flex-shrink-0 rounded-full ${it.partial ? "bg-[#F79009]" : "bg-gray-300"}`} />
                       <span className="min-w-0 flex-1">
@@ -1488,9 +1492,19 @@ export default function RAFormV4() {
                           {it.fields.length ? it.fields.join(", ") : "Not started"}
                         </span>
                       </span>
-                      <span className="flex-shrink-0 text-xs font-semibold text-brand-400 transition-transform group-hover:translate-x-0.5">
-                        Go →
-                      </span>
+                      {/* A row chevron, not a text link: the whole row is the button. */}
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 16 16"
+                        className="size-4 flex-shrink-0 text-gray-400 transition-[color,transform] group-hover:translate-x-0.5 group-hover:text-brand-400"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.75"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M6 3.5 10.5 8 6 12.5" />
+                      </svg>
                     </button>
                   </motion.li>
                 ))}

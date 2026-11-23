@@ -2103,15 +2103,15 @@ function Section({
   open,
   missing,
   summary,
-  nextTitle,
+  nextTitle: _nextTitle,
   fields,
   attempted,
   onOpen,
   onClose,
-  onNext,
-  onSkip,
+  onNext: _onNext,
+  onSkip: _onSkip,
   onFocusField,
-  onBack,
+  onBack: _onBack,
   children,
 }: {
   id: SectionId;
@@ -2206,41 +2206,13 @@ function Section({
             <ChevronDownIcon className="size-3.5 rotate-180" />
           </button>
         </div>
+        {/* Same element, same place as in the closed row below, so React keeps the
+            fields (and what the buyer typed) when the section opens or closes. */}
         <ShowErrors.Provider value={attempted}>
           <div data-section-body={id} className={STACK}>
             {children}
           </div>
         </ShowErrors.Provider>
-        <div className="mt-6 flex items-center gap-3 border-0 border-t border-solid border-gray-200 pt-4">
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              className="h-9 cursor-pointer rounded-lg border border-solid border-gray-300 bg-white px-3.5 text-[13px] font-semibold text-gray-700 hover:bg-gray-50"
-            >
-              Back
-            </button>
-          )}
-          <span className="text-xs text-gray-500">{nextTitle ? `Next: ${nextTitle}` : "Last section"}</span>
-          {!done && nextTitle && (
-            <button
-              type="button"
-              onClick={onSkip}
-              className="ml-auto cursor-pointer border-0 bg-transparent px-1 text-xs font-semibold text-gray-500 hover:text-gray-900"
-            >
-              Skip for now
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onNext}
-            className={`h-9 cursor-pointer rounded-lg border border-solid border-gray-300 bg-white px-4 text-[13px] font-semibold text-gray-900 shadow-[0_1px_2px_rgba(16,24,40,0.05)] transition-colors hover:bg-gray-50 ${
-              !done && nextTitle ? "" : "ml-auto"
-            }`}
-          >
-            {!done ? `${left} ${left === 1 ? "field" : "fields"} left` : nextTitle ? "Save and continue" : "Finish this step"}
-          </button>
-        </div>
       </section>
     );
   }
@@ -2273,7 +2245,7 @@ function Section({
       {/* Kept mounted so answers stay and missing answers keep counting. */}
       <ShowErrors.Provider value={attempted}>
         <div data-section-body={id} className="hidden">
-          <div className={STACK}>{children}</div>
+          {children}
         </div>
       </ShowErrors.Provider>
     </section>
@@ -2744,7 +2716,7 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
     <div ref={rootRef} className="form-lg rd-v3 rd-v4 w-full max-w-[800px] px-4 pb-6 pt-4 md:px-0 md:pt-0">
       <div className="min-w-0">
         {/* Same step banner as step 1, so every step opens the same way. */}
-        <StepHeaderV3 step={2} title="Representative Details" className="pb-6">
+        <StepHeaderV3 hideStep step={2} title="Representative Details" className="pb-6">
           Enter the buyer's details exactly as they appear on their ID.
         </StepHeaderV3>
 

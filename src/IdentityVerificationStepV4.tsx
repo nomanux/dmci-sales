@@ -473,20 +473,19 @@ export function IdUploadPanel({
 
       {/* Example photos — upload guidance, so hidden once the ID has been read */}
       {!compact && phase !== "done" && (
-        <section aria-labelledby={uid + "-tips"} className="flex flex-col gap-2 border-t border-gray-200 pt-4">
+        <section aria-labelledby={uid + "-tips"} className="flex flex-col gap-2.5 border-t border-gray-200 pt-4">
           <h2 id={uid + "-tips"} className="m-0 text-sm font-semibold leading-5 text-gray-900">
             Get the details read right the first time
           </h2>
-          <div className="grid max-w-[560px] grid-cols-4 gap-2">
+          <div className="grid max-w-[440px] grid-cols-4 gap-2">
             {EXAMPLES.map((example, index) => (
-              <figure key={example.caption} className="m-0 flex flex-col gap-1">
-                {/* Same frame as the Live Selfie step's "Check your photo" examples; opens the full-size preview. */}
+              <figure key={example.caption} className="m-0 flex min-w-0 flex-col gap-1">
                 <button
                   type="button"
                   aria-label={"View example: " + example.caption}
                   onClick={() => setPreviewIndex(index)}
-                  className={`relative block w-full cursor-zoom-in overflow-hidden rounded-lg border-0 bg-white p-0.5 outline outline-[1.4px] -outline-offset-[1.4px] transition-transform duration-150 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${
-                    example.ok ? "outline-[#079455]" : "outline-[#f02b2b]"
+                  className={`block w-full cursor-zoom-in overflow-hidden rounded-md border-0 bg-white p-0 transition-opacity duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 ${
+                    example.ok ? "ring-2 ring-[#079455]" : "ring-1 ring-gray-200"
                   }`}
                 >
                   <img
@@ -495,23 +494,15 @@ export function IdUploadPanel({
                     width={840}
                     height={560}
                     loading="lazy"
-                    className="block aspect-[3/2] w-full rounded-md object-cover"
+                    className="block aspect-[3/2] w-full object-cover"
                   />
-                  <span
-                    aria-hidden="true"
-                    className={`absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full text-white outline outline-1 outline-white ${
-                      example.ok ? "bg-[#079455]" : "bg-[#f02b2b]"
-                    }`}
-                  >
-                    {example.ok ? <CheckIcon size={10} /> : <CrossIcon size={10} />}
-                  </span>
                 </button>
                 <figcaption
-                  className={`flex items-center gap-1 text-xs font-medium leading-[18px] ${
-                    example.ok ? "text-success-700" : "text-error-600"
-                  }`}
+                  className={`flex items-center gap-1 text-xs leading-4 ${example.ok ? "font-medium text-success-700" : "text-gray-600"}`}
                 >
-                  {example.ok ? <CheckIcon size={12} /> : <CrossIcon size={12} />}
+                  <span className={example.ok ? "text-success-600" : "text-error-500"}>
+                    {example.ok ? <CheckIcon size={11} /> : <CrossIcon size={11} />}
+                  </span>
                   {example.caption}
                 </figcaption>
               </figure>
@@ -540,14 +531,14 @@ export default function IdentityVerificationStepV4({
 }) {
   return (
     <section className="form-lg w-full md:max-h-full rd-v3 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3 step={3} title="Upload your government ID" className="flex-shrink-0 pb-6">
+      <StepHeaderV3 hideStep step={3} title="Upload your government ID" className="flex-shrink-0 pb-6">
         Upload the front of your ID. We read your details from the card and fill in the form for you.{" "}
         <a href="#" className="font-semibold text-brand-600 underline hover:text-brand-700">
           See accepted IDs
         </a>
       </StepHeaderV3>
 
-      <div className="flex min-h-0 flex-col overflow-hidden bg-white md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
+      <div className="flex min-h-0 flex-col overflow-hidden bg-white pt-6 md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
 
       {/* Only the card body scrolls; the title stays put. */}
       <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">

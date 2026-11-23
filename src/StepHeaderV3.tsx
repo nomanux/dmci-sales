@@ -26,6 +26,7 @@ export default function StepHeaderV3({
   className = "",
   titleSize = "md:text-[22px]",
   plain = false,
+  hideStep = false,
 }: {
   title: string;
   step: number;
@@ -35,6 +36,8 @@ export default function StepHeaderV3({
   titleSize?: string;
   /** Title and one line, no banner or ring: the sidebar already shows the step. */
   plain?: boolean;
+  /** Drop the "Step N of 8" line: the sidebar and the ring already show it. */
+  hideStep?: boolean;
 }) {
   if (plain) {
     return (
@@ -53,9 +56,11 @@ export default function StepHeaderV3({
           <Icon size={20} strokeWidth={1.5} color="currentColor" aria-hidden="true" />
         </span>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="m-0 text-xs font-semibold leading-4 text-brand-400">
-            Step {step} of {TOTAL}
-          </p>
+          {!hideStep && (
+            <p className="m-0 text-xs font-semibold leading-4 text-brand-400">
+              Step {step} of {TOTAL}
+            </p>
+          )}
           <h1 className={`m-0 text-lg font-bold leading-6 tracking-[-0.02em] text-gray-900 ${titleSize} md:leading-7`}>{title}</h1>
           {children && <p className="m-0 text-[13px] leading-5 text-gray-600">{children}</p>}
         </div>

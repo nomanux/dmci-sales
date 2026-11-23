@@ -174,11 +174,11 @@ export default function TermsStepV4({
   // Fills the visible area so only the text column scrolls (one scrollbar), not the page too.
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3 step={5} title="Terms and Conditions" className="flex-shrink-0 pb-6">
+      <StepHeaderV3 hideStep step={5} title="Terms and Conditions" className="flex-shrink-0 pb-6">
         Please read the terms and conditions carefully before proceeding next step.
       </StepHeaderV3>
 
-      <div className="flex min-h-0 flex-col overflow-hidden bg-white md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
+      <div className="flex min-h-0 flex-col overflow-hidden bg-white pt-6 md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
 
       <div className="flex flex-1 min-h-0 flex-col px-4 md:px-8">
           {/* Reading progress, pinned to the top of the text. */}

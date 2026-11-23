@@ -389,15 +389,15 @@ export default function ReviewStepV4({
 
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3 step={8} title="Review & Submit" className="flex-shrink-0 pb-6">
+      <StepHeaderV3 hideStep step={8} title="Review & Submit" className="flex-shrink-0 pb-6">
         Review the details below to ensure they are correct and up to date before submission.
       </StepHeaderV3>
 
-      <div className="flex min-h-0 flex-col overflow-hidden bg-white md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
+      <div className="flex min-h-0 flex-col overflow-hidden bg-white pt-6 md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
 
       {/* Only the card body scrolls; the title stays put. */}
       <div className="md:flex-1 md:min-h-0 md:overflow-y-auto [scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent] [scrollbar-gutter:stable]">
-      <div className="px-4 md:pl-8 md:pr-6 pb-6 pt-1 flex flex-col gap-6">
+      <div className="px-4 md:pl-8 md:pr-6 pb-6 flex flex-col gap-6">
         <SectionCard title="Buyer & Property Information" onEdit={() => onEdit(1)}>
           <Pairs pairs={BUYER_PROPERTY} />
         </SectionCard>

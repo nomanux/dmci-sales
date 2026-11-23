@@ -32,15 +32,15 @@ export default function ConsentStepV4({
 
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3 step={7} title="Customer Acceptance Policy & Client Consent" className="flex-shrink-0 pb-6">
+      <StepHeaderV3 hideStep step={7} title="Customer Acceptance Policy & Client Consent" className="flex-shrink-0 pb-6">
         Please review the Customer Acceptance Policy and provide your consent before proceeding to the next step.
       </StepHeaderV3>
 
-      <div className="flex min-h-0 flex-col overflow-hidden bg-white md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
+      <div className="flex min-h-0 flex-col overflow-hidden bg-white pt-6 md:flex-1 md:rounded-xl md:border md:border-solid md:border-gray-200">
 
       {/* Same text scale as Terms and Data Privacy; no box, one left edge for text and consents. */}
       <div className="md:flex-1 md:min-h-0 md:overflow-y-auto">
-        <div className="px-4 pb-5 pt-1 text-[14px] leading-6 text-gray-700 md:px-8">
+        <div className="px-4 pb-5 text-[14px] leading-6 text-gray-700 md:px-8">
           <ConsentPolicyText />
         </div>
       </div>
