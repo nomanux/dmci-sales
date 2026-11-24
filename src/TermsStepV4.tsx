@@ -2,6 +2,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Checkbox from "./Checkbox";
 import StepHeaderV3 from "./StepHeaderV3";
+import { File01Icon } from "hugeicons-react";
 import "./RepresentativeDetailsStepV3.css";
 
 /**
@@ -174,7 +175,7 @@ export default function TermsStepV4({
   // Fills the visible area so only the text column scrolls (one scrollbar), not the page too.
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3 hideStep step={5} title="Terms and Conditions" className="flex-shrink-0 pb-6">
+      <StepHeaderV3 hideStep step={6} total={9} icon={File01Icon} title="Terms and Conditions" className="flex-shrink-0 pb-6">
         Please read the terms and conditions carefully before proceeding next step.
       </StepHeaderV3>
 

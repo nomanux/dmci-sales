@@ -2,6 +2,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Checkbox from "./Checkbox";
 import StepHeaderV3 from "./StepHeaderV3";
+import { TaskDone01Icon } from "hugeicons-react";
 import "./RepresentativeDetailsStepV3.css";
 import { ChevronDownIcon, ChevronUpIcon } from "./icons";
 import { AGREEMENTS as TERMS_AGREEMENTS, TermsAgreementText } from "./TermsStep";
@@ -389,7 +390,7 @@ export default function ReviewStepV4({
 
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3 hideStep step={8} title="Review & Submit" className="flex-shrink-0 pb-6">
+      <StepHeaderV3 hideStep step={9} total={9} icon={TaskDone01Icon} title="Review & Submit" className="flex-shrink-0 pb-6">
         Review the details below to ensure they are correct and up to date before submission.
       </StepHeaderV3>
 

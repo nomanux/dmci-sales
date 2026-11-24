@@ -531,7 +531,7 @@ export default function IdentityVerificationStepV4({
 }) {
   return (
     <section className="form-lg w-full md:max-h-full rd-v3 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3 hideStep step={3} title="Upload your government ID" className="flex-shrink-0 pb-6">
+      <StepHeaderV3 hideStep step={3} total={9} title="Upload your government ID" className="flex-shrink-0 pb-6">
         Upload the front of your ID. We read your details from the card and fill in the form for you.{" "}
         <a href="#" className="font-semibold text-brand-600 underline hover:text-brand-700">
           See accepted IDs

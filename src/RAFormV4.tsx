@@ -4,6 +4,7 @@ import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import RepresentativeDetailsStepV4, { type SectionNav } from "./RepresentativeDetailsStepV4";
 import BuyerPropertyStepV4 from "./BuyerPropertyStepV4";
 import IdentityVerificationStepV4 from "./IdentityVerificationStepV4";
+import AdditionalDocumentsStepV4 from "./AdditionalDocumentsStepV4";
 import TermsStepV4 from "./TermsStepV4";
 import DataPrivacyStepV4 from "./DataPrivacyStepV4";
 import ConsentStepV4 from "./ConsentStepV4";
@@ -236,17 +237,18 @@ const PREVIEW_EXAMPLES: ExamplePhoto[] = THUMBNAIL_ATTEMPTS.map(({ photo, label,
   accepted: status === "accepted",
 }));
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 const BUYER_PROPERTY_STEP = 1;
 const BUYER_DETAILS_STEP = 2;
 const IDENTITY_STEP = 3;
 const SELFIE_STEP = 4;
-const TERMS_STEP = 5;
-const PRIVACY_STEP = 6;
-const CONSENT_STEP = 7;
-const REVIEW_STEP = 8;
+const DOCUMENTS_STEP = 5;
+const TERMS_STEP = 6;
+const PRIVACY_STEP = 7;
+const CONSENT_STEP = 8;
+const REVIEW_STEP = 9;
 // Steps that have a screen in this prototype; the rest can't be opened yet.
-const STEPS_WITH_CONTENT = [BUYER_PROPERTY_STEP, BUYER_DETAILS_STEP, IDENTITY_STEP, SELFIE_STEP, TERMS_STEP, PRIVACY_STEP, CONSENT_STEP, REVIEW_STEP];
+const STEPS_WITH_CONTENT = [BUYER_PROPERTY_STEP, BUYER_DETAILS_STEP, IDENTITY_STEP, SELFIE_STEP, DOCUMENTS_STEP, TERMS_STEP, PRIVACY_STEP, CONSENT_STEP, REVIEW_STEP];
 // URL slug per step (index = step - 1), shown as /ra-form4?step=<slug> so the
 // address bar tracks the current step and a refresh reopens it.
 const STEP_SLUGS = [
@@ -254,6 +256,7 @@ const STEP_SLUGS = [
   "representative-details",
   "identity-verification",
   "live-selfie",
+  "additional-documents",
   "terms-and-conditions",
   "data-privacy",
   "consent-and-acceptance",
@@ -603,6 +606,7 @@ export default function RAFormV4() {
     "Representative details",
     "Identity verification",
     "Live selfie",
+    "Additional documents",
     "Terms & conditions",
     "Data privacy",
     "Consent & acceptance",
@@ -969,6 +973,8 @@ export default function RAFormV4() {
           </div>
           {currentStep === BUYER_PROPERTY_STEP || currentStep === BUYER_DETAILS_STEP ? null : currentStep === IDENTITY_STEP ? (
             <IdentityVerificationStepV4 onReadyChange={setIdentityReady} />
+          ) : currentStep === DOCUMENTS_STEP ? (
+            <AdditionalDocumentsStepV4 />
           ) : currentStep === TERMS_STEP ? (
             <TermsStepV4 onReadyChange={setTermsReady} />
           ) : currentStep === PRIVACY_STEP ? (
@@ -981,6 +987,7 @@ export default function RAFormV4() {
             <section className="rd-v3 w-full md:max-h-full flex flex-col px-4 pt-4 md:px-0 md:pt-0">
               <StepHeaderV3 hideStep
                 step={4}
+                total={9}
                 title="Capture Live Selfie with ID"
                 className="flex-shrink-0 pb-6"
               >

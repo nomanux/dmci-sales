@@ -2715,7 +2715,7 @@ export default function RepresentativeDetailsStepV4({ onNavChange }: { onNavChan
     <div ref={rootRef} className="form-lg rd-v3 rd-v4 w-full max-w-[800px] px-4 pb-6 pt-4 md:px-0 md:pt-0">
       <div className="min-w-0">
         {/* Same step banner as step 1, so every step opens the same way. */}
-        <StepHeaderV3 hideStep step={2} title="Representative Details" className="pb-6">
+        <StepHeaderV3 hideStep step={2} total={9} title="Representative Details" className="pb-6">
           Enter the buyer's details exactly as they appear on their ID.
         </StepHeaderV3>
 

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Checkbox from "./Checkbox";
 import StepHeaderV3 from "./StepHeaderV3";
+import { Shield01Icon } from "hugeicons-react";
 import "./RepresentativeDetailsStepV3.css";
 
 /**
@@ -32,7 +33,7 @@ export default function ConsentStepV4({
 
   return (
     <section className="antialiased w-full md:max-h-full rd-v3 flex flex-col px-4 pt-4 md:px-0 md:pt-0">
-      <StepHeaderV3 hideStep step={7} title="Customer Acceptance Policy & Client Consent" className="flex-shrink-0 pb-6">
+      <StepHeaderV3 hideStep step={8} total={9} icon={Shield01Icon} title="Customer Acceptance Policy & Client Consent" className="flex-shrink-0 pb-6">
         Please review the Customer Acceptance Policy and provide your consent before proceeding to the next step.
       </StepHeaderV3>
 

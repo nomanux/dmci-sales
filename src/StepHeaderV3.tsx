@@ -27,6 +27,8 @@ export default function StepHeaderV3({
   titleSize = "md:text-[22px]",
   plain = false,
   hideStep = false,
+  total = TOTAL,
+  icon,
 }: {
   title: string;
   step: number;
@@ -38,6 +40,10 @@ export default function StepHeaderV3({
   plain?: boolean;
   /** Drop the "Step N of 8" line: the sidebar and the ring already show it. */
   hideStep?: boolean;
+  /** Steps in the flow; v4 has 9 (Additional documents added). */
+  total?: number;
+  /** Icon override, for flows whose step numbers differ from ICONS. */
+  icon?: typeof Building03Icon;
 }) {
   if (plain) {
     return (
@@ -47,8 +53,8 @@ export default function StepHeaderV3({
       </div>
     );
   }
-  const Icon = ICONS[step] ?? ICONS[1];
-  const pct = Math.round((step / TOTAL) * 100);
+  const Icon = icon ?? ICONS[step] ?? ICONS[1];
+  const pct = Math.round((step / total) * 100);
   return (
     <div className={className}>
       <div className="flex items-center gap-4 rounded-2xl border border-solid border-[#E0E8FB] bg-[linear-gradient(135deg,#EEF4FF_0%,#F5F3FF_55%,#FDF2FA_100%)] px-4 py-4 md:px-5">
@@ -58,19 +64,30 @@ export default function StepHeaderV3({
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           {!hideStep && (
             <p className="m-0 text-xs font-semibold leading-4 text-brand-400">
-              Step {step} of {TOTAL}
+              Step {step} of {total}
             </p>
           )}
           <h1 className={`m-0 text-lg font-bold leading-6 tracking-[-0.02em] text-gray-900 ${titleSize} md:leading-7`}>{title}</h1>
           {children && <p className="m-0 text-[13px] leading-5 text-gray-600">{children}</p>}
         </div>
-        <div
-          className="grid size-14 flex-shrink-0 place-items-center rounded-full"
-          style={{ background: `conic-gradient(#0a4de0 ${pct}%, #ffffff 0)` }}
-          aria-hidden="true"
-        >
-          <span className="grid size-[44px] place-items-center rounded-full bg-white text-xs font-semibold text-brand-500">
-            {step}/{TOTAL}
+        {/* Progress ring: an SVG arc so both ends are round. */}
+        <div className="relative grid size-14 flex-shrink-0 place-items-center" aria-hidden="true">
+          <svg className="absolute inset-0 -rotate-90" width="56" height="56" viewBox="0 0 56 56">
+            <circle cx="28" cy="28" r="25" fill="none" stroke="#ffffff" strokeWidth="6" />
+            <circle
+              cx="28"
+              cy="28"
+              r="25"
+              fill="none"
+              stroke="#0a4de0"
+              strokeWidth="6"
+              strokeLinecap="round"
+              pathLength={100}
+              strokeDasharray={`${pct} 100`}
+            />
+          </svg>
+          <span className="relative grid size-[44px] place-items-center rounded-full bg-white text-xs font-semibold text-brand-500">
+            {step}/{total}
           </span>
         </div>
       </div>
