@@ -20,6 +20,7 @@ export const DOCUMENT_TYPES = [
   "Birth Certificate",
   "SEC Registration",
   "Marriage Certificate",
+  "Others",
 ] as const;
 type DocType = (typeof DOCUMENT_TYPES)[number];
 
