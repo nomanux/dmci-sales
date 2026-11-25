@@ -2,6 +2,7 @@
 // Ported from Claude outputs/dmci-upload-additional-documents-themed.html.
 import { useEffect, useRef, useState, type DragEvent, type KeyboardEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { createPortal } from "react-dom";
 import { FileUploadIcon } from "hugeicons-react";
 import StepHeaderV3 from "./StepHeaderV3";
 import "./RepresentativeDetailsStepV3.css";
@@ -30,6 +31,129 @@ const ext = (n: string) => n.split(".").pop()?.toLowerCase() ?? "";
 const tag = (n: string) => (ext(n) === "pdf" ? "PDF" : ext(n) === "jpeg" ? "JPG" : ext(n).toUpperCase());
 const fmtSize = (b: number) => (b >= 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB");
 
+
+/** Type tag on a document row: opens a small menu to move the file to another type. */
+function RowTypeMenu({
+  value,
+  fileName,
+  disabled,
+  onChange,
+}: {
+  value: DocType;
+  fileName: string;
+  disabled?: boolean;
+  onChange: (c: DocType) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  // Fixed position from the tag's box; flips above when there's no room below.
+  // When up, `top` holds the distance from the viewport bottom.
+  const [pos, setPos] = useState<{ top: number; right: number; up: boolean } | null>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const MENU_H = 8 + DOCUMENT_TYPES.length * 40;
+
+  const place = () => {
+    const r = btnRef.current?.getBoundingClientRect();
+    if (!r) return;
+    const up = window.innerHeight - r.bottom < MENU_H + 12 && r.top > MENU_H + 12;
+    setPos({ top: up ? window.innerHeight - r.top + 6 : r.bottom + 6, right: window.innerWidth - r.right, up });
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    place();
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (!wrapRef.current?.contains(t) && !menuRef.current?.contains(t)) setOpen(false);
+    };
+    // The menu is fixed, so close it when the page or a parent scrolls.
+    const close = () => setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (open && pos) menuRef.current?.querySelector<HTMLButtonElement>('[aria-selected="true"]')?.focus({ preventScroll: true });
+  }, [open, pos]);
+
+  const onKey = (e: KeyboardEvent) => {
+    const opts = [...(menuRef.current?.querySelectorAll<HTMLButtonElement>("[role=option]") ?? [])];
+    const i = opts.indexOf(document.activeElement as HTMLButtonElement);
+    if (e.key === "ArrowDown") { e.preventDefault(); opts[Math.min(i + 1, opts.length - 1)]?.focus(); }
+    if (e.key === "ArrowUp") { e.preventDefault(); opts[Math.max(i - 1, 0)]?.focus(); }
+    if (e.key === "Escape") { e.stopPropagation(); setOpen(false); btnRef.current?.focus(); }
+  };
+
+  return (
+    <div ref={wrapRef} className="relative flex-none">
+      <button
+        ref={btnRef}
+        type="button"
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label={`Document type for ${fileName}: ${value}`}
+        onClick={() => setOpen((o) => !o)}
+        className={`inline-flex h-7 max-w-[180px] items-center gap-1.5 rounded-full border border-solid px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:cursor-default ${
+          open ? "border-brand-400 bg-brand-25 text-brand-600" : "border-[#c7d7fe] bg-brand-25 text-brand-600 enabled:cursor-pointer enabled:hover:border-brand-400"
+        }`}
+      >
+        <span className="truncate">{value}</span>
+        <svg className={`flex-none transition-transform ${open ? "rotate-180" : ""}`} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+      </button>
+      {createPortal(
+      <AnimatePresence>
+        {open && pos && (
+          <motion.div
+            ref={menuRef}
+            role="listbox"
+            aria-label="Document type"
+            onKeyDown={onKey}
+            style={pos.up ? { position: "fixed", right: pos.right, bottom: pos.top } : { position: "fixed", right: pos.right, top: pos.top }}
+            initial={{ opacity: 0, y: pos.up ? 4 : -4, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: pos.up ? 4 : -4, scale: 0.98 }}
+            transition={{ duration: 0.14 }}
+            className={`z-[45] flex w-56 ${pos.up ? "origin-bottom-right" : "origin-top-right"} flex-col gap-1 rounded-lg border border-solid border-gray-200 bg-white p-1.5 shadow-[0_12px_16px_-4px_#0a0d1214,0_4px_6px_-2px_#0a0d1208]`}
+          >
+            {DOCUMENT_TYPES.map((c) => {
+              const on = c === value;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  role="option"
+                  aria-selected={on}
+                  onClick={() => {
+                    setOpen(false);
+                    if (!on) onChange(c);
+                  }}
+                  className={`flex w-full cursor-pointer items-center gap-2 rounded-md border-0 px-2.5 py-2 text-left text-[13px] font-medium text-gray-900 outline-none ${
+                    on ? "bg-brand-25" : "bg-transparent hover:bg-gray-50 focus-visible:bg-gray-50"
+                  }`}
+                >
+                  <span className="flex-1 truncate">{c}</span>
+                  {on && (
+                    <svg className="flex-none text-brand-500" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+                  )}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>,
+        document.body,
+      )}
+    </div>
+  );
+}
 
 /** File icon from the design (document with a paperclip), used on each document row. */
 function DocFileIcon({ size = 18 }: { size?: number }) {
@@ -150,11 +274,9 @@ export default function AdditionalDocumentsStepV4() {
     const errs: string[] = [];
     const ok: File[] = [];
     list.forEach((f) => {
-      const dup = (x: File) => x.name === f.name && x.size === f.size;
       if (!OK_EXT.includes(ext(f.name))) errs.push(`${f.name}: only JPEG, JPG, PNG, WebP, HEIC or PDF files are allowed.`);
       else if (f.size > MAX) errs.push(`${f.name}: ${fmtSize(f.size)} is over the 10 MB limit.`);
       else if (!f.size) errs.push(`${f.name}: file is empty.`);
-      else if (ok.some(dup) || items.some((i) => dup(i.file))) errs.push(`${f.name}: already added.`);
       else ok.push(f);
     });
     setErrors(errs);
@@ -368,14 +490,14 @@ export default function AdditionalDocumentsStepV4() {
           {items.length === 0 ? (
             <div className="rounded-xl border border-dashed border-gray-300 bg-[#fdfdfd] px-4 py-7 text-center text-gray-500">No documents yet. Pick a type and upload a file above.</div>
           ) : (
-            <ul className="m-0 list-none overflow-hidden rounded-xl border border-solid border-gray-200 p-0">
+            <ul className="m-0 list-none rounded-xl border border-solid border-gray-200 p-0">
               {items.map((i) => (
                 <motion.li
                   key={`${i.id}-${i.cat}`}
                   initial={i.isNew ? { backgroundColor: i.uploading ? "#f9fafb" : "#ecfdf3" } : false}
                   animate={{ backgroundColor: i.uploading ? "#f9fafb" : "#ffffff" }}
                   transition={{ duration: i.uploading ? 0.2 : 1.4 }}
-                  className="flex items-center gap-3 border-0 border-b border-solid border-gray-200 px-3.5 py-3 last:border-b-0"
+                  className="flex items-center gap-3 border-0 border-b border-solid border-gray-200 px-3.5 py-3 first:rounded-t-xl last:rounded-b-xl last:border-b-0"
                 >
                   {i.uploading ? (
                     <>
@@ -403,16 +525,7 @@ export default function AdditionalDocumentsStepV4() {
                           <span className="min-w-10 text-right text-sm font-medium text-gray-700 tabular-nums">{Math.round(i.progress)}%</span>
                         </div>
                       </div>
-                      <select
-                        title="Change document type"
-                        aria-label={`Document type for ${i.file.name}`}
-                        value={i.cat}
-                        onChange={(e) => moveTo(i.id, e.target.value as DocType)}
-                        disabled={i.uploading}
-                        className="h-[22px] max-w-[150px] cursor-pointer appearance-none truncate rounded-md border border-solid border-[#c7d7fe] bg-brand-25 bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2210%22%20height=%2210%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%230B2E83%22%20stroke-width=%223%22%3E%3Cpath%20d=%22m6%209%206%206%206-6%22/%3E%3C/svg%3E')] bg-[length:10px] bg-[right_8px_center] bg-no-repeat pl-2.5 pr-6 text-xs font-semibold text-brand-600 enabled:hover:bg-[#DDE7FF] disabled:cursor-default disabled:opacity-100 sm:max-w-[200px]"
-                      >
-                        {DOCUMENT_TYPES.map((c) => <option key={c} value={c}>{c}</option>)}
-                      </select>
+                      <RowTypeMenu value={i.cat} fileName={i.file.name} disabled={i.uploading} onChange={(c) => moveTo(i.id, c)} />
                       <button type="button" title="Cancel upload" aria-label={`Cancel upload of ${i.file.name}`} onClick={() => cancelUpload(i.id)} className="grid size-9 flex-none cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-gray-500 hover:bg-[#fef3f2] hover:text-error-500">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
                       </button>
@@ -433,16 +546,7 @@ export default function AdditionalDocumentsStepV4() {
                       )}
                     </div>
                   </div>
-                  <select
-                        title="Change document type"
-                        aria-label={`Document type for ${i.file.name}`}
-                        value={i.cat}
-                        onChange={(e) => moveTo(i.id, e.target.value as DocType)}
-                        disabled={i.uploading}
-                        className="h-[22px] max-w-[150px] cursor-pointer appearance-none truncate rounded-md border border-solid border-[#c7d7fe] bg-brand-25 bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2210%22%20height=%2210%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%230B2E83%22%20stroke-width=%223%22%3E%3Cpath%20d=%22m6%209%206%206%206-6%22/%3E%3C/svg%3E')] bg-[length:10px] bg-[right_8px_center] bg-no-repeat pl-2.5 pr-6 text-xs font-semibold text-brand-600 enabled:hover:bg-[#DDE7FF] disabled:cursor-default disabled:opacity-100 sm:max-w-[200px]"
-                      >
-                        {DOCUMENT_TYPES.map((c) => <option key={c} value={c}>{c}</option>)}
-                      </select>
+                  <RowTypeMenu value={i.cat} fileName={i.file.name} disabled={i.uploading} onChange={(c) => moveTo(i.id, c)} />
                   <div className="flex flex-none items-center gap-0.5">
                     <button type="button" title="View" aria-label={`View ${i.file.name}`} onClick={() => setModal({ kind: "preview", id: i.id })} className="grid size-9 cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-gray-500 hover:bg-brand-25 hover:text-brand-600">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" /><circle cx="12" cy="12" r="3" /></svg>
