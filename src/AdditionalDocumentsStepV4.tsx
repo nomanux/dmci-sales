@@ -1,8 +1,8 @@
 // RA form v4 step 5: optional supporting documents, after Live selfie and before Terms.
 // Ported from Claude outputs/dmci-upload-additional-documents-themed.html.
-import { useEffect, useRef, useState, type DragEvent, type KeyboardEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type DragEvent, type KeyboardEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { FileAttachmentIcon, FileUploadIcon } from "hugeicons-react";
+import { Baby01Icon, Building03Icon, File01Icon, FileUploadIcon, PlusSignCircleIcon, WeddingIcon } from "hugeicons-react";
 import StepHeaderV3 from "./StepHeaderV3";
 import "./RepresentativeDetailsStepV3.css";
 
@@ -31,19 +31,17 @@ const tag = (n: string) => (ext(n) === "pdf" ? "PDF" : ext(n) === "jpeg" ? "JPG"
 const fmtSize = (b: number) => (b >= 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB");
 const plural = (n: number) => `${n} file${n === 1 ? "" : "s"}`;
 
-const PATHS: Record<DocType | "", ReactNode> = {
-  "Birth Certificate": (<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /><circle cx="12" cy="13" r="2.5" /><path d="M8.5 19a3.5 3.5 0 0 1 7 0" /></>),
-  "SEC Registration": (<><path d="M3 21h18M5 21V9l7-5 7 5v12" /><path d="M9 21v-6h6v6" /></>),
-  "Marriage Certificate": (<><circle cx="9" cy="14" r="5" /><circle cx="15" cy="14" r="5" /><path d="m10 4 2 2 2-2" /></>),
-  Others: (<><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></>),
-  "": (<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></>),
+// Hugeicons (stroke 1.5), the set the rest of the v4 form uses.
+const TYPE_ICONS: Record<DocType | "", typeof File01Icon> = {
+  "Birth Certificate": Baby01Icon,
+  "SEC Registration": Building03Icon,
+  "Marriage Certificate": WeddingIcon,
+  Others: PlusSignCircleIcon,
+  "": File01Icon,
 };
 function TypeIcon({ type, size = 16 }: { type: DocType | ""; size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      {PATHS[type]}
-    </svg>
-  );
+  const Icon = TYPE_ICONS[type];
+  return <Icon size={size} strokeWidth={1.5} color="currentColor" aria-hidden="true" />;
 }
 
 type Item = {
@@ -398,7 +396,7 @@ export default function AdditionalDocumentsStepV4() {
                   {i.uploading ? (
                     <>
                       <span className="grid size-9 flex-none place-items-center self-start rounded-lg bg-gray-100 text-gray-500">
-                        <FileAttachmentIcon size={18} strokeWidth={1.5} color="currentColor" aria-hidden="true" />
+                        <File01Icon size={18} strokeWidth={1.5} color="currentColor" aria-hidden="true" />
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="truncate font-medium text-gray-900" title={i.file.name}>{i.file.name}</div>
