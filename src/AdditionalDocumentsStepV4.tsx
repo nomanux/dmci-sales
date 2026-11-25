@@ -2,14 +2,15 @@
 // Ported from Claude outputs/dmci-upload-additional-documents-themed.html.
 import { useEffect, useRef, useState, type DragEvent, type KeyboardEvent } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Baby01Icon, Building03Icon, File01Icon, FileUploadIcon, PlusSignCircleIcon, WeddingIcon } from "hugeicons-react";
+import { FileUploadIcon } from "hugeicons-react";
 import StepHeaderV3 from "./StepHeaderV3";
 import "./RepresentativeDetailsStepV3.css";
 
 /**
  * Step 5 of the v4 RA form — "Upload Additional Documents" (optional).
- * Pick a type and a file in any order (or drop files on the bar); once both
- * are set the files are added under that type. "Others" asks for a name.
+ * Pick a type, then choose one file (or drop one file on the bar); it is
+ * added under that type. One file per upload. Choose file stays off
+ * until a type is picked.
  * Each file can change type, open in a preview, or be deleted after a
  * confirm. Nothing here blocks the shell's Next.
  */
@@ -18,30 +19,31 @@ export const DOCUMENT_TYPES = [
   "Birth Certificate",
   "SEC Registration",
   "Marriage Certificate",
-  "Others",
 ] as const;
 type DocType = (typeof DOCUMENT_TYPES)[number];
 
-const MAX = 20 * 1024 * 1024;
-const OK_EXT = ["pdf", "jpg", "jpeg", "png"];
-const ACCEPT = ".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png";
+const MAX = 10 * 1024 * 1024;
+const OK_EXT = ["jpeg", "jpg", "png", "webp", "heic", "pdf"];
+const ACCEPT = ".jpeg,.jpg,.png,.webp,.heic,.pdf,image/jpeg,image/png,image/webp,image/heic,application/pdf";
 
 const ext = (n: string) => n.split(".").pop()?.toLowerCase() ?? "";
 const tag = (n: string) => (ext(n) === "pdf" ? "PDF" : ext(n) === "jpeg" ? "JPG" : ext(n).toUpperCase());
 const fmtSize = (b: number) => (b >= 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB");
-const plural = (n: number) => `${n} file${n === 1 ? "" : "s"}`;
 
-// Hugeicons (stroke 1.5), the set the rest of the v4 form uses.
-const TYPE_ICONS: Record<DocType | "", typeof File01Icon> = {
-  "Birth Certificate": Baby01Icon,
-  "SEC Registration": Building03Icon,
-  "Marriage Certificate": WeddingIcon,
-  Others: PlusSignCircleIcon,
-  "": File01Icon,
-};
-function TypeIcon({ type, size = 16 }: { type: DocType | ""; size?: number }) {
-  const Icon = TYPE_ICONS[type];
-  return <Icon size={size} strokeWidth={1.5} color="currentColor" aria-hidden="true" />;
+
+/** File icon from the design (document with a paperclip), used on each document row. */
+function DocFileIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M13.3307 4.66634V4.53301C13.3307 3.4129 13.3307 2.85285 13.1127 2.42503C12.921 2.0487 12.615 1.74274 12.2387 1.55099C11.8109 1.33301 11.2508 1.33301 10.1307 1.33301H5.86406C4.74396 1.33301 4.1839 1.33301 3.75608 1.55099C3.37976 1.74274 3.0738 2.0487 2.88205 2.42503C2.66406 2.85285 2.66406 3.4129 2.66406 4.53301V11.4663C2.66406 12.5864 2.66406 13.1465 2.88205 13.5743C3.0738 13.9506 3.37976 14.2566 3.75608 14.4484C4.1839 14.6663 4.74396 14.6663 5.86406 14.6663H8.33073M8.33073 7.33301H5.33073M7.66406 9.99967H5.33073M10.6641 4.66634H5.33073M11.9974 11.9997V8.33301C11.9974 7.78072 12.4451 7.33301 12.9974 7.33301C13.5497 7.33301 13.9974 7.78072 13.9974 8.33301V11.9997C13.9974 13.1042 13.102 13.9997 11.9974 13.9997C10.8928 13.9997 9.9974 13.1042 9.9974 11.9997V9.33301"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 type Item = {
@@ -67,12 +69,10 @@ const timeLeft = (i: Item) => {
 };
 type Modal = { kind: "preview" | "delete"; id: number } | null;
 
-const label = (i: Item) => (i.cat === "Others" ? i.other : i.cat);
+const label = (i: Item) => i.cat;
 
 export default function AdditionalDocumentsStepV4() {
   const [sel, setSel] = useState<DocType | "">("");
-  const [otherName, setOtherName] = useState("");
-  const [staged, setStaged] = useState<File[]>([]);
   const [items, setItems] = useState<Item[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -86,11 +86,9 @@ export default function AdditionalDocumentsStepV4() {
   const tbtnRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const otherRef = useRef<HTMLInputElement>(null);
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
-  const typeLabel = sel === "Others" ? otherName.trim() : sel;
 
   const toast = (text: string) => setToastText({ text, key: Date.now() });
   useEffect(() => {
@@ -122,44 +120,45 @@ export default function AdditionalDocumentsStepV4() {
     return () => document.removeEventListener("keydown", onKey);
   }, [modal]);
 
-  // Add the staged files once a type (and for Others, a name) is set.
-  const commit = (files: File[], cat: DocType | "", name: string) => {
-    const t = cat === "Others" ? name.trim() : cat;
-    if (!files.length || !cat || !t) return false;
-    const added = files.map((f) => ({ id: ++uid.current, file: f, cat, other: cat === "Others" ? t : "", url: URL.createObjectURL(f), isNew: true, uploading: true, progress: 0, speed: 0, justDone: false }));
+  // Add files under the picked type; the type resets for the next upload.
+  const commit = (files: File[], cat: DocType) => {
+    const added = files.map((f) => ({ id: ++uid.current, file: f, cat, other: "", url: URL.createObjectURL(f), isNew: true, uploading: true, progress: 0, speed: 0, justDone: false }));
     setItems((prev) => [...prev.map((i) => ({ ...i, isNew: false })), ...added]);
-    toast(`Uploading ${plural(added.length)} to ${t}`);
-    setStaged([]);
+    toast(`Uploading ${files[0].name} to ${cat}`);
     setSel("");
-    setOtherName("");
-    return true;
   };
 
   const pickType = (c: DocType) => {
     setSel(c);
+    setErrors([]);
     setMenuOpen(false);
-    if (c === "Others") setTimeout(() => otherRef.current?.focus(), 0);
-    else commit(staged, c, "");
   };
 
   const take = (list: File[]) => {
+    if (!list.length) return;
+    // One file at a time: a drop with several files is refused.
+    if (list.length > 1) {
+      setErrors(["Upload one file at a time."]);
+      return;
+    }
+    // A type comes first (Choose file is off until then; this covers drops).
+    if (!sel) {
+      setErrors(["Select a document type first."]);
+      setNudge((n) => n + 1);
+      return;
+    }
     const errs: string[] = [];
-    const next = [...staged];
+    const ok: File[] = [];
     list.forEach((f) => {
       const dup = (x: File) => x.name === f.name && x.size === f.size;
-      if (!OK_EXT.includes(ext(f.name))) errs.push(`${f.name}: only PDF, JPG or PNG files are allowed.`);
-      else if (f.size > MAX) errs.push(`${f.name}: ${fmtSize(f.size)} is over the 20 MB limit.`);
+      if (!OK_EXT.includes(ext(f.name))) errs.push(`${f.name}: only JPEG, JPG, PNG, WebP, HEIC or PDF files are allowed.`);
+      else if (f.size > MAX) errs.push(`${f.name}: ${fmtSize(f.size)} is over the 10 MB limit.`);
       else if (!f.size) errs.push(`${f.name}: file is empty.`);
-      else if (next.some(dup) || items.some((i) => dup(i.file))) errs.push(`${f.name}: already added.`);
-      else next.push(f);
+      else if (ok.some(dup) || items.some((i) => dup(i.file))) errs.push(`${f.name}: already added.`);
+      else ok.push(f);
     });
     setErrors(errs);
-    // Others waits for the user to finish typing the name.
-    const ready = sel && sel !== "Others" ? commit(next, sel, "") : false;
-    if (!ready) {
-      setStaged(next);
-      if (next.length && !typeLabel) setNudge((n) => n + 1);
-    }
+    if (ok.length) commit(ok, sel);
   };
 
   const onDrop = (e: DragEvent) => {
@@ -275,8 +274,8 @@ export default function AdditionalDocumentsStepV4() {
                   sel ? "font-semibold text-gray-900" : "text-gray-500"
                 }`}
               >
-                <span className={`grid size-7 flex-none place-items-center rounded-md ${sel ? "bg-brand-600 text-white" : "bg-gray-100 text-gray-500"}`}>
-                  <TypeIcon type={sel} />
+                <span className="grid size-7 flex-none place-items-center rounded-md bg-gray-100 text-gray-500">
+                  <DocFileIcon size={16} />
                 </span>
                 <span className="min-w-0 flex-1 truncate">{sel || "Select document type"}</span>
                 <svg className={`flex-none text-gray-500 transition-transform ${menuOpen ? "rotate-180" : ""}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
@@ -292,10 +291,9 @@ export default function AdditionalDocumentsStepV4() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute -left-1 top-[calc(100%+8px)] z-20 max-h-80 w-[min(340px,calc(100vw-32px))] overflow-auto rounded-lg border border-solid border-gray-200 bg-white p-1.5 shadow-[0_20px_24px_-4px_#0a0d1214,0_8px_8px_-4px_#0a0d1208]"
+                    className="absolute -left-1 top-[calc(100%+8px)] z-20 flex max-h-80 flex-col gap-1 w-[min(340px,calc(100vw-32px))] overflow-auto rounded-lg border border-solid border-gray-200 bg-white p-1.5 shadow-[0_20px_24px_-4px_#0a0d1214,0_8px_8px_-4px_#0a0d1208]"
                   >
                     {DOCUMENT_TYPES.map((c) => {
-                      const n = items.filter((i) => i.cat === c).length;
                       const on = c === sel;
                       return (
                         <button
@@ -309,7 +307,6 @@ export default function AdditionalDocumentsStepV4() {
                           }`}
                         >
                           <span className="flex-1">{c}</span>
-                          {n > 0 && <span className="rounded-full bg-success-50 px-[7px] py-px text-[11px] font-semibold text-success-700">{n}</span>}
                         </button>
                       );
                     })}
@@ -321,7 +318,9 @@ export default function AdditionalDocumentsStepV4() {
             <button
               type="button"
               onClick={() => pickerRef.current?.click()}
-              className="flex h-full flex-none cursor-pointer items-center gap-2 rounded-lg border-0 bg-brand-600 px-3.5 font-semibold text-white shadow-[0_1px_2px_#0a0d120d,inset_0_-2px_0_#0a0d120d,inset_0_0_0_1px_#0a0d122e] hover:bg-brand-700 sm:px-[18px] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[rgba(26,86,219,.25)]"
+              disabled={!sel}
+              title={sel ? undefined : "Select a document type first"}
+              className="flex h-full flex-none cursor-pointer items-center gap-2 rounded-lg border-0 bg-brand-600 px-3.5 font-semibold text-white shadow-[0_1px_2px_#0a0d120d,inset_0_-2px_0_#0a0d120d,inset_0_0_0_1px_#0a0d122e] enabled:hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-[#8a9cc6] disabled:shadow-none sm:px-[18px] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[rgba(26,86,219,.25)]"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" /></svg>
               <span className="max-sm:sr-only">Choose file</span>
@@ -329,7 +328,6 @@ export default function AdditionalDocumentsStepV4() {
             <input
               ref={pickerRef}
               type="file"
-              multiple
               accept={ACCEPT}
               className="sr-only"
               tabIndex={-1}
@@ -340,33 +338,7 @@ export default function AdditionalDocumentsStepV4() {
             />
           </div>
 
-          {sel === "Others" && (
-            <input
-              ref={otherRef}
-              value={otherName}
-              onChange={(e) => setOtherName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && commit(staged, sel, otherName)}
-              onBlur={() => commit(staged, sel, otherName)}
-              placeholder="Type the document name"
-              maxLength={60}
-              aria-label="Other document name"
-              className="mt-2 h-11 w-full rounded-lg border border-solid border-gray-300 px-3.5 text-gray-900 shadow-[0_1px_2px_#0a0d120d] focus:outline focus:outline-[3px] focus:outline-[rgba(26,86,219,.25)]"
-            />
-          )}
-
-          {staged.length ? (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-[#93370D]">
-              <b className="font-semibold">{sel === "Others" && !typeLabel ? "Type the document name" : "Select document type"}</b> to add:
-              {staged.map((f, i) => (
-                <span key={f.name + i} className="inline-flex max-w-[240px] items-center gap-1 rounded-full border border-solid border-[#FEDF89] bg-[#FFFAEB] py-0.5 pl-2.5 pr-1 text-gray-900">
-                  <span className="truncate">{f.name}</span>
-                  <button type="button" aria-label={`Remove ${f.name}`} onClick={() => setStaged((p) => p.filter((_, j) => j !== i))} className="grid size-[22px] flex-none cursor-pointer place-items-center rounded-full border-0 bg-transparent text-sm leading-none text-gray-500 hover:bg-white hover:text-error-500">×</button>
-                </span>
-              ))}
-            </div>
-          ) : (
-            <p className="m-0 mt-2 text-xs text-gray-500">Pick a type and a file, in any order. Or drag files onto the bar. PDF, JPG or PNG, up to 20 MB.</p>
-          )}
+          <p className="m-0 mt-2 text-xs text-gray-500">JPEG, JPG, PNG, WebP, HEIC or PDF • Max 10 MB</p>
 
           {errors.length > 0 && (
             <div role="alert" className="mt-2 flex items-start gap-2 rounded-lg border border-solid border-[#fecdca] bg-[#fef3f2] px-2.5 py-2 text-xs text-[#b42318]">
@@ -376,10 +348,22 @@ export default function AdditionalDocumentsStepV4() {
             </div>
           )}
 
+          {/* Upload tips: amber note with a left bar, as in the design. */}
+          <div role="note" className="mt-5 rounded-lg border-0 border-l-[3px] border-solid border-[#F79009] bg-[#FFFAEB] px-4 py-3">
+            <p className="m-0 text-[13px] font-semibold leading-5 text-[#B54708]">Important</p>
+            <ul className="m-0 mt-1 flex list-none flex-col gap-0.5 p-0 text-[13px] leading-5 text-[#B54708]">
+              {["Make sure documents are clear, complete and readable."].map((tip) => (
+                <li key={tip} className="flex gap-2">
+                  <span aria-hidden="true">•</span>
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* List */}
           <div className="mb-2.5 mt-6 flex flex-wrap items-center justify-between gap-3">
             <h3 className="m-0 text-base font-semibold text-gray-900">Your documents</h3>
-            <span className="whitespace-nowrap rounded-full border border-solid border-[#B2CCFF] bg-brand-25 px-2 py-0.5 text-xs font-medium text-brand-600">{plural(items.length)}</span>
           </div>
           {items.length === 0 ? (
             <div className="rounded-xl border border-dashed border-gray-300 bg-[#fdfdfd] px-4 py-7 text-center text-gray-500">No documents yet. Pick a type and upload a file above.</div>
@@ -395,8 +379,8 @@ export default function AdditionalDocumentsStepV4() {
                 >
                   {i.uploading ? (
                     <>
-                      <span className="grid size-9 flex-none place-items-center self-start rounded-lg bg-gray-100 text-gray-500">
-                        <File01Icon size={18} strokeWidth={1.5} color="currentColor" aria-hidden="true" />
+                      <span className="grid size-9 flex-none place-items-center rounded-lg bg-gray-100 text-gray-500">
+                        <DocFileIcon size={16} />
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="truncate font-medium text-gray-900" title={i.file.name}>{i.file.name}</div>
@@ -422,13 +406,12 @@ export default function AdditionalDocumentsStepV4() {
                       <select
                         title="Change document type"
                         aria-label={`Document type for ${i.file.name}`}
-                        value={i.cat === "Others" ? "__other" : i.cat}
+                        value={i.cat}
                         onChange={(e) => moveTo(i.id, e.target.value as DocType)}
                         disabled={i.uploading}
                         className="h-[22px] max-w-[150px] cursor-pointer appearance-none truncate rounded-md border border-solid border-[#c7d7fe] bg-brand-25 bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2210%22%20height=%2210%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%230B2E83%22%20stroke-width=%223%22%3E%3Cpath%20d=%22m6%209%206%206%206-6%22/%3E%3C/svg%3E')] bg-[length:10px] bg-[right_8px_center] bg-no-repeat pl-2.5 pr-6 text-xs font-semibold text-brand-600 enabled:hover:bg-[#DDE7FF] disabled:cursor-default disabled:opacity-100 sm:max-w-[200px]"
                       >
-                        {i.cat === "Others" && <option value="__other">{i.other}</option>}
-                        {DOCUMENT_TYPES.filter((c) => c !== "Others").map((c) => <option key={c} value={c}>{c}</option>)}
+                        {DOCUMENT_TYPES.map((c) => <option key={c} value={c}>{c}</option>)}
                       </select>
                       <button type="button" title="Cancel upload" aria-label={`Cancel upload of ${i.file.name}`} onClick={() => cancelUpload(i.id)} className="grid size-9 flex-none cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-gray-500 hover:bg-[#fef3f2] hover:text-error-500">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
@@ -436,7 +419,9 @@ export default function AdditionalDocumentsStepV4() {
                     </>
                   ) : (
                     <>
-                  <span className={`grid size-9 flex-none place-items-center rounded-lg text-[10px] font-bold ${ext(i.file.name) === "pdf" ? "bg-[#fef3f2] text-[#b42318]" : "bg-brand-25 text-brand-500"}`}>{tag(i.file.name)}</span>
+                  <span className="grid size-9 flex-none place-items-center rounded-lg bg-gray-100 text-gray-500" title={tag(i.file.name)}>
+                    <DocFileIcon size={16} />
+                  </span>
                   <div className="min-w-0 flex-1">
                     <div className="truncate font-medium text-gray-900" title={i.file.name}>{i.file.name}</div>
                     <div className="mt-[3px] flex items-center gap-2">
@@ -451,13 +436,12 @@ export default function AdditionalDocumentsStepV4() {
                   <select
                         title="Change document type"
                         aria-label={`Document type for ${i.file.name}`}
-                        value={i.cat === "Others" ? "__other" : i.cat}
+                        value={i.cat}
                         onChange={(e) => moveTo(i.id, e.target.value as DocType)}
                         disabled={i.uploading}
                         className="h-[22px] max-w-[150px] cursor-pointer appearance-none truncate rounded-md border border-solid border-[#c7d7fe] bg-brand-25 bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2210%22%20height=%2210%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%230B2E83%22%20stroke-width=%223%22%3E%3Cpath%20d=%22m6%209%206%206%206-6%22/%3E%3C/svg%3E')] bg-[length:10px] bg-[right_8px_center] bg-no-repeat pl-2.5 pr-6 text-xs font-semibold text-brand-600 enabled:hover:bg-[#DDE7FF] disabled:cursor-default disabled:opacity-100 sm:max-w-[200px]"
                       >
-                        {i.cat === "Others" && <option value="__other">{i.other}</option>}
-                        {DOCUMENT_TYPES.filter((c) => c !== "Others").map((c) => <option key={c} value={c}>{c}</option>)}
+                        {DOCUMENT_TYPES.map((c) => <option key={c} value={c}>{c}</option>)}
                       </select>
                   <div className="flex flex-none items-center gap-0.5">
                     <button type="button" title="View" aria-label={`View ${i.file.name}`} onClick={() => setModal({ kind: "preview", id: i.id })} className="grid size-9 cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-gray-500 hover:bg-brand-25 hover:text-brand-600">
@@ -473,14 +457,6 @@ export default function AdditionalDocumentsStepV4() {
               ))}
             </ul>
           )}
-
-          <div className="mt-6 rounded-lg border-0 border-l-4 border-solid border-[#F79009] bg-[#FEF0C7] px-4 py-3 text-[#93370D]">
-            <b className="mb-0.5 block font-semibold">Important</b>
-            <ul className="m-0 mt-1 pl-[18px]">
-              <li>Make sure documents are clear, complete and readable.</li>
-              <li>For multi-page documents, upload a single PDF instead of separate images.</li>
-            </ul>
-          </div>
         </div>
       </div>
 
