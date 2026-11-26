@@ -4,6 +4,7 @@ const config: Config = {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./mydmci/**/*.{html,js,ts,jsx,tsx}",
     "./.storybook/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
