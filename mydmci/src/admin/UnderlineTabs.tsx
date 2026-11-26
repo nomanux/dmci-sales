@@ -19,7 +19,7 @@ export default function UnderlineTabs<K extends string>({
     <div
       role="tablist"
       aria-label={label}
-      className="flex overflow-x-auto border-0 border-b border-solid border-[#e5e7eb] px-6 pt-4"
+      className="flex overflow-x-auto overflow-y-hidden [scrollbar-width:none] border-0 border-b border-solid border-[#e5e7eb] px-6 pt-4"
     >
       {tabs.map((t) => {
         const selected = t.key === value;
@@ -30,7 +30,7 @@ export default function UnderlineTabs<K extends string>({
             role="tab"
             aria-selected={selected}
             onClick={() => onChange(t.key)}
-            className={`-mb-px flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap border-0 border-b-2 border-solid bg-transparent px-5 pb-4 text-sm font-semibold leading-5 ${
+            className={`-mb-px flex shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap border-0 border-b-2 border-solid bg-transparent px-5 pb-4 text-sm font-semibold leading-5 outline-none focus-visible:rounded-t-md focus-visible:bg-[#f5f8ff] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#1448b3]/40 ${
               selected ? "border-[#10398e] text-[#0a255c]" : "border-transparent text-[#717680] hover:text-[#414651]"
             }`}
           >

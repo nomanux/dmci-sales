@@ -93,13 +93,19 @@ const NAV_SECTIONS: { heading: string; items: NavItem[] }[] = [
   },
 ];
 
+/** Menu items that have a page so far. */
+const NAV_ROUTES: Partial<Record<AdminNavKey, string>> = {
+  "rto-applications": "admin",
+  "reservation-ops": "admin/reservation-ops",
+};
+
 function Sidebar({ active }: { active: AdminNavKey }) {
   return (
     <nav
       aria-label="Admin"
       className="flex h-full w-60 shrink-0 flex-col justify-between overflow-y-auto border-0 border-r border-solid border-[#e9eaeb] bg-white"
     >
-      <div className="flex flex-col gap-6 pt-5">
+      <div className="flex flex-col gap-5 pt-4">
         <a
           href={hrefFor("admin")}
           onClick={(e) => {
@@ -116,17 +122,17 @@ function Sidebar({ active }: { active: AdminNavKey }) {
         <div className="flex flex-col">
           {NAV_SECTIONS.map((section) => (
             <div key={section.heading}>
-              <p className="m-0 px-5 pb-1 text-xs font-bold leading-[18px] text-[#717680]">{section.heading}</p>
-              <ul className="m-0 flex list-none flex-col p-0 px-4 pb-5">
+              <p className="m-0 px-5 pb-1 text-[11px] font-bold uppercase tracking-wide leading-4 text-[#717680]">{section.heading}</p>
+              <ul className="m-0 flex list-none flex-col gap-px p-0 px-3 pb-3">
                 {section.items.map((item) => {
                   const isActive = item.key === active;
                   return (
-                    <li key={item.key} className="py-1">
+                    <li key={item.key}>
                       <button
                         type="button"
                         aria-current={isActive ? "page" : undefined}
-                        onClick={item.key === "rto-applications" ? () => navigate("admin") : undefined}
-                        className={`flex w-full cursor-pointer items-center gap-2 rounded-md border-0 px-2 py-1.5 text-left text-sm font-semibold leading-6 transition-colors ${
+                        onClick={NAV_ROUTES[item.key] ? () => navigate(NAV_ROUTES[item.key]!) : undefined}
+                        className={`flex w-full cursor-pointer items-center gap-2 rounded-md border-0 px-2 py-1.5 text-left text-[13px] font-semibold leading-5 transition-colors ${
                           isActive
                             ? "bg-[#fafafa] text-[#1448b3]"
                             : "bg-white text-[#414651] hover:bg-[#fafafa]"
@@ -144,20 +150,20 @@ function Sidebar({ active }: { active: AdminNavKey }) {
         </div>
       </div>
 
-      <div className="px-4 pb-4">
-        <div className="relative flex items-center gap-2 rounded-xl border border-solid border-[#e9eaeb] bg-white p-3 shadow-[0_1px_1px_rgba(10,13,18,0.05)]">
-          <span className="relative flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f5f5f5] text-base font-semibold leading-6 text-[#10398e]">
+      <div className="px-3 pb-3">
+        <div className="relative flex items-center gap-2 rounded-xl border border-solid border-[#e9eaeb] bg-white p-2 shadow-[0_1px_1px_rgba(10,13,18,0.05)]">
+          <span className="relative flex size-8 shrink-0 items-center justify-center rounded-full bg-[#f5f5f5] text-xs font-semibold leading-4 text-[#10398e]">
             <span className="absolute inset-0 rounded-full border-[0.75px] border-solid border-black/[0.08]" aria-hidden />
             OR
           </span>
-          <span className="flex min-w-0 flex-col text-sm leading-5">
+          <span className="flex min-w-0 flex-col text-[13px] leading-[18px]">
             <span className="truncate font-semibold text-[#181d27]">Olivia Rhye</span>
             <span className="text-[#535862]">Admin</span>
           </span>
           <button
             type="button"
             aria-label="Account menu"
-            className="absolute right-[5px] top-[5px] flex size-8 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent p-1.5 hover:bg-[#fafafa]"
+            className="absolute right-1 top-1/2 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent p-1.5 hover:bg-[#fafafa]"
           >
             <img src={chevronSelectorVertical} alt="" width={20} height={20} className="block size-5" />
           </button>

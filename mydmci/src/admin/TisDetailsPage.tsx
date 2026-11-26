@@ -3,6 +3,13 @@ import Button from "@/Button";
 import AdminLayout from "./AdminLayout";
 import Badge from "./Badge";
 import UnderlineTabs from "./UnderlineTabs";
+import TisTab from "./TisTab";
+import ReservationTab from "./ReservationTab";
+import PaymentTab from "./PaymentTab";
+import DocumentsTab from "./DocumentsTab";
+import CreditTab from "./CreditTab";
+import LeaseContractTab from "./LeaseContractTab";
+import ActivityTab from "./ActivityTab";
 import { getApplicationDetails, type RtoApplicationDetails } from "./rtoData";
 import { navigate } from "../router";
 import backChevron from "../assets/icons/back-chevron.svg";
@@ -194,6 +201,20 @@ export default function TisDetailsPage({ tisNo }: { tisNo: string }) {
           <UnderlineTabs label="Application sections" tabs={TABS} value={tab} onChange={setTab} />
           {tab === "summary" ? (
             <Summary app={app} />
+          ) : tab === "tis" ? (
+            <TisTab app={app} />
+          ) : tab === "reservation" ? (
+            <ReservationTab />
+          ) : tab === "payment" ? (
+            <PaymentTab app={app} />
+          ) : tab === "documents" ? (
+            <DocumentsTab />
+          ) : tab === "credit" ? (
+            <CreditTab app={app} />
+          ) : tab === "contract" ? (
+            <LeaseContractTab app={app} />
+          ) : tab === "activity" ? (
+            <ActivityTab />
           ) : (
             <p className="m-0 px-6 py-12 text-center text-sm text-[#717680]">
               {TABS.find((t) => t.key === tab)?.label} details will appear here.

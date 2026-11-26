@@ -96,7 +96,7 @@ export default function RtoApplicationsPage() {
               <img src={share06} alt="" width={20} height={20} className="block size-5" />
               Export
             </Button>
-            <Button variant="primary" size="sm" className="h-9">
+            <Button variant="primary" size="sm" className="h-9" onClick={() => navigate("admin/create-link")}>
               Create Link
             </Button>
           </div>
